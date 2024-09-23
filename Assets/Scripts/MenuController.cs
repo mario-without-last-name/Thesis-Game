@@ -18,6 +18,7 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     [SerializeField] private GameObject background2;
     [SerializeField] private GameObject temporaryBlueprint;
     [SerializeField] private GameObject pageMainMenu;
+    [SerializeField] private GameObject pageConfirmExitGame;
     [SerializeField] private GameObject pageFight;
     [SerializeField] private GameObject pageGuide;
     [SerializeField] private GameObject pageHowToPlay1;
@@ -49,12 +50,13 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     // FUNCTION TO ENABLE/DISABLE PAGES ==========================================================
     public void MenuVisiblityChanger(string pageToShow)
     {
-        musicController.PlaySoundEffect(); // GANTI KE CLICK SOUND EFFECT
+        musicController.PlayClickSoundEffect();
 
         background1.SetActive(false);
         background2.SetActive(false);
         temporaryBlueprint.SetActive(false);
         pageMainMenu.SetActive(false);
+        pageConfirmExitGame.SetActive(false);
         pageFight.SetActive(false);
         pageGuide.SetActive(false);
         pageHowToPlay1.SetActive(false);
@@ -81,6 +83,11 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
         {
             background1.SetActive(true);
             pageMainMenu.SetActive(true);
+        }
+        else if (pageToShow == "confirmExitGame")
+        {
+            background1.SetActive(true);
+            pageConfirmExitGame.SetActive(true);
         }
         else if (pageToShow == "fight")
         {
@@ -196,9 +203,10 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     // GOING TO THE GAMEPLAY ==================================================================
 
     private void EnterFight(string difficulty) // "easy" / "medium" / "hard" / "adaptive" // SHOULD THIS BE PLAYER PREFS TOO?
-    { 
+    {
+        PlayerPrefs.SetString("modeDifficulty", difficulty);
         Debug.Log("(Click on this console message to see more of the selected difficuly and settings)" +
-            "\nDifficulty : " + difficulty +
+            "\nDifficulty : " + PlayerPrefs.GetString("modeDifficulty", "???") +
             "\nMusic : " + PlayerPrefs.GetInt("isMusicChecked", 0) +
             "\nSound Effects : " + PlayerPrefs.GetInt("isSoundEffectsChecked", 0) +
             "\nShow Timer : " + PlayerPrefs.GetInt("isTimerChecked", 0) +
@@ -207,7 +215,6 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
             "\nPowerup Usage : " + PlayerPrefs.GetInt("isPowerupChecked", 0) +
             "\nEnemy AI : " + PlayerPrefs.GetInt("isAIChecked", 0) +
             "\nTime Limit : " + PlayerPrefs.GetInt("isLimitChecked", 0));
-        // Will we need player prefs?
         SceneManager.LoadSceneAsync("SceneFight"); // Can also use LoadSceneAsync(1), a scene index as seen in the Build Settings
     }
 

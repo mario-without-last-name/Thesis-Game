@@ -6,8 +6,12 @@ using UnityEngine.Audio;
 public class MusicController : MonoBehaviour
 {
     [SerializeField] private AudioSource backgroundMusicSource;
-    [SerializeField] private AudioSource soundEffectSource; // No need to name this "clickSoundEffect" or something. make it flexible and just change the audio from drag-and-drop.
-    [SerializeField] private AudioMixer audioMixer; // You must make child groups, then open inspector to expose variables, to make it modifiable from scripts
+    [SerializeField] private AudioSource clickSoundEffectSource;
+    [SerializeField] private AudioSource moveSoundEffectSource;
+    [SerializeField] private AudioSource damageSoundEffectSource;
+    [SerializeField] private AudioSource buySellSoundEffectSource;
+    [SerializeField] private AudioSource gameOverSoundEffectSource;
+    [SerializeField] private AudioMixer audioMixer; // You must make child groups, then open inspector to expose variables, to make it modifiable from scripts. Also so that in the MusicController -> Inspector --> Audio Source Component, you can set the "Output" into one of those exposed parameters
 
     private void Start()
     {
@@ -26,14 +30,50 @@ public class MusicController : MonoBehaviour
 
     public void SetSoundEffects(bool isEnabled)
     {
-        soundEffectSource.mute = !isEnabled;
+        clickSoundEffectSource.mute = !isEnabled;
+        moveSoundEffectSource.mute = !isEnabled;
+        damageSoundEffectSource.mute = !isEnabled;
+        buySellSoundEffectSource.mute = !isEnabled;
+        gameOverSoundEffectSource.mute = !isEnabled;
     }
 
-    public void PlaySoundEffect()
+    public void PlayClickSoundEffect()
     {
-        if (!soundEffectSource.mute)
+        if (!clickSoundEffectSource.mute)
         {
-            soundEffectSource.Play(); // This is fine as long as you don't need to play multiple of the same audio at the same time.
+            clickSoundEffectSource.Play(); // .Play()  is fine as long as you don't need to play multiple of the same audio at the same time. Because they will cut the unfinished audio early.
+        }
+    }
+
+    public void PlayMoveSoundEffectSource()
+    {
+        if (!moveSoundEffectSource.mute)
+        {
+            moveSoundEffectSource.Play();
+        }
+    }
+
+    public void PlayDamageSoundEffectSource()
+    {
+        if (!damageSoundEffectSource.mute)
+        {
+            damageSoundEffectSource.Play();
+        }
+    }
+
+    public void PlayBuySellSoundEffectSource()
+    {
+        if (!buySellSoundEffectSource.mute)
+        {
+            buySellSoundEffectSource.Play();
+        }
+    }
+
+    public void PlayGameOverSoundEffectSource()
+    {
+        if (!gameOverSoundEffectSource.mute)
+        {
+            gameOverSoundEffectSource.Play();
         }
     }
 }

@@ -80,7 +80,7 @@ public class SettingsController : MonoBehaviour
 
     public void ToggleButton(string buttonType)
     {
-        musicController.PlaySoundEffect();
+        musicController.PlayClickSoundEffect();
 
         if (buttonType == "music")
         {
