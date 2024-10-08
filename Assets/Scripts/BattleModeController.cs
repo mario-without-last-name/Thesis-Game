@@ -15,13 +15,20 @@ public class BattleModeController : MonoBehaviour
     [SerializeField] private GameObject FightMode;
     [SerializeField] private GameObject VictoryMode;
     [SerializeField] private GameObject ShopMode;
+    [SerializeField] private GameObject gameOverMode;
     [Header("Other Controllers")]
-    [SerializeField] private SideBarController SideBarController;
-    [SerializeField] private PlayerAndEnemyStatusController PlayerAndEnemyStatusController;
-    [SerializeField] private ShopController ShopController;
-    [SerializeField] private BottomBarController BottomBarController;
+    [SerializeField] private TurnController turnController;
+    [SerializeField] private SideBarController sideBarController;
+    [SerializeField] private PlayerAndEnemyStatusController playerAndEnemyStatusController;
+    [SerializeField] private ShopController shopController;
+    [SerializeField] private BottomBarController bottomBarController;
+    [SerializeField] private GameOverController gameOverController;
     [Header("Temporary")]
-    [SerializeField] private ExampleSpawner ExampleSpawner; // Temporary
+    [SerializeField] private ExampleSpawner exampleSpawner; // Temporary
+
+
+    //[SerializeField] private GameObject enemyPrefab;
+    //private CodeForPrefabEnemy codeForPrefabEnemy;
 
     // Start is called before the first frame update
     void Start()
@@ -41,7 +48,7 @@ public class BattleModeController : MonoBehaviour
 
         if (battleMode == "GetReady")
         {
-            BottomBarController.powerupsAreReadyForBattle(); // Should not be activated until the battle has actually begun
+            bottomBarController.PowerupsAreReadyForBattle(); // Should not be activated until the battle has actually begun
             ShopMode.SetActive(false);
             GetReadyMode.SetActive(true);
         }
@@ -49,24 +56,43 @@ public class BattleModeController : MonoBehaviour
         {
             GetReadyMode.SetActive(false);
             FightMode.SetActive(true);
-            SideBarController.SetSideBarIsTimerRunning(true);
-            //ExampleSpawner.ExampleSpawnPlayerPiece(); // Temporary
-            PlayerAndEnemyStatusController.SpawnPlayerAndEnemiesForNewRound();
+            sideBarController.SetSideBarIsTimerRunning(true);
+            //exampleSpawner.ExampleSpawnPlayerPiece(); // Temporary
+            playerAndEnemyStatusController.SpawnPlayerAndEnemiesForNewRound();
         }
         else if(battleMode == "Victory")
         {
             //DestoryAllExampleTags(); // Temporary
-            PlayerAndEnemyStatusController.DestroyAllPlayerAndEnemyPrefabs();
+            playerAndEnemyStatusController.DestroyAllPlayerAndEnemyPrefabs();
             FightMode.SetActive(false);
             VictoryMode.SetActive(true);
-            SideBarController.SetSideBarIsTimerRunning(false);
+            sideBarController.SetSideBarIsTimerRunning(false);
         }
         else if(battleMode == "Shop")
         {
-            ShopController.refreshShopPowerupOptions();
-            BottomBarController.optionToSellPowerups();
+            playerAndEnemyStatusController.SetNextRoundNumber();
+            shopController.RefreshShopPowerupOptions();
+            bottomBarController.OptionToSellPowerups();
             VictoryMode.SetActive(false);
             ShopMode.SetActive(true);
+        }
+        else if (battleMode == "GameOver")
+        {
+            playerAndEnemyStatusController.DestroyAllPlayerAndEnemyPrefabs();
+            FightMode.SetActive(false);
+            VictoryMode.SetActive(false);
+            sideBarController.SetSideBarIsTimerRunning(false);
+            playerAndEnemyStatusController.DestroyAllPlayerAndEnemyPrefabs();
+            musicController.PlayClickSoundEffect();
+            musicController.SetBackgroundMusic(false);
+            musicController.PlayGameOverSoundEffectSource();
+            sideBarController.SetSideBarIsTimerRunning(false);
+            gameOverController.ChangeTextOf5GameOverStatistics();
+            gameOverMode.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("Unkown battle mode");
         }
     }
 

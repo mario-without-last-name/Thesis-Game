@@ -106,7 +106,7 @@ public class SideBarController : MonoBehaviour
     //{
     //    return currPlayerHealthPointValue;
     //}
-    public void SetSideBarcurrPlayerHealthPointValue(int newInt)
+    public void SetSideBarCurrPlayerHealthPointValue(int newInt)
     {
         currPlayerHealthPointValue = newInt;
         healthPoint.text = currPlayerHealthPointValue.ToString() + "/" + maxPlayerHealthPointValue.ToString();
@@ -116,7 +116,7 @@ public class SideBarController : MonoBehaviour
     //{
     //    return maxPlayerHealthPointValue;
     //}
-    public void SetSideBarmaxPlayerHealthPointValue(int newInt)
+    public void SetSideBarMaxPlayerHealthPointValue(int newInt)
     {
         maxPlayerHealthPointValue = newInt;
         healthPoint.text = currPlayerHealthPointValue.ToString() + "/" + maxPlayerHealthPointValue.ToString();

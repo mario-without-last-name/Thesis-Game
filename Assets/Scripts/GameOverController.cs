@@ -18,15 +18,15 @@ public class GameOverController : MonoBehaviour
     [SerializeField] private GameObject timeHeaderAndValue;
     [SerializeField] private TextMeshProUGUI timeDisplay;
     [Header("Other Controllers")]
-    [SerializeField] private SideBarController SideBarController;
-    [SerializeField] private PlayerAndEnemyStatusController PlayerAndEnemyStatusController;
+    [SerializeField] private SideBarController sideBarController;
+    [SerializeField] private PlayerAndEnemyStatusController playerAndEnemyStatusController;
 
     public void ChangeTextOf5GameOverStatistics()
     {
         modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
-        roundNumber.text = "999"; // Later add this dynamically
-        moveCount.text = "999"; // Later add this dynamically
-        killCount.text = "999"; // Later add this dynamically
+        roundNumber.text = "" + playerAndEnemyStatusController.GetRoundNumber();
+        moveCount.text = "" + playerAndEnemyStatusController.GetMoveCount();
+        killCount.text = "" + playerAndEnemyStatusController.GetKillCount();
         if (PlayerPrefs.GetInt("isTimerChecked", 0) == 1)
         {
             timeHeaderAndValue.SetActive(true);
@@ -35,7 +35,7 @@ public class GameOverController : MonoBehaviour
         {
             timeHeaderAndValue.SetActive(false);
         }
-        timeDisplay.text = SideBarController.GetSideBarTimerValue();
+        timeDisplay.text = sideBarController.GetSideBarTimerValue();
     }
 
     public void RetryBattle()
@@ -53,6 +53,6 @@ public class GameOverController : MonoBehaviour
     public void GenerateStatistics()
     {
         musicController.PlayClickSoundEffect();
-
+        // Somehow get statistics
     }
 }

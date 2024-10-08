@@ -10,8 +10,8 @@ public class ExampleSpawner : MonoBehaviour
     public GameObject chessPiecePrefab; // Assign the "chessPiece" prefab in the Inspector
     public GameObject battleBoard; // Assign the "BattleBoard" GameObject in the Inspector
     public Sprite newImageSprite; // Drag and drop the new image Sprite in the Inspector
-    public ActualXYCoordinates coordinateScript; // The script translating tile XY index into actual unity XY coordinates
-    public ExampleCircleTimer ExampleCircleTimer; // Temporary
+    public ActualXYCoordinatesController coordinateScript; // The script translating tile XY index into actual unity XY coordinates
+    public ExampleCircleTimer exampleCircleTimer; // Temporary
 
     public void ExampleSpawnPlayerPiece()
     {
@@ -26,7 +26,7 @@ public class ExampleSpawner : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(coordinateScript.GetTileWidth(), coordinateScript.GetTileHeight());
 
         // Make the circle timer around the player
-        ExampleCircleTimer.ExampleSpawnCircleTimer(gridX, gridY);
+        exampleCircleTimer.ExampleSpawnCircleTimer(gridX, gridY);
 
         // Find the child Image UI component and change its sprite
         Transform childImageTransform = chessPieceInstance.transform.Find("ImageChessPiece");

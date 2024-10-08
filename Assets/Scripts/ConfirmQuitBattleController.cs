@@ -7,16 +7,14 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.UIElements;
 
-public class QuitBattleButton : MonoBehaviour
+public class ConfirmQuitBattleController : MonoBehaviour
 {
     [Header("Sounds")]
     [SerializeField] private MusicController musicController;
     [Header("Game Over Status")]
-    [SerializeField] private GameObject gameOverScreen;
     [SerializeField] private TextMeshProUGUI textOfExitBattleButton;
     [Header("Other Controllers")]
-    [SerializeField] private SideBarController sideBarController;
-    [SerializeField] private GameOverController gameOverController;
+    [SerializeField] private BattleModeController battleModeController;
 
 
     private bool exitBattleButtonHasBeenClicked;
@@ -38,18 +36,13 @@ public class QuitBattleButton : MonoBehaviour
             musicController.PlayClickSoundEffect();
             textOfExitBattleButton.text = "Confirm?";
             exitBattleButtonHasBeenClicked = true;
-            Invoke("ButtonCancel", 5.0f);
+            Invoke(nameof(ButtonCancel), 5.0f);
         }
         else // When clicked within 5 seconds
         {
-            musicController.PlayClickSoundEffect();
-            musicController.SetBackgroundMusic(false);
-            musicController.PlayGameOverSoundEffectSource();
-            sideBarController.SetSideBarIsTimerRunning(false);
-            gameOverController.ChangeTextOf5GameOverStatistics();
-            gameOverScreen.SetActive(true);
             exitBattleButtonHasBeenClicked = false;
-            CancelInvoke("ButtonCancel");
+            CancelInvoke(nameof(ButtonCancel));
+            battleModeController.BattleModeChanger("GameOver");
         }
     }
 

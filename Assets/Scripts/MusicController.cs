@@ -11,7 +11,7 @@ public class MusicController : MonoBehaviour
     [SerializeField] private AudioSource damageSoundEffectSource;
     [SerializeField] private AudioSource buySellSoundEffectSource;
     [SerializeField] private AudioSource gameOverSoundEffectSource;
-    [SerializeField] private AudioMixer audioMixer; // You must make child groups, then open inspector to expose variables, to make it modifiable from scripts. Also so that in the MusicController -> Inspector --> Audio Source Component, you can set the "Output" into one of those exposed parameters
+    [SerializeField] private AudioMixer audioMixer; // You must make child groups below the "Master" group (in the Audio Mixer ribbon, beside the project / console ribbons), then open inspector to expose variables, to make it modifiable from scripts. Also so that in the MusicController -> Inspector --> Audio Source Component, you can set the "Output" into one of those exposed parameters
 
     private void Start()
     {

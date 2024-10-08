@@ -11,7 +11,7 @@ public class ExampleCircleTimer : MonoBehaviour
     public GameObject imagePrefab; // Assign the Image prefab in the Inspector
     public GameObject battleBoard; // Assign the BattleBoard GameObject in the Inspector
     public float fillDuration; // Time to reduce fill amount from 1 to 0
-    public ActualXYCoordinates coordinateScript; // The script translating tile XY index into actual unity XY coordinates
+    public ActualXYCoordinatesController coordinateScript; // The script translating tile XY index into actual unity XY coordinates
 
 
     private GameObject imageInstance;
