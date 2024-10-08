@@ -1131,9 +1131,9 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Titan<size=25><line-height=130%>
 
-    Health: 60
+    Health: 40
 
-    Attack: 20
+    Attack: 10
 
     Delay:
     6'
@@ -1556,7 +1556,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ee51aecadc0747a4db393019399d1315, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e069dd0b169d2e04b944e7ecd1cf447a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3134,9 +3134,9 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Vampire<size=25><line-height=130%>
 
-    Health: 30
+    Health: 20
 
-    Attack: 12
+    Attack: 8
 
     Delay:
     3'
@@ -3947,7 +3947,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0fd8f1c37058818439e049baee367555, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e972111e46af24a409499a353c22301a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7196,12 +7196,12 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Wyrm<size=25><line-height=130%>
 
-    Health: 22
+    Health: 18
 
     Attack: 9
 
     Delay:
-    4'
+    5'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -9991,7 +9991,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Dragon<size=25><line-height=130%>
 
-    Health: 40
+    Health: 22
 
     Attack: 1
 
@@ -15916,12 +15916,12 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Lich<size=25><line-height=130%>
 
-    Health: 40
+    Health: 30
 
-    Attack: 18
+    Attack: 12
 
     Delay:
-    3'
+    4'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -18847,9 +18847,9 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Abomination<size=25><line-height=130%>
 
-    Health: 20
+    Health: 16
 
-    Attack: 12
+    Attack: 9
 
     Delay:
     3'
@@ -21076,12 +21076,12 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Minotaur<size=25><line-height=130%>
 
-    Health: 25
+    Health: 20
 
     Attack: 8
 
     Delay:
-    3'
+    4'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -23580,7 +23580,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ae91c4520ba493a4da33a9268cdd9af0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 617bb616a747bba4d982aa74fb25f123, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -23996,12 +23996,12 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Golem<size=25><line-height=130%>
 
-    Health: 30
+    Health: 22
 
     Attack: 10
 
     Delay:
-    6'
+    4'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}

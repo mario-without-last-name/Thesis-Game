@@ -59,24 +59,20 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     {
         // Set several variables, and also display them in the SideBar
         roundNumber = 1;
+        currPlayerHealthPoint = 50;
+        maxPlayerHealthPoint = 50;
         if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
         {
-            currPlayerHealthPoint = 50;
-            maxPlayerHealthPoint = 50;
-            currGold = 30;
+            currGold = 15;
             timeToMove = 6.0f;
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
         {
-            currPlayerHealthPoint = 35;
-            maxPlayerHealthPoint = 35;
-            currGold = 15;
+            currGold = 8;
             timeToMove = 3.0f;
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
         {
-            currPlayerHealthPoint = 20;
-            maxPlayerHealthPoint = 20;
             currGold = 0;
             timeToMove = 1.5f;
         }
@@ -112,60 +108,21 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         // Instantiate the chessPiece prefab first before the enemies
         Instantiate(playerPrefab, battleBoard.transform);
 
-        // TEMPORARY - MANUAL DETERMINATION OF ENEMIES
-        // Instatiate the enemyPiece prefab (but later control the amount of spawned enemies by the round number / difficulty mode / DGB. Ex: out of 10 enemies, only 4 may exist at any tim
-        //if (roundNumber == 1)
-        //{
-        //    whichEnemyVariantToSpawn = "pawnBandit";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "pawnSkeleton";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "pawnSlime";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "pawnGoblin";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    currEnemiesLeft = 4;
-        //    totalEnemiesThisRound = 4;
-        //}
-        //else if (roundNumber == 2)
-        //{
-        //    whichEnemyVariantToSpawn = "rookTroll";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "bishopDarkElf";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "pawnSlime";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    currEnemiesLeft = 3;
-        //    totalEnemiesThisRound = 3;
-        //}
-        //else if (roundNumber >= 3)
-        //{
-        //    whichEnemyVariantToSpawn = "knightDullahan";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "queenGolem";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    whichEnemyVariantToSpawn = "kingLich";
-        //    Instantiate(enemyPrefab, battleBoard.transform);
-        //    currEnemiesLeft = 3;
-        //    totalEnemiesThisRound = 3;
-        //}
-        //sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
-        //sideBarController.SetSideBarTotalEnemiesThisRoundValue(totalEnemiesThisRound);
-
+        // Now Randomize the instantiation of enemies
         if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
         {
             maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(2 + roundNumber * 0.33));
-            enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber));
+            enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 0.75));
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
         {
             maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(3 + roundNumber * 0.5));
-            enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 2));
+            enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 1.5));
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
         {
-            maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(5 + roundNumber * 1));
-            enemyPointsToAllocate = (int)Math.Round((double)(4 + roundNumber * 3.5));
+            maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(3 + roundNumber * 1));
+            enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 2));
         }
 
         enemyVariantsToBeSpawnedThisRound = bestiaryController.DecideWhatEnemiesToSpawnThisRound(enemyPointsToAllocate);
@@ -182,8 +139,6 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             Instantiate(enemyPrefab, battleBoard.transform);
             enemiesSpawnedSoFarThisRound += 1;
         }
-
-
 
         //Finally, start with the player's turn
         turnController.RememberNewlySpawnedPlayerForNewRound();

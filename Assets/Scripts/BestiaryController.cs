@@ -63,9 +63,9 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "bishopElementalist") { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "bishopBomber")       { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "knightDireBeast")    { return new int[][] { new[] {+1,+2}, new[] {+2,+1}, new[] {+2,-1}, new[] {+1,-2}, new[] {-1,-2}, new[] {-2,-1}, new[] {-2,+1}, new[] {-1,+2} }; }
-        else if (thisEnemyVariant == "knightCentaur")      { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1}, new[] {+2,+1}, new[] {+2, 0}, new[] {+2,-1}, new[] {+1,-2}, new[] { 0,-2}, new[] {-1,-2}, new[] {-2,-1}, new[] {-2, 0}, new[] {-2,+1}, new[] {-1,+2}, new[] { 0,+2}, new[] {+1,+2} }; }
-        else if (thisEnemyVariant == "knightDullahan")     { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
-        else if (thisEnemyVariant == "knightGryphon")      { return new int[][] { new[] {+1, 0}, new[] {+2, 0}, new[] {+3, 0}, new[] {-1, 0}, new[] {-2, 0}, new[] {-3, 0}, new[] { 0,+1}, new[] { 0,+2}, new[] { 0,+3}, new[] { 0,-1}, new[] { 0,-2}, new[] { 0,-3}, new[] {+1,+1}, new[] {+2,+2}, new[] {+3,+3}, new[] {+1,-1}, new[] {+2,-2}, new[] {+3,-3}, new[] {-1,+1}, new[] {-2,+2}, new[] {-3,+3}, new[] {-1,-1}, new[] {-2,-2}, new[] {-3,-3} }; }
+        else if (thisEnemyVariant == "knightCentaur")      { return new int[][] { new[] {+1, 0}, new[] {+2, 0}, new[] {-1, 0}, new[] {-2, 0}, new[] { 0,+1}, new[] { 0,+2}, new[] { 0,-1}, new[] { 0,-2}, new[] {+1,+1}, new[] {+2,+2}, new[] {+1,-1}, new[] {+2,-2}, new[] {-1,+1}, new[] {-2,+2}, new[] {-1,-1}, new[] {-2,-2} }; }
+        else if (thisEnemyVariant == "knightDullahan")     { return new int[][] { new[] {+1, 0}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1, 0} }; }
+        else if (thisEnemyVariant == "knightGryphon")      { return new int[][] { new[] {+3,+2}, new[] {+3,+1}, new[] {+3, 0}, new[] {+3,-1}, new[] {+3,-2}, new[] {-3,+2}, new[] {-3,+1}, new[] {-3, 0}, new[] {-3,-1}, new[] {-3,-2}, new[] {+2,+3}, new[] {+1,+3}, new[] { 0,+3}, new[] {-1,+3}, new[] {-2,+3}, new[] {+2,-3}, new[] {+1,-3}, new[] { 0,-3}, new[] {-1,-3}, new[] {-2,-3} }; }
         else if (thisEnemyVariant == "queenMinotaur")      { return new int[][] { new[] {+1, 0}, new[] {+2, 0}, new[] {+3, 0}, new[] {-1, 0}, new[] {-2, 0}, new[] {-3, 0}, new[] { 0,+1}, new[] { 0,+2}, new[] { 0,+3}, new[] { 0,-1}, new[] { 0,-2}, new[] { 0,-3} }; }
         else if (thisEnemyVariant == "queenWyrm")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1}, new[] { 0,+2}, new[] {+2, 0}, new[] { 0,-2}, new[] {-2, 0} }; }
         else if (thisEnemyVariant == "queenAbomination")   { return new int[][] { new[] { 0,+2}, new[] {+2,+2}, new[] {+2, 0}, new[] {+2,-2}, new[] { 0,-2}, new[] {-2,-2}, new[] {-2, 0}, new[] {-2,+2} }; }
@@ -100,7 +100,7 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "knightDullahan")     { return new int[][] { }; }
         else if (thisEnemyVariant == "knightGryphon")      { return new int[][] { }; }
         else if (thisEnemyVariant == "queenMinotaur")      { return new int[][] { new[] {+1, 0}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1, 0}, new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3, 0}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3, 0} }; }
-        else if (thisEnemyVariant == "queenWyrm")          { return new int[][] { new[] {+1,+1}, new[] {+1,-1}, new[] {-1,+1}, new[] {-1,-1}, new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3,+3}, new[] {+3,-3}, new[] {-3,+3}, new[] {-3,-3} }; }
+        else if (thisEnemyVariant == "queenWyrm")          { return new int[][] { new[] {+1,+1}, new[] {+1,-1}, new[] {-1,+1}, new[] {-1,-1}, new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+2,+2}, new[] {+2,-2}, new[] {-2,+2}, new[] {-2,-2} }; }
         else if (thisEnemyVariant == "queenAbomination")   { return new int[][] { new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3, 0}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3, 0}, new[] {+1,+3}, new[] {+3,+1}, new[] {-1,+3}, new[] {-3,+1}, new[] {+1,-3}, new[] {+3,-1}, new[] {-1,-3}, new[] {-3,-1} }; }
         else if (thisEnemyVariant == "queenGolem")         { return new int[][] { new[] {+1,+1}, new[] {+1,-1}, new[] {-1,+1}, new[] {-1,-1}, new[] {+2,+2}, new[] {+2,-2}, new[] {-2,+2}, new[] {-2,-2}, new[] {+3,+3}, new[] {+3,-3}, new[] {-3,+3}, new[] {-3,-3} }; }
         else if (thisEnemyVariant == "kingLich")           { return new int[][] { new[] {+2,+2}, new[] {+2,-2}, new[] {-2,+2}, new[] {-2,-2}, new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3, 0}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3, 0}, new[] {+3,+2}, new[] {+2,+3}, new[] {-3,+2}, new[] {-2,+3}, new[] {+3,-2}, new[] {+2,-3}, new[] {-3,-2}, new[] {-2,-3} }; }
@@ -177,7 +177,7 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "rookBeastMan")
         {
             if      (selectedDifficulty == "Easy")     { return new int[] {12,12, 6}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {15,15, 5}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {15,15, 6}; }
             else if (selectedDifficulty == "Hard")     { return new int[] {18,18, 4}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
@@ -198,8 +198,8 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "bishopElementalist")
         {
             if      (selectedDifficulty == "Easy")     { return new int[] {10, 2, 6}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {13, 3, 5}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {16, 4, 4}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {12, 3, 5}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {14, 4, 4}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "bishopBomber")
@@ -213,7 +213,7 @@ public class BestiaryController : MonoBehaviour
         {
             if      (selectedDifficulty == "Easy")     { return new int[] { 9, 4, 3}; }
             else if (selectedDifficulty == "Medium")   { return new int[] {12, 5, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 1}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 2}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "knightCentaur")
@@ -239,58 +239,58 @@ public class BestiaryController : MonoBehaviour
         }
         else if (thisEnemyVariant == "queenMinotaur")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {20, 6, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {25, 8, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {30,10, 2}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 5}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 4}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 3}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "queenWyrm")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {17, 7, 5}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {22, 9, 4}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {27,11, 3}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {15, 7, 6}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {18, 9, 5}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {21,11, 4}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "queenAbomination")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {16, 8, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {20,12, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {24,16, 2}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {13, 7, 5}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {16, 9, 4}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {19,11, 3}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "queenGolem")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {24, 7, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {30,10, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {36,13, 2}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {18, 7, 5}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {22,10, 4}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {26,13, 3}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "kingLich")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {30,14, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {40,18, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {50,22, 2}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {25, 9, 5}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {30,12, 4}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {35,15, 3}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "kingTitan")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {48,15, 7}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {60,20, 6}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {72,25, 5}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {34, 7, 7}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {40,10, 6}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {46,13, 5}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "kingDragon")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {30, 1,12}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {40, 1,10}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {50, 2, 8}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {18, 1,12}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {22, 1,10}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {26, 2, 8}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else if (thisEnemyVariant == "kingVampire")
         {
-            if      (selectedDifficulty == "Easy")     { return new int[] {25, 9, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {30,12, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {35,15, 2}; }
+            if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 4}; }
+            else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 3}; }
+            else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 2}; }
             else    /* Adaptive */                     { return new int[] {99,99,99}; }
         }
         else
@@ -312,7 +312,7 @@ public class BestiaryController : MonoBehaviour
         string[] queenEnemies = { "queenMinotaur", "queenWyrm", "queenAbomination", "queenGolem" };
         string[] kingEnemies = { "kingLich", "kingTitan", "kingDragon", "kingVampire" };
 
-        int[] pointValues = { 1, 1, 2, 2, 3, 5, 10 };
+        int[] pointValues = { 1, 1, 2, 2, 3, 5, 8 };
 
         // Continue until all points are allocated
         while (enemyPointsToAllocate > 0)
@@ -346,7 +346,7 @@ public class BestiaryController : MonoBehaviour
             {
                 enemiesToDeploy.Add(queenEnemies[UnityEngine.Random.Range(0, queenEnemies.Length)]);
             }
-            else if (selectedPointValue == 10)
+            else if (selectedPointValue == 8)
             {
                 enemiesToDeploy.Add(kingEnemies[UnityEngine.Random.Range(0, kingEnemies.Length)]);
             }
