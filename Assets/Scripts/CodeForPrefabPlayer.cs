@@ -9,6 +9,7 @@ using System.Reflection;
 
 using DG.Tweening;
 using System.Linq;
+using UnityEngine.Windows;
 
 public class CodeForPrefabPlayer : MonoBehaviour
 {
@@ -32,10 +33,10 @@ public class CodeForPrefabPlayer : MonoBehaviour
     private PlayerAndEnemyStatusController playerAndEnemyStatusController;
     private MusicController musicController;
     private TurnController turnController;
+    private DynamicDifficultyController dynamicDifficultyController;
 
     private bool isMoveTimeLlimitActive; // to control the Update() for controlling the timer
     private float elapsedTime;
-
     private float timeLimit;
     private int currGridX;
     private int currGridY;
@@ -43,9 +44,10 @@ public class CodeForPrefabPlayer : MonoBehaviour
     // The PlayerAndStatusController is the one who will remember the player's stats, and values are fetched from there, since the player prefab instance can be destroyed
     private int maxHealth;
     private int currHealth;
-    private int playerLandingDamage;
+    private int playerDirectContactDamage;
     private bool alreadyKnockbackedFromDamage;
 
+    private int[][] moveTilesToSpawn         = new int[][] { new int[] { 1, 2 }, new int[] { 2, 1 }, new int[] { -1, 2 }, new int[] { -2, 1 }, new int[] { 1, -2 }, new int[] { 2, -1 }, new int[] { -1, -2 }, new int[] { -2, -1 } };
     private int[][] knockbackDirections1Tile = new int[][] { new int[] { 1, 1 }, new int[] { 1, 0 }, new int[] { 1, -1 }, new int[] { 0, -1 }, new int[] { -1, -1 }, new int[] { -1, 0 }, new int[] { -1, 1 }, new int[] { 0, 1 } };
     private int[][] knockbackDirections2Tile = new int[][] { new int[] { 2, 2 }, new int[] { 2, 1 }, new int[] { 2, 0 }, new int[] { 2, -1 }, new int[] { 2, -2 }, new int[] { 1, -2 }, new int[] { 0, -2 }, new int[] { -1, -2 }, new int[] { -2, -2 }, new int[] { -2, -1 }, new int[] { -2, 0 }, new int[] { -2, 1 }, new int[] { -2, 2 }, new int[] { -1, 2 }, new int[] { 0, 2 }, new int[] { 1, 2 } };
     private int[][] knockbackDirections3Tile = new int[][] { new int[] { 3, 3 }, new int[] { 3, 2 }, new int[] { 3, 1 }, new int[] { 3, 0 }, new int[] { 3, -1 }, new int[] { 3, -2 }, new int[] { 3, -3 }, new int[] { 2, -3 }, new int[] { 1, -3 }, new int[] { 0, -3 }, new int[] { -1, -3 }, new int[] { -2, -3 }, new int[] { -3, -3 }, new int[] { -3, -2 }, new int[] { -3, -1 }, new int[] { -3, 0 }, new int[] { -3, 1 }, new int[] { -3, 2 }, new int[] { -3, 3 }, new int[] { -2, 3 }, new int[] { -1, 3 }, new int[] { 0, 3 }, new int[] { 1, 3 }, new int[] { 2, 3 } };
@@ -54,21 +56,23 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
     void Awake()
     {
-        GameObject CoordinateScriptObject = GameObject.FindGameObjectWithTag("tagForActualXYCoordinates");
-        actualXYCoordinates = CoordinateScriptObject.GetComponent<ActualXYCoordinatesController>();
+        GameObject actualXYCoordinatesObject = GameObject.FindGameObjectWithTag("tagForActualXYCoordinatesController");
+        actualXYCoordinates = actualXYCoordinatesObject.GetComponent<ActualXYCoordinatesController>();
         GameObject PlayerAndEnemyStatusControllerObject = GameObject.FindGameObjectWithTag("tagForPlayerAndEnemyStatusController");
         playerAndEnemyStatusController = PlayerAndEnemyStatusControllerObject.GetComponent<PlayerAndEnemyStatusController>();
         GameObject musicControllerObject = GameObject.FindGameObjectWithTag("tagForMusicController");
         musicController = musicControllerObject.GetComponent<MusicController>();
         GameObject turnControllerObject = GameObject.FindGameObjectWithTag("tagForTurnController");
         turnController = turnControllerObject.GetComponent<TurnController>();
+        GameObject dynamicDifficultyControllerObject = GameObject.FindGameObjectWithTag("tagForDynamicDifficultyController");
+        dynamicDifficultyController = dynamicDifficultyControllerObject.GetComponent<DynamicDifficultyController>();
 
         currGridX = UnityEngine.Random.Range(1, 17);
         currGridY = UnityEngine.Random.Range(1, 9);
 
         maxHealth = playerAndEnemyStatusController.GetPlayerMaxHealth();
         currHealth = playerAndEnemyStatusController.GetPlayerCurrHealth();
-        playerLandingDamage = playerAndEnemyStatusController.GetPlayerLandingDamage();
+        playerDirectContactDamage = playerAndEnemyStatusController.GetPlayerDirectContactDamage();
 
         thisPieceTransform.position = new Vector3(actualXYCoordinates.GetActualXCoordinate(currGridX), actualXYCoordinates.GetActualYCoordinate(currGridY), transform.position.z);
         canvasUITransform.anchoredPosition = new Vector2(actualXYCoordinates.GetActualXCoordinateUIImage(currGridX), actualXYCoordinates.GetActualYCoordinateUIImage(currGridY));
@@ -89,25 +93,26 @@ public class CodeForPrefabPlayer : MonoBehaviour
         circleTimer.SetActive(true);
         groupMoveTiles.SetActive(true);
 
-        StartTimer(playerAndEnemyStatusController.GetTimeToMove()); // Set the timer to the move time limit as efined in playerAndEnemyStatusController
+        //StartTimer(playerAndEnemyStatusController.GetTimeToMove());
+
+        float timeLimitIndex = dynamicDifficultyController.GetDynamicOutput("timeLimit");
+        if (timeLimitIndex <= 0.5f) { timeLimit = Mathf.Lerp(6.0f, 3.0f, timeLimitIndex / 0.5f); }
+        else { timeLimit = Mathf.Lerp(3.0f, 1.5f, (timeLimitIndex - 0.5f) / 0.5f); }
+        StartTimer();
+
         // The Standard 8 move tiles for a knight. OPTIONAL: Maybe add more depending on move-related powerups?
-        ActivateMoveTiles(2, 1);
-        ActivateMoveTiles(1, 2);
-        ActivateMoveTiles(-2, 1);
-        ActivateMoveTiles(-1, 2);
-        ActivateMoveTiles(2, -1);
-        ActivateMoveTiles(1, -2);
-        ActivateMoveTiles(-2, -1);
-        ActivateMoveTiles(-1, -2);
+        ActivateMoveTiles();
     }
 
     public void PlayerMoveTileWasClicked(int xAndYOffset) // Activated by clicking one of the player's move tiles. The xAndYOffest variable is the x and y offset values combined into 1 number
     {
         circleTimer.SetActive(false);
         groupMoveTiles.SetActive(false);
+        //dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", +0.01f, false);
+        dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", 0.02f - (0.03f * elapsedTime / timeLimit), false);
 
         musicController.PlayMoveSoundEffectSource();
-        playerAndEnemyStatusController.SetMoveCountIncreaseBy1();
+        //playerAndEnemyStatusController.SetTotalMoveCountIncreaseBy1();
         playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, null);
         isMoveTimeLlimitActive = false;
         int gridXOffset = ((xAndYOffset - (xAndYOffset % 10)) / 10) - 4;
@@ -128,7 +133,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         GameObject enemyAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX, currGridY);
         if (enemyAtThisTile != null) // If not null, no doubt that this is an enemy, so just call the enemy script. Alternatively use:    if (enemyAtThisTile.GetComponent<CodeForPrefabEnemy>() != null)
         {
-            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerLandingDamage, true);
+            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerDirectContactDamage, true);
             playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, gameObject);
             //Invoke(nameof(CallForEnemyTurn), 0.5f); // Don't call it here. Otherwise when the last enemy is killed, it will call for enemy turn, but no enemies so immeadiately call player turn, but the player prefab is already destroyed since we are at the victory screen, leading to an error due to calling a function from a non-existent prefab.
         }   
@@ -139,12 +144,13 @@ public class CodeForPrefabPlayer : MonoBehaviour
         }
     }
 
-    public void PlayerTakesDamage(int damageTaken, bool isKnockback)
+    public void PlayerTakesDamage(int damageTaken, bool isKnockback) // Make this function also accept healing?
     {
-        //Debug.Log("Player takes " + damageTaken + " damage");
-        currHealth = playerAndEnemyStatusController.GetPlayerCurrHealth();
-
+        //currHealth = playerAndEnemyStatusController.GetPlayerCurrHealth();
         currHealth = currHealth - damageTaken;
+        dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", -0.1f, false);
+        dynamicDifficultyController.SetDynamicInputChange("healthLeft", (float)currHealth / (float)maxHealth, true);
+
         if (currHealth <= 0)
         {
             musicController.PlayDamageSoundEffectSource();
@@ -239,25 +245,30 @@ public class CodeForPrefabPlayer : MonoBehaviour
         }
     }
 
-    public void ActivateMoveTiles(int gridXOffset, int gridYOffset)
+    public void ActivateMoveTiles()
     {
-        if (actualXYCoordinates.IsThisStillInsideTheBoard(currGridX + gridXOffset, currGridY + gridYOffset))
+        foreach (int[] offset in moveTilesToSpawn)
         {
-            int index = gridXOffset + 3 + (gridYOffset + 3) * 7;
-            moveTiles[index].SetActive(true);
+            int gridXOffset = offset[0];
+            int gridYOffset = offset[1];
+
+            if (actualXYCoordinates.IsThisStillInsideTheBoard(currGridX + gridXOffset, currGridY + gridYOffset))
+            {
+                int index = gridXOffset + 3 + (gridYOffset + 3) * 7;
+                moveTiles[index].SetActive(true);
+            }
         }
     }
 
     public void CallForEnemyTurn()
     {
-        turnController.EnemyTurn();
+        turnController.AllEnemiesTurn();
     }
 
-    public void StartTimer(float x)
+    public void StartTimer()
     {
         isMoveTimeLlimitActive = true;
         elapsedTime = 0f;
-        timeLimit = x;
     }
 
     void Update() // For the circle timer
@@ -267,10 +278,12 @@ public class CodeForPrefabPlayer : MonoBehaviour
             elapsedTime += Time.deltaTime;
             imageCircleTimer.fillAmount = Mathf.Lerp(1f, 0f, elapsedTime / timeLimit);
         }
-        else if (isMoveTimeLlimitActive && elapsedTime >= timeLimit)
+        else if (isMoveTimeLlimitActive && elapsedTime >= timeLimit) // Player did not make a move before its timer ran out
         {
+            //dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", -0.02f, false);
+            dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", -0.02f, false);
             DeactivateMoveTiles();
-            playerAndEnemyStatusController.SetMoveCountIncreaseBy1();
+            //playerAndEnemyStatusController.SetTotalMoveCountIncreaseBy1();
             isMoveTimeLlimitActive = false;
             CallForEnemyTurn();
         }
@@ -290,5 +303,10 @@ public class CodeForPrefabPlayer : MonoBehaviour
     public (int, int) GetPlayerCurrGridXAndCurrGridY()
     {
         return (currGridX, currGridY);
+    }
+
+    public int[][] GetPlayerMoveTiles()
+    {
+        return moveTilesToSpawn;
     }
 }

@@ -9,6 +9,10 @@ using System.Reflection;
 
 public class CodeForPrefabPlayerOldImageUI : MonoBehaviour
 {
+    /*
+     * 
+     * 
+     * 
     //[Header("Other Controllers")]
     //private PlayerAndEnemyStatusController PlayerAndEnemyStatusController;
     //private TurnController TurnController;
@@ -93,5 +97,9 @@ public class CodeForPrefabPlayerOldImageUI : MonoBehaviour
             circleTimerImage.fillAmount = Mathf.Lerp(1f, 0f, elapsedTime / timeLimit);
         }
     }
+
+
+
+    */
 
 }

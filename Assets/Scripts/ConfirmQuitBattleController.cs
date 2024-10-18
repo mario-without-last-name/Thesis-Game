@@ -9,20 +9,20 @@ using UnityEngine.UIElements;
 
 public class ConfirmQuitBattleController : MonoBehaviour
 {
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
     [Header("Game Over Status")]
     [SerializeField] private TextMeshProUGUI textOfExitBattleButton;
-    [Header("Other Controllers")]
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
     [SerializeField] private BattleModeController battleModeController;
 
-
     private bool exitBattleButtonHasBeenClicked;
+    private bool quitBattleManuallyAndNotFrom0Hp;
 
     private void Start()
     {
         textOfExitBattleButton.text = "Quit";
         exitBattleButtonHasBeenClicked = false;
+        quitBattleManuallyAndNotFrom0Hp = false;
     }
 
     // CLICK ON "QUIT" BUTTON ONCE, ITS TEXT BECOMES "CONFIRM?" fOR 5 SECONDS
@@ -41,6 +41,7 @@ public class ConfirmQuitBattleController : MonoBehaviour
         else // When clicked within 5 seconds
         {
             exitBattleButtonHasBeenClicked = false;
+            quitBattleManuallyAndNotFrom0Hp = true;
             CancelInvoke(nameof(ButtonCancel));
             battleModeController.BattleModeChanger("GameOver");
         }
@@ -50,5 +51,10 @@ public class ConfirmQuitBattleController : MonoBehaviour
     {
         textOfExitBattleButton.text = "Quit";
         exitBattleButtonHasBeenClicked = false;
+    }
+
+    public bool GetQuitBattleManuallyAndNotFrom0Hp()
+    {
+        return quitBattleManuallyAndNotFrom0Hp;
     }
 }

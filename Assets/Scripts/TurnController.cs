@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class TurnController : MonoBehaviour
 {
+    [Header("Controllers")]
+    [SerializeField] PlayerAndEnemyStatusController playerAndEnemyStatusController;
+    [SerializeField] DynamicDifficultyController dynamicDifficultyController;
+
     private GameObject prefabPlayer;
-    private CodeForPrefabPlayer codeForPrefabPlayer;
     private GameObject prefabPEnemy;
+    private CodeForPrefabPlayer codeForPrefabPlayer;
     private CodeForPrefabEnemy codeForPrefabEnemy;
 
     private GameObject[] allEnemiesAliveRightNow;
@@ -25,7 +29,9 @@ public class TurnController : MonoBehaviour
         // Or a powerup where you don't have to click on a tile.
         // Timer's up = skip to enemy's turn
         // Enemy left in round = 0, win and go to shop
-
+        dynamicDifficultyController.PrintAllDGBInputAndOutputIndex();
+;       playerAndEnemyStatusController.SetTotalMoveCountIncreaseBy1();
+        playerAndEnemyStatusController.SetMoveCountThisRoundIncreaseBy1();
         codeForPrefabPlayer.PlayerCanMoveNow();
     }
 
@@ -35,7 +41,7 @@ public class TurnController : MonoBehaviour
         // Timer's up = skip to enemy's turn
     }
 
-    public void EnemyTurn() // Change into AllEnemiesTurn
+    public void AllEnemiesTurn()
     {
         // For every enemy... reduce delay counter by 1
         // If counter = 1, show yellow tiles

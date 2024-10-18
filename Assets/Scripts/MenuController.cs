@@ -11,8 +11,6 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     // ALL OF THESE ARE INSERTED INTO BUTTONS WITHIN THE SceneMainMenu SCENE,
     // TO TELL THEM WHAT "PAGE" THEY MUST DIRECT TO WHEN CLICKED
 
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
     [Header("Menu Pages")]
     [SerializeField] private GameObject background1;
     [SerializeField] private GameObject background2;
@@ -40,6 +38,8 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     [SerializeField] private GameObject pageSettings;
     [SerializeField] private GameObject pageSettingsGeneral;
     [SerializeField] private GameObject pageSettingsAdaptive;
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
 
     // Start is called before the first frame update
     private void Start()

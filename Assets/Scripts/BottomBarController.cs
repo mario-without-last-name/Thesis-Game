@@ -9,8 +9,6 @@ using System.Reflection;
 
 public class BottomBarController : MonoBehaviour
 {
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
 
     [Header("Active Powerups")]
     [SerializeField] private GameObject groupActivePowerupSlot1;
@@ -74,7 +72,8 @@ public class BottomBarController : MonoBehaviour
     [SerializeField] private GameObject groupPassiveSell4;
     [SerializeField] private TextMeshProUGUI textPassiveSellPrice4;
 
-    [Header("Other Controllers")]
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
     [SerializeField] private ShopController shopController;
     [SerializeField] private BattleModeController battleModeController;
     [SerializeField] private TurnController turnController;

@@ -8,21 +8,22 @@ using TMPro;
 
 public class BattleModeController : MonoBehaviour
 {
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
+    [SerializeField] private TextMeshProUGUI textBonusGold;
     [Header("Battle Modes")]
     [SerializeField] private GameObject GetReadyMode;
     [SerializeField] private GameObject FightMode;
     [SerializeField] private GameObject VictoryMode;
     [SerializeField] private GameObject ShopMode;
     [SerializeField] private GameObject gameOverMode;
-    [Header("Other Controllers")]
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
     [SerializeField] private TurnController turnController;
     [SerializeField] private SideBarController sideBarController;
     [SerializeField] private PlayerAndEnemyStatusController playerAndEnemyStatusController;
     [SerializeField] private ShopController shopController;
     [SerializeField] private BottomBarController bottomBarController;
     [SerializeField] private GameOverController gameOverController;
+    [SerializeField] private DynamicDifficultyController dynamicDifficultyController;
     [Header("Temporary")]
     [SerializeField] private ExampleSpawner exampleSpawner; // Temporary
 
@@ -59,6 +60,7 @@ public class BattleModeController : MonoBehaviour
             sideBarController.SetSideBarIsTimerRunning(true);
             //exampleSpawner.ExampleSpawnPlayerPiece(); // Temporary
             playerAndEnemyStatusController.SpawnPlayerAndEnemiesForNewRound();
+            dynamicDifficultyController.ResetThisRoundInitialDynamicInputIndices();
         }
         else if(battleMode == "Victory")
         {
@@ -94,6 +96,11 @@ public class BattleModeController : MonoBehaviour
         {
             Debug.LogWarning("Unkown battle mode");
         }
+    }
+
+    public void SetTextBonusGold(int bonusGoldValue)
+    {
+        textBonusGold.text = "$ " + bonusGoldValue;
     }
 
     //public void DestoryAllExampleTags() // Temporary

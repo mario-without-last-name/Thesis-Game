@@ -11,9 +11,10 @@ TagManager:
   - dummyTag
   - tagForPlayerAndEnemyStatusController
   - tagForTurnController
-  - tagForActualXYCoordinates
   - tagForBestiaryController
   - tagForMusicController
+  - tagForDynamicDifficultyController
+  - tagForActualXYCoordinatesController
   layers:
   - Default
   - TransparentFX

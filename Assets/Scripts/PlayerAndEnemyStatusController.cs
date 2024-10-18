@@ -22,32 +22,38 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab; // Assign the "chessPiece" prefab in the Inspector
     [SerializeField] private GameObject battleBoard; // Assign the "battleBoard" GameObject in the Inspector
 
-    [Header("Other Controllers")]
+    [Header("Controllers")]
     [SerializeField] private TurnController turnController;
     [SerializeField] private SideBarController sideBarController;
     [SerializeField] private ActualXYCoordinatesController coordinateScript;
     [SerializeField] private BattleModeController battleModeController;
     [SerializeField] private BestiaryController bestiaryController;
+    [SerializeField] private DynamicDifficultyController dynamicDifficultyController;
 
     private int roundNumber;
     private int killCount;
-    private int moveCount;
+    private int totalMoveCount;
+    private int moveCountThisRound;
     private int currEnemiesLeft;
     private int totalEnemiesThisRound;
-    private int maxNoOfEnemiesAtAnyPoint; // not used yet
+    private int maxNoOfEnemiesAtAnyPoint;
     private int enemyPointsToAllocate;
+    private int numberOfTimesEnemiesTookDamageThisRound;
     private int currPlayerHealthPoint;
     private int maxPlayerHealthPoint;
     private int currGold;
-    private float timeToMove;
-    private int playerLandingDamage;
+    private int bonusGoldAtEndOfRound;
+    //private float timeToMove;
+    private int playerDirectContactDamage;
     private int[,] playerMoveTiles;
+    CodeForPrefabPlayer codeForPrefabPlayer;
 
     //private int enemiesAlreadySpawnedThisRound;
     private string[] enemyVariantsToBeSpawnedThisRound;
     private int enemiesSpawnedSoFarThisRound;
     private string whichEnemyVariantToSpawn;
     private GameObject[,] identitiesOfPiecesInBoard; // Make an array of game objects
+    
     // When accessing a specific gameobject prefab in the 2d array, you can just access one of its function, like getting damaged.
     // Move a piece, move the reference to the other tile coordinates.
     // Changing the prefab being referenced in the 2d array doesnot immeadiately dictate where the prefab should be
@@ -61,30 +67,28 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         roundNumber = 1;
         currPlayerHealthPoint = 50;
         maxPlayerHealthPoint = 50;
-        if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
-        {
-            currGold = 15;
-            timeToMove = 6.0f;
-        }
-        else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
-        {
-            currGold = 8;
-            timeToMove = 3.0f;
-        }
-        else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
-        {
-            currGold = 0;
-            timeToMove = 1.5f;
-        }
+        currGold = 0;
+        //if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
+        //{
+        //    timeToMove = 6.0f;
+        //}
+        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
+        //{
+        //    timeToMove = 3.0f;
+        //}
+        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
+        //{
+        //    timeToMove = 1.5f;
+        //}
         sideBarController.SetSideBarRoundNumber(roundNumber);
         sideBarController.SetSideBarCurrPlayerHealthPointValue(currPlayerHealthPoint);
         sideBarController.SetSideBarMaxPlayerHealthPointValue(maxPlayerHealthPoint);
         sideBarController.SetSideBarCurrGoldValue(currGold);
 
-        playerLandingDamage = 5; // The damage the player deals upon landing on another enemy
+        playerDirectContactDamage = 5; // The damage the player deals upon DirectContact on another enemy
 
         killCount = 0;
-        moveCount = 0;
+        totalMoveCount = -1;
 
 
         //enemiesAlreadySpawnedThisRound = 0;
@@ -107,21 +111,23 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
         // Instantiate the chessPiece prefab first before the enemies
         Instantiate(playerPrefab, battleBoard.transform);
+        GameObject prefabPlayer = GameObject.FindWithTag("tagForPrefabPlayer");
+        codeForPrefabPlayer = prefabPlayer.GetComponent<CodeForPrefabPlayer>();
 
         // Now Randomize the instantiation of enemies
         if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
         {
-            maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(2 + roundNumber * 0.33));
+            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(2 + roundNumber * 0.33)));
             enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 0.75));
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
         {
-            maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(3 + roundNumber * 0.5));
+            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 0.5)));
             enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 1.5));
         }
         else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
         {
-            maxNoOfEnemiesAtAnyPoint = (int)Math.Round((double)(3 + roundNumber * 1));
+            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 1)));
             enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 2));
         }
 
@@ -139,6 +145,10 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             Instantiate(enemyPrefab, battleBoard.transform);
             enemiesSpawnedSoFarThisRound += 1;
         }
+
+        //The faster the player finishes a level (depending on enemyPointsToAllocate)
+        bonusGoldAtEndOfRound = enemyPointsToAllocate * 2; // Initial max reward or clearing levels faster
+        numberOfTimesEnemiesTookDamageThisRound = 0;
 
         //Finally, start with the player's turn
         turnController.RememberNewlySpawnedPlayerForNewRound();
@@ -183,15 +193,16 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
         SetKillCountIncreaseBy1();
 
-        currGold += goldEarned;
-        sideBarController.SetSideBarCurrGoldValue(currGold);
-
-        GameObject prefabPlayer = GameObject.FindWithTag("tagForPrefabPlayer");
-        CodeForPrefabPlayer codeForPrefabPlayer = prefabPlayer.GetComponent<CodeForPrefabPlayer>();
+        SetCurrGold(currGold + goldEarned);
         codeForPrefabPlayer.ShowGoldEarned(goldEarned);
 
-        if (currEnemiesLeft == 0)
+        if (currEnemiesLeft == 0) // All enemies killed, victory for this round
         {
+            float changeTodynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5)/10), -0.3f, 0.3f);
+            dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", changeTodynamicInputIndexTimeThinkingAndStepsTaken, false);
+            bonusGoldAtEndOfRound = Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0);
+            battleModeController.SetTextBonusGold(bonusGoldAtEndOfRound);
+            SetCurrGold(currGold + bonusGoldAtEndOfRound);
             Invoke(nameof(VictoryBattle), 0.5f);
         }
         else
@@ -220,7 +231,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     public void CallForEnemyTurn()
     {
-        turnController.EnemyTurn();
+        turnController.AllEnemiesTurn();
     }
 
 
@@ -228,10 +239,10 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     // ====================================================
     // GETTER, SETTER
-    public float GetTimeToMove()
-    {
-        return timeToMove;
-    }
+    //public float GetTimeToMove()
+    //{
+    //    return timeToMove;
+    //}
 
     public GameObject GetIdentityOfPieceAtThisBoardTile(int gridX, int gridY)
     {
@@ -249,14 +260,14 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         return whichEnemyVariantToSpawn;
     }
 
-    public int GetPlayerLandingDamage()
+    public int GetPlayerDirectContactDamage()
     {
-        return playerLandingDamage;
+        return playerDirectContactDamage;
     }
 
-    public void SetPlayerLandingDamage(int newLandingDamage)
+    public void SetPlayerDirectContactDamage(int newDirectContactDamage)
     {
-        playerLandingDamage = newLandingDamage;
+        playerDirectContactDamage = newDirectContactDamage;
     }
 
     public void SetNextRoundNumber()
@@ -302,13 +313,39 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     {
         killCount += 1;
     }
-    public int GetMoveCount()
+    public int GetTotalMoveCount()
     {
-        return moveCount;
+        return totalMoveCount;
     }
 
-    public void SetMoveCountIncreaseBy1()
+    public void SetTotalMoveCountIncreaseBy1()
     {
-        moveCount += 1;
+        totalMoveCount += 1;
+    }
+
+    public int GetMoveCountThisRound()
+    {
+        return moveCountThisRound;
+    }
+
+    public void SetMoveCountThisRoundIncreaseBy1()
+    {
+        moveCountThisRound += 1;
+    }
+
+    public int GetCurrGold()
+    {
+        return currGold;
+    }
+
+    public void SetCurrGold(int newGoldValue)
+    {
+        currGold = newGoldValue;
+        sideBarController.SetSideBarCurrGoldValue(currGold);
+    }
+
+    public void SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1()
+    {
+        numberOfTimesEnemiesTookDamageThisRound += 1;
     }
 }

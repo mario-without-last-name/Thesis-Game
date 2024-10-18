@@ -8,8 +8,6 @@ using TMPro;
 
 public class SettingsController : MonoBehaviour
 {
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
     [Header("Setting Buttons")]
     [SerializeField] private Button buttonMusic;
     [SerializeField] private Button buttonSoundEffects;
@@ -40,6 +38,8 @@ public class SettingsController : MonoBehaviour
     [Header("Checkbox Images")]
     [SerializeField] private Sprite checkedSprite;
     [SerializeField] private Sprite uncheckedSprite;
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
 
     // Start is called before the first frame update
     private void Start()

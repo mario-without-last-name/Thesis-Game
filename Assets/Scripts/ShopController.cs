@@ -9,9 +9,6 @@ using System.Reflection;
 
 public class ShopController : MonoBehaviour
 {
-    [Header("Sounds")]
-    [SerializeField] private MusicController musicController;
-
     [Header("Reroll")]
     [SerializeField] private GameObject groupRerollButton;
     [SerializeField] private Image RerollButtonColor;
@@ -59,25 +56,46 @@ public class ShopController : MonoBehaviour
     [SerializeField] private GameObject groupTextPurchased4;
     [SerializeField] private TextMeshProUGUI textPurchased4;
 
-    [Header("OtherControllers")]
-    [SerializeField] private BottomBarController BottomBarController;
+    [Header("Controllers")]
+    [SerializeField] private MusicController musicController;
+    [SerializeField] private BottomBarController bottomBarController;
+    [SerializeField] private PlayerAndEnemyStatusController playerAndEnemyStatusController;
+    [SerializeField] private PowerupsCatalogController powerupsCatalogController;
+
+    [Header("Button Images")]
+    [SerializeField] private Sprite rerollButtonActiveSprite;
+    [SerializeField] private Sprite rerollButtonInactiveSprite;
+    [SerializeField] private Sprite powerupPriceButtonActiveSprite;
+    [SerializeField] private Sprite powerupPriceButtonInactiveSprite;
+
+    private int currGold;
 
     // Start is called before the first frame update
     void Start()
     {
-        // Reset reroll price. Affected by difficuly too?
-        RefreshShopPowerupOptions();
+
+    }
+
+    public void SetColorOfPurchaseButtons()
+    {
+        if (currGold < 2) { RerollButtonColor.sprite = rerollButtonInactiveSprite; }
+        else { RerollButtonColor.sprite = rerollButtonActiveSprite; }
     }
 
     public void RerollButtonClicked()
     {
-        musicController.PlayBuySellSoundEffectSource();
-        //Increase price of reroll
-        RefreshShopPowerupOptions();
+        if (currGold >= 2)
+        {
+            musicController.PlayBuySellSoundEffectSource();
+            currGold -= 2;
+            playerAndEnemyStatusController.SetCurrGold(currGold);
+            RefreshShopPowerupOptions();
+        }
     }
 
     public void RefreshShopPowerupOptions()
     {
+        currGold = playerAndEnemyStatusController.GetCurrGold();
         groupPowerupSale1.SetActive(true);
         groupPowerupSale2.SetActive(true);
         groupPowerupSale3.SetActive(true);
@@ -86,6 +104,7 @@ public class ShopController : MonoBehaviour
         groupTextPurchased2.SetActive(false);
         groupTextPurchased3.SetActive(false);
         groupTextPurchased4.SetActive(false);
+        SetColorOfPurchaseButtons();
     }
 
     public void PurchasedPowerup1()

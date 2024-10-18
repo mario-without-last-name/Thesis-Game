@@ -38,6 +38,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
     private MusicController musicController;
     private CodeForPrefabPlayer codeForPrefabPlayer;
     private TurnController turnController;
+    private DynamicDifficultyController dynamicDifficultyController;
 
     private GameObject prefabPlayerObject;
 
@@ -51,14 +52,19 @@ public class CodeForPrefabEnemy : MonoBehaviour
     private int maxHealth;
     private int currHealth;
     private int enemyDamage;
+    private int goldOnKill;
     private int moveDelay;
     private int currDelayLeft;
+    private int numberOfMovesThisRound;
+    private int numberOfTurnsThisRound;
+    private float opacityOfMoveTilesAndAttackTiles;
 
     private bool alreadyKnockbackedFromDamage;
     private bool cannotAttackNextTurn;
     private bool alreadyMoved;
     private float lowestEuclideanDistance;
     private int yellowTileIndexWithLowestEuclideanDistance;
+    private string selectedDifficulty;
 
     private int[][] knockbackDirections1Tile = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1} };
     private int[][] knockbackDirections2Tile = new int[][] { new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2} };
@@ -77,7 +83,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
     void Awake()
     {
-        GameObject actualXYCoordinatesObject = GameObject.FindGameObjectWithTag("tagForActualXYCoordinates");
+        GameObject actualXYCoordinatesObject = GameObject.FindGameObjectWithTag("tagForActualXYCoordinatesController");
         actualXYCoordinates = actualXYCoordinatesObject.GetComponent<ActualXYCoordinatesController>();
         GameObject playerAndEnemyStatusControllerObject = GameObject.FindGameObjectWithTag("tagForPlayerAndEnemyStatusController");
         playerAndEnemyStatusController = playerAndEnemyStatusControllerObject.GetComponent<PlayerAndEnemyStatusController>();
@@ -87,20 +93,23 @@ public class CodeForPrefabEnemy : MonoBehaviour
         musicController = musicControllerObject.GetComponent<MusicController>();
         GameObject turnControllerObject = GameObject.FindGameObjectWithTag("tagForTurnController");
         turnController = turnControllerObject.GetComponent<TurnController>();
+        GameObject dynamicDifficultyControllerObject = GameObject.FindGameObjectWithTag("tagForDynamicDifficultyController");
+        dynamicDifficultyController = dynamicDifficultyControllerObject.GetComponent<DynamicDifficultyController>();
         // Must know where the player is.
         prefabPlayerObject = GameObject.FindGameObjectWithTag("tagForPrefabPlayer");
         codeForPrefabPlayer = prefabPlayerObject.GetComponent<CodeForPrefabPlayer>();
+
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        numberOfMovesThisRound = 0;
+        numberOfTurnsThisRound = 0;
 
         // Find out what enemy variant this piece should be as controlled by the playerAndEnemyStatusController
         thisEnemyVariant = playerAndEnemyStatusController.GetWhichEnemyVariantToSpawn();
 
         // Based on the enemy variant, determine its sprite, health, damage, and delay
         piecePicture.sprite = bestiaryController.GetEnemySprite(thisEnemyVariant);
-        int [] pieceHealthDamageDelay = bestiaryController.GetHealthAttackDelay(thisEnemyVariant);
-        maxHealth = pieceHealthDamageDelay[0];
+        UpdateEnemyStats();
         currHealth = maxHealth;
-        enemyDamage = pieceHealthDamageDelay[1];
-        moveDelay = pieceHealthDamageDelay[2];
         currDelayLeft = moveDelay;
         cannotAttackNextTurn = false;
 
@@ -123,14 +132,22 @@ public class CodeForPrefabEnemy : MonoBehaviour
         canvasUITransform = groupCanvasUI.GetComponent<RectTransform>();
         canvasUITransform.anchoredPosition = new Vector2(actualXYCoordinates.GetActualXCoordinateUIImage(currGridX), actualXYCoordinates.GetActualYCoordinateUIImage(currGridY));
 
+        // Reveal the enemies' attack and move tile when spawned. After this enemy moves once, control their visibility
+        //opacityOfMoveTilesAndAttackTiles = 1.0f;
+
         // Based on the enemy variant, determine the move tiles and attack tiles it has
         DeactivateAllMoveTiles();
         moveTilesToSpawn = bestiaryController.GetEnemyMoveTiles(thisEnemyVariant);
-        ActivateSpecificMoveTiles(); // LATER, MAKE ITS VISIBILITY DEPENDANT ON VISUAL HINTS DGB
+        ActivateSpecificMoveTiles();
         tilesThatTheEnemyWillMoveTo = moveTilesToSpawn;
         DeactivateAllAttackTiles();
         attackTilesToSpawn = bestiaryController.GetEnemyAttackTiles(thisEnemyVariant);
         ActivateSpecificAttackTiles();
+
+        //// Determine Visibility of move tiles and attack tiles after the enemy has moved once
+        //if (selectedDifficulty == "Easy") { opacityOfMoveTilesAndAttackTiles = 1.0f; }
+        //else if (selectedDifficulty == "Medium") { opacityOfMoveTilesAndAttackTiles = 0.5f; }
+        //else if (selectedDifficulty == "Hard") { opacityOfMoveTilesAndAttackTiles = 0.0f; }
 
         if (currDelayLeft == 1) { ShowMoveTiles(); yellowGlow.SetActive(true); }
         else { HideMoveTiles(); yellowGlow.SetActive(false); }
@@ -144,6 +161,30 @@ public class CodeForPrefabEnemy : MonoBehaviour
         Randomize2DArray(tilesThatTheEnemyWillMoveTo);
     }
 
+    public void UpdateEnemyStats()
+    {
+        //int[] pieceHealthDamageDelayGold = bestiaryController.GetHealthAttackDelayGold(thisEnemyVariant);
+        //highestMaxHealth = pieceHealthDamageDelayGold[0];
+        //enemyDamage = pieceHealthDamageDelayGold[1];
+        //moveDelay = pieceHealthDamageDelayGold[2];
+        //goldOnKill = pieceHealthDamageDelayGold[3];
+
+        float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("enemyStats");
+        int[] pieceHealthDamageDelayGoldMinAndMax = bestiaryController.GetHealthAttackDelayGoldMinAndMax(thisEnemyVariant);
+
+        // Calculate stats based on difficulty index (INTERPOLATION)
+        int lowesthighestMaxHealth = pieceHealthDamageDelayGoldMinAndMax[0];
+        int highestMaxHealth = pieceHealthDamageDelayGoldMinAndMax[1];
+        maxHealth = (int)(lowesthighestMaxHealth + (highestMaxHealth - lowesthighestMaxHealth) * difficultyIndex);
+        int minEnemyDamage = pieceHealthDamageDelayGoldMinAndMax[2];
+        int maxEnemyDamage = pieceHealthDamageDelayGoldMinAndMax[3];
+        enemyDamage = (int)(minEnemyDamage + (maxEnemyDamage - minEnemyDamage) * difficultyIndex);
+        int slowestMoveDelay = pieceHealthDamageDelayGoldMinAndMax[4];
+        int fastestMoveDelay = pieceHealthDamageDelayGoldMinAndMax[5];
+        moveDelay = (int)(slowestMoveDelay + (fastestMoveDelay - slowestMoveDelay) * (1.0f - difficultyIndex));
+        goldOnKill = pieceHealthDamageDelayGoldMinAndMax[6];
+    }
+
     public void DeactivateAllMoveTiles()
     {
         for (int i = 0; i < moveTiles.Length; i++)
@@ -154,6 +195,8 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
     public void ActivateSpecificMoveTiles()
     {
+        if (numberOfMovesThisRound == 0) { opacityOfMoveTilesAndAttackTiles = 1.0f; }
+        else { opacityOfMoveTilesAndAttackTiles = Math.Max(1.0f - dynamicDifficultyController.GetDynamicOutput("visualHint") * 1.0f , 0); }
         foreach (int[] offset in moveTilesToSpawn)
         {
             int gridXOffset = offset[0];
@@ -163,6 +206,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
             {
                 int index = gridXOffset + 3 + (gridYOffset + 3) * 7;
                 moveTiles[index].SetActive(true);
+                moveTiles[index].GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, opacityOfMoveTilesAndAttackTiles);
             }
         }
     }
@@ -177,6 +221,8 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
     public void ActivateSpecificAttackTiles()
     {
+        if (numberOfTurnsThisRound == 0) { opacityOfMoveTilesAndAttackTiles = 1.0f; }
+        else { opacityOfMoveTilesAndAttackTiles = Math.Max(1.0f - dynamicDifficultyController.GetDynamicOutput("visualHint") * 1.0f, 0); }
         foreach (int[] offset in attackTilesToSpawn)
         {
             int gridXOffset = offset[0];
@@ -186,18 +232,21 @@ public class CodeForPrefabEnemy : MonoBehaviour
             {
                 int index = gridXOffset + 3 + (gridYOffset + 3) * 7;
                 attackTiles[index].SetActive(true);
+                attackTiles[index].GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, opacityOfMoveTilesAndAttackTiles);
             }
         }
     }
 
     public void ThisEnemyTakesDamage(int damageTaken, bool isKnockback)
     { // QUESTION: IF THE ATTACK HAS NO KNOCKBACK? WILL THE DELAY ALSO INCREASE  AND ALSO CANNOT ATTACK NEXT TURN? - I think no?
+        dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", +0.025f, false);
+        playerAndEnemyStatusController.SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1();
         currHealth = currHealth - damageTaken;
         if (currHealth <= 0)
         {
             //Debug.Log("You just killed a " + thisEnemyVariant);
             musicController.PlayBuySellSoundEffectSource();
-            playerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold(2);
+            playerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold(goldOnKill);
             Destroy(gameObject);
         }
         else
@@ -206,7 +255,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
             Invoke(nameof(CallForEnemyTurn), 0.5f); // THIS MIGHT BE PROBLEMATIC WITH POWEUPS THAT ATTACK MULTIPLE ENEMIES AT ONCE
             musicController.PlayDamageSoundEffectSource();
             groupHitpoints.SetActive(true);
-            imageGreenHealthBar.fillAmount = (float)currHealth / (float)maxHealth;
+            imageGreenHealthBar.fillAmount = Math.Min((float)currHealth / (float)maxHealth, 1);
             textDamageOrHealTaken.text = "-" + damageTaken;
             Invoke(nameof(HideHealthBar), 0.5f);
             // We cannot just setActive the entire move and attack tile groups. It must change depending how close they are to the board's edges
@@ -268,8 +317,9 @@ public class CodeForPrefabEnemy : MonoBehaviour
         groupHitpoints.SetActive(false);
     }
 
-    public void ActivateEnemyTurnForRedTiles()
+    public void ActivateEnemyTurnForRedTiles() // Check if player is in one of this enemy's red tiles at the end of their turn. If yes, damage them (no knockback)
     {
+        UpdateEnemyStats(); // AT THE START OF THE ENEMY'S TURN, START UPDATING THEIR STATS.
         bool playerWasInThisEnemysAttackTile = false;
 
         if (cannotAttackNextTurn) // If this enemy was just knockedbacked, it cannot attack player this turn with its red tiles
@@ -300,9 +350,19 @@ public class CodeForPrefabEnemy : MonoBehaviour
         else { CallForNextEnemysTurnOneByOneForRedTiles(); }
     }
 
-    public void ActivateEnemyTurnForYellowTiles()
+    public void ActivateEnemyTurnForYellowTiles() // Enemy reduces their movement delay by 1.
     {
+        UpdateEnemyStats(); // UPDATING THEIR STATS AGAIN
+        DeactivateAllMoveTiles(); // REFRESH ATTACK TILES RIGHT NOW TO UPDATE THE OPACITY
+        ActivateSpecificMoveTiles();
+        numberOfTurnsThisRound += 1;
         redGlow.SetActive(false);
+
+        if (numberOfTurnsThisRound == 1) // to readjust the red tile visibility after 1 turn
+        {
+            DeactivateAllAttackTiles();
+            ActivateSpecificAttackTiles();
+        }
 
         currDelayLeft -= 1;
         if (currDelayLeft == 1)
@@ -313,6 +373,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
         }
         else if (currDelayLeft == 0)
         {
+            numberOfMovesThisRound += 1;
             HideMoveTiles();
             yellowGlow.SetActive(false);
             DeactivateAllMoveTiles();
@@ -334,60 +395,137 @@ public class CodeForPrefabEnemy : MonoBehaviour
         }
     }
 
-    public void EnemyMovesToOneOfItsYellowTiles()
-    { // EASY = random / always avoids hitting player when possible      MEDIUM = goes to the direction of the player             HARD = goes to player (and lands on them if possible) but otherwise move to a tile without one of the player's move tiles?
-
-        // EASY ==============================================================================
-        //foreach (int[] direction in tilesThatTheEnemyWillMoveTo)
-        //{
-        //    int gridXOffset = direction[0];
-        //    int gridYOffset = direction[1];
-        //    if (actualXYCoordinates.IsThisStillInsideTheBoard(currGridX + gridXOffset, currGridY + gridYOffset) && playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX + gridXOffset, currGridY + gridYOffset) == null)
-        //    {
-        //        alreadyKnockbackedFromDamage = true;
-        //        playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, null);
-        //        playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX + gridXOffset, currGridY + gridYOffset, gameObject);
-        //        thisPieceTransform.DOMove(new Vector3(actualXYCoordinates.GetActualXCoordinate(currGridX + gridXOffset), actualXYCoordinates.GetActualYCoordinate(currGridY + gridYOffset), transform.position.z), 0.5f);
-        //        canvasUITransform.DOAnchorPos(new Vector2(actualXYCoordinates.GetActualXCoordinateUIImage(currGridX + gridXOffset), actualXYCoordinates.GetActualYCoordinateUIImage(currGridY + gridYOffset)), 0.5f);
-        //        // Randomize the 2D enemy movement arrays again
-        //        Randomize2DArray(tilesThatTheEnemyWillMoveTo);
-        //        currGridX += gridXOffset;
-        //        currGridY += gridYOffset;
-        //        break;
-        //    }
-        //}
-
-        // MEDIUM ==============================================================================
-        // Check first if player exist in one of the yellow tiles. If yes, then move there and attack player + cause them to knockback. If not, then move to any random tiles (or the one closest to the player)
-        // Maybe we can do that? Calculate the euclidean distance from a yellow tile to the player then pick the smallest one?
+    public void EnemyMovesToOneOfItsYellowTiles() // Move to a yellow tile when their delay counter is 0. If there is a player in the target, then damage + knockback the player. If none of the yelloe tiles point to an empty tile, then just skip this turn.
+    { 
         alreadyMoved = false;
-        lowestEuclideanDistance = 99;
-        yellowTileIndexWithLowestEuclideanDistance = -1;
+        lowestEuclideanDistance = 999;
+        yellowTileIndexWithLowestEuclideanDistance = -1; 
+
+        // For the Hard difficulty only, calculating where the player can move next turn
+        (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
+        int[][] originalPlayerMoveTiles = codeForPrefabPlayer.GetPlayerMoveTiles();
+        int[][] playerCanMoveToTheseMoveTilesNextTurn = new int[originalPlayerMoveTiles.Length][];
+        for (int i = 0; i < originalPlayerMoveTiles.Length; i++)
+        {
+            playerCanMoveToTheseMoveTilesNextTurn[i] = new int[2];
+            playerCanMoveToTheseMoveTilesNextTurn[i][0] = originalPlayerMoveTiles[i][0] + playerCurrGridX;
+            playerCanMoveToTheseMoveTilesNextTurn[i][1] = originalPlayerMoveTiles[i][1] + playerCurrGridY;
+        }
+
         for (int i = 0; i < tilesThatTheEnemyWillMoveTo.Length; i++)
             {
             int gridXOffset = tilesThatTheEnemyWillMoveTo[i][0];
             int gridYOffset = tilesThatTheEnemyWillMoveTo[i][1];
-            // MAKE SURE IT IS NOT NULL FIRST, ONLY THEN YOU CAN CHECK IF IT HAS THE PLAYER OR ENEMY SCRIPT COMPONENTS
+            float aiMovementDifficulty = 0.0f;
+            aiMovementDifficulty = selectedDifficulty == "Easy" ? 0.0f : selectedDifficulty == "Medium" ? 0.5f : selectedDifficulty == "Hard" ? 1.0f : 0.5f;
+            if (selectedDifficulty == "Adaptive") { aiMovementDifficulty = dynamicDifficultyController.GetDynamicOutput("enemyAI"); } 
+            // If selected difficulty is adaptive, then switch between easy / easy 2 / medium / hard ai movements
+
+
             if (actualXYCoordinates.IsThisStillInsideTheBoard(currGridX + gridXOffset, currGridY + gridYOffset))
             {
                 GameObject currentGameObjectAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX + gridXOffset, currGridY + gridYOffset);
-                if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
+
+                // EASY ===========================================================
+                // Move to a random yellow tile, try to not to move to the player unless no other options exist. IF A TILE EXIST WHERE THE PLAYER CAN ATTACK IT NEXT TURN, GO TO IT
+                if (aiMovementDifficulty >= 0.0f && aiMovementDifficulty < 0.25f)
                 {
-                    lowestEuclideanDistance = 0;
-                    yellowTileIndexWithLowestEuclideanDistance = i;
-                }
-                else if (currentGameObjectAtThisTile == null)
-                {
-                    (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
-                    int xDifferenceToPlayer = (currGridX + gridXOffset) - playerCurrGridX;
-                    int yDifferenceToPlayer = (currGridY + gridYOffset) - playerCurrGridY;
-                    float currentEuclideanDistance = Mathf.Sqrt(xDifferenceToPlayer * xDifferenceToPlayer + yDifferenceToPlayer * yDifferenceToPlayer);
-                    if (currentEuclideanDistance < lowestEuclideanDistance)
+                    if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
                     {
-                        lowestEuclideanDistance = currentEuclideanDistance;
-                        yellowTileIndexWithLowestEuclideanDistance = i;
+                        float currentEuclideanDistance = 100;
+                        if (currentEuclideanDistance < lowestEuclideanDistance)
+                        {
+                            lowestEuclideanDistance = currentEuclideanDistance;
+                            yellowTileIndexWithLowestEuclideanDistance = i;
+                        }
+                    }
+                    else if (currentGameObjectAtThisTile == null)
+                    {
+                        float currentEuclideanDistance = UnityEngine.Random.Range(1f, 99f);
+                        if (currentEuclideanDistance < lowestEuclideanDistance)
+                        {
+                            lowestEuclideanDistance = currentEuclideanDistance;
+                            yellowTileIndexWithLowestEuclideanDistance = i;
+                        }
                     }
                 }
+
+                // EASY 2 ===========================================================
+                // Move to a random yellow tile
+                else if (aiMovementDifficulty >= 0.25f && aiMovementDifficulty < 0.5f)
+                {
+                    if ( ( currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>() ) || currentGameObjectAtThisTile == null )
+                    {
+                        float currentEuclideanDistance = UnityEngine.Random.Range(1f, 99f);
+                        if (currentEuclideanDistance < lowestEuclideanDistance)
+                        {
+                            lowestEuclideanDistance = currentEuclideanDistance;
+                            yellowTileIndexWithLowestEuclideanDistance = i;
+                        }
+                    }
+                }
+
+                // MEDIUM ===========================================================
+                // Move to the yellow tile with the lowest euclidean distance to the player
+                else if (aiMovementDifficulty >= 0.5f && aiMovementDifficulty < 0.75f)
+                {
+                    if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
+                    {
+                        lowestEuclideanDistance = 0;
+                        yellowTileIndexWithLowestEuclideanDistance = i;
+                    }
+                    else if (currentGameObjectAtThisTile == null)
+                    {
+                        int xDifferenceToPlayer = (currGridX + gridXOffset) - playerCurrGridX;
+                        int yDifferenceToPlayer = (currGridY + gridYOffset) - playerCurrGridY;
+                        float currentEuclideanDistance = Mathf.Sqrt(xDifferenceToPlayer * xDifferenceToPlayer + yDifferenceToPlayer * yDifferenceToPlayer);
+                        if (currentEuclideanDistance < lowestEuclideanDistance)
+                        {
+                            lowestEuclideanDistance = currentEuclideanDistance;
+                            yellowTileIndexWithLowestEuclideanDistance = i;
+                        }
+                    }
+                }
+
+                // HARD ===========================================================
+                // like Medium, but avoid going to one of the tiles that the player can jump to in the next turn.
+                else if (aiMovementDifficulty >= 0.75f && aiMovementDifficulty <= 1.0f)
+                {
+                    if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
+                    {
+                        lowestEuclideanDistance = 0;
+                        yellowTileIndexWithLowestEuclideanDistance = i;
+                    }
+                    else if (currentGameObjectAtThisTile == null)
+                    {
+                        int xDifferenceToPlayer = (currGridX + gridXOffset) - playerCurrGridX;
+                        int yDifferenceToPlayer = (currGridY + gridYOffset) - playerCurrGridY;
+
+                        bool playerMayMoveToThisTileNextTurn = false;
+                        for (int j = 0; j < playerCanMoveToTheseMoveTilesNextTurn.Length; j++)
+                        {
+                            if (currGridX + gridXOffset == playerCanMoveToTheseMoveTilesNextTurn[j][0] && currGridY + gridYOffset == playerCanMoveToTheseMoveTilesNextTurn[j][1])
+                            {
+                                playerMayMoveToThisTileNextTurn = true;
+
+                                break;
+                            }
+                        }
+
+                        float currentEuclideanDistance = 0;
+                        if (playerMayMoveToThisTileNextTurn) { currentEuclideanDistance = Mathf.Sqrt(xDifferenceToPlayer * xDifferenceToPlayer + yDifferenceToPlayer * yDifferenceToPlayer) + 100; }
+                        else { currentEuclideanDistance = Mathf.Sqrt(xDifferenceToPlayer * xDifferenceToPlayer + yDifferenceToPlayer * yDifferenceToPlayer); }
+
+                        if (currentEuclideanDistance < lowestEuclideanDistance)
+                        {
+                            lowestEuclideanDistance = currentEuclideanDistance;
+                            yellowTileIndexWithLowestEuclideanDistance = i;
+                        }
+                    }
+                }
+
+
+
             }
         }
 
@@ -428,7 +566,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
     public void CallForEnemyTurn()
     {
-        turnController.EnemyTurn();
+        turnController.AllEnemiesTurn();
     }
 
     public void CallForNextEnemysTurnOneByOneForRedTiles()

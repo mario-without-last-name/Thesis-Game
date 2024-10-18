@@ -10,6 +10,8 @@ using UnityEditor.U2D.Aseprite;
 
 public class CodeForPrefabEnemyOldImageUI : MonoBehaviour
 {
+    /*
+     * 
     [Header("Tiles")]
     [SerializeField] private GameObject[] moveTiles;
     [SerializeField] private GameObject[] attackTiles;
@@ -107,4 +109,6 @@ public class CodeForPrefabEnemyOldImageUI : MonoBehaviour
             }
         }
     }
+
+    */
 }

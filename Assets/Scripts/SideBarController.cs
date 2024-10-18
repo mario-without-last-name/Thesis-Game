@@ -33,12 +33,7 @@ public class SideBarController : MonoBehaviour
     void Start()
     {
         SetSideBarRoundNumber(1);
-        //SetSideBarCurrEnemiesLeftValue(2); // Initial Value may be adjusted by DGB / Easy / Medium / Hard later
-        //SetSideBarTotalEnemiesThisRoundValue(2); // Initial Value may be adjusted by DGB / Easy / Medium / Hard later
         modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
-        //SetSideBarcurrPlayerHealthPointValue(50); // Initial Value may be adjusted by DGB / Easy / Medium / Hard later
-        //SetSideBarmaxPlayerHealthPointValue(50); // Initial Value may be adjusted by DGB / Easy / Medium / Hard later
-        //SetSideBarCurrGoldValue(20); // Initial Value may be adjusted by DGB / Easy / Medium / Hard later
 
         if (PlayerPrefs.GetInt("isTimerChecked", 0) == 1)
         {
@@ -129,7 +124,7 @@ public class SideBarController : MonoBehaviour
     public void SetSideBarCurrGoldValue(int newInt)
     {
         currGoldValue = newInt;
-        goldCount.text = currGoldValue.ToString();
+        goldCount.text = "$ " + currGoldValue.ToString();
     }
 
     //public bool GetSideBarIsTimerRunning()
