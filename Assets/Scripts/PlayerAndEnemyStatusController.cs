@@ -29,6 +29,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     [SerializeField] private BattleModeController battleModeController;
     [SerializeField] private BestiaryController bestiaryController;
     [SerializeField] private DynamicDifficultyController dynamicDifficultyController;
+    [SerializeField] private GenerateStatisticsController generateStatisticsController;
 
     private int roundNumber;
     private int killCount;
@@ -42,9 +43,11 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int currPlayerHealthPoint;
     private int maxPlayerHealthPoint;
     private int currGold;
+    private int goldGainedSoFar;
     private int bonusGoldAtEndOfRound;
     //private float timeToMove;
     private int playerDirectContactDamage;
+    private int playerBonusDamage;
     private int[,] playerMoveTiles;
     CodeForPrefabPlayer codeForPrefabPlayer;
 
@@ -53,7 +56,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int enemiesSpawnedSoFarThisRound;
     private string whichEnemyVariantToSpawn;
     private GameObject[,] identitiesOfPiecesInBoard; // Make an array of game objects
-    
+
     // When accessing a specific gameobject prefab in the 2d array, you can just access one of its function, like getting damaged.
     // Move a piece, move the reference to the other tile coordinates.
     // Changing the prefab being referenced in the 2d array doesnot immeadiately dictate where the prefab should be
@@ -68,6 +71,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         currPlayerHealthPoint = 50;
         maxPlayerHealthPoint = 50;
         currGold = 0;
+        goldGainedSoFar = 0;
         //if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
         //{
         //    timeToMove = 6.0f;
@@ -86,6 +90,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         sideBarController.SetSideBarCurrGoldValue(currGold);
 
         playerDirectContactDamage = 5; // The damage the player deals upon DirectContact on another enemy
+        playerBonusDamage = 0; // Bonus damage applied to both direct contact or from powerups
 
         killCount = 0;
         totalMoveCount = -1;
@@ -115,21 +120,35 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         codeForPrefabPlayer = prefabPlayer.GetComponent<CodeForPrefabPlayer>();
 
         // Now Randomize the instantiation of enemies
-        if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
-        {
-            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(2 + roundNumber * 0.33)));
-            enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 0.75));
-        }
-        else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
-        {
-            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 0.5)));
-            enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 1.5));
-        }
-        else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
-        {
-            maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 1)));
-            enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 2));
-        }
+        float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("enemyStats");
+        maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)((difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
+        enemyPointsToAllocate = (int)Math.Round((double)((difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1)));
+        //if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
+        //{
+        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(2 + roundNumber * 0.333)));
+        //    enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 1));
+        //}
+        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium")
+        //{
+        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 0.66666)));
+        //    enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 2));
+        //}
+        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
+        //{
+        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(4 + roundNumber * 1)));
+        //    enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 3));
+        //}
+        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
+        //{
+        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)( (difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
+        //    enemyPointsToAllocate = (int)Math.Round((double)( (difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1) ));
+        //}
+        //else
+        //{
+        //    maxNoOfEnemiesAtAnyPoint = 1;
+        //    enemyPointsToAllocate = 1;
+        //    Debug.LogWarning("Unkown mode difficulty");
+        //}
 
         enemyVariantsToBeSpawnedThisRound = bestiaryController.DecideWhatEnemiesToSpawnThisRound(enemyPointsToAllocate);
         currEnemiesLeft = enemyVariantsToBeSpawnedThisRound.Length;
@@ -189,6 +208,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     public void AnEnemyWasKilledAndEarnGold(int goldEarned)
     {
+        //Debug.Log(Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0));
         currEnemiesLeft -= 1;
         sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
         SetKillCountIncreaseBy1();
@@ -198,8 +218,16 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
         if (currEnemiesLeft == 0) // All enemies killed, victory for this round
         {
-            float changeTodynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5)/10), -0.3f, 0.3f);
-            dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", changeTodynamicInputIndexTimeThinkingAndStepsTaken, false);
+            // at end of each round, update the logs of both per turn and per round
+            PrintAndLogPerTurnHealthKillsPointsGold();
+            dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex();
+            PrintAndLogPerRoundHealthKillsPointsGoldMoves();
+            dynamicDifficultyController.PrintAndLogPerRoundAllDGBInputAndOutputIndex();
+
+            // CHANGE THE BONUS GOLD CALCULATION. WHENEVER AN ENEMY IS DAMAGED, THE BONUS GOLD REDUCTION IS HALTED FOR 2 TURNS
+            // MAYBE ALSO CHANGE IT SO THAT IT IS INDEPENDENT OF THE enemyPointsToAllocate. PERHAPS MAKE IT DEPENDENT ON ROUND NUMBER, THEN THE MORE THE enemyPointsToAllocate, THEN THE SLOWE IT IS REDUCED
+            float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5) / 10), -0.3f, 0.3f);
+            dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", changeToDynamicInputIndexTimeThinkingAndStepsTaken, false);
             bonusGoldAtEndOfRound = Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0);
             battleModeController.SetTextBonusGold(bonusGoldAtEndOfRound);
             SetCurrGold(currGold + bonusGoldAtEndOfRound);
@@ -234,6 +262,17 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         turnController.AllEnemiesTurn();
     }
 
+    public void PrintAndLogPerTurnHealthKillsPointsGold() // ENEMY POINTS GAINED NOT YET FIXED
+    {
+        Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
+        generateStatisticsController.LogPerTurnHealthKillsPointsGold(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString());
+    }
+
+    public void PrintAndLogPerRoundHealthKillsPointsGoldMoves() // ENEMY POINTS GAINED NOT YET FIXED
+    {
+        Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
+        generateStatisticsController.LogPerRoundHealthKillsPointsGoldMoves(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString(), totalMoveCount.ToString());
+    }
 
 
 
@@ -260,43 +299,10 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         return whichEnemyVariantToSpawn;
     }
 
-    public int GetPlayerDirectContactDamage()
-    {
-        return playerDirectContactDamage;
-    }
-
-    public void SetPlayerDirectContactDamage(int newDirectContactDamage)
-    {
-        playerDirectContactDamage = newDirectContactDamage;
-    }
-
     public void SetNextRoundNumber()
     {
         roundNumber += 1;
         sideBarController.SetSideBarRoundNumber(roundNumber);
-    }
-
-    public int GetPlayerMaxHealth()
-    {
-        return maxPlayerHealthPoint;
-    }
-
-    public void SetPlayerMaxHealth(int newPlayerMaxHealth)
-    {
-        maxPlayerHealthPoint = newPlayerMaxHealth;
-        sideBarController.SetSideBarMaxPlayerHealthPointValue(maxPlayerHealthPoint);
-    }
-
-    public int GetPlayerCurrHealth()
-    {
-        return currPlayerHealthPoint;
-    }
-
-    public void SetPlayerCurrHealth(int newPlayerCurrHealth)
-    {
-        currPlayerHealthPoint = newPlayerCurrHealth;
-        sideBarController.SetSideBarCurrPlayerHealthPointValue(currPlayerHealthPoint);
-        if (currPlayerHealthPoint <= 0) { PlayerDied(); }
     }
 
     public int GetRoundNumber()
@@ -341,6 +347,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     public void SetCurrGold(int newGoldValue)
     {
         currGold = newGoldValue;
+        goldGainedSoFar += currGold;
         sideBarController.SetSideBarCurrGoldValue(currGold);
     }
 
@@ -348,4 +355,50 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     {
         numberOfTimesEnemiesTookDamageThisRound += 1;
     }
+
+    public int GetPlayerMaxHealth()
+    {
+        return maxPlayerHealthPoint;
+    }
+
+    public void SetPlayerMaxHealth(int newPlayerMaxHealth)
+    {
+        maxPlayerHealthPoint = newPlayerMaxHealth;
+        sideBarController.SetSideBarMaxPlayerHealthPointValue(maxPlayerHealthPoint);
+    }
+
+    public int GetPlayerCurrHealth()
+    {
+        return currPlayerHealthPoint;
+    }
+
+    public void SetPlayerCurrHealth(int newPlayerCurrHealth)
+    {
+        currPlayerHealthPoint = newPlayerCurrHealth;
+        if (currPlayerHealthPoint > maxPlayerHealthPoint) { currPlayerHealthPoint = maxPlayerHealthPoint; }
+        sideBarController.SetSideBarCurrPlayerHealthPointValue(currPlayerHealthPoint);
+        if (currPlayerHealthPoint <= 0) { PlayerDied(); }
+    }
+    public int GetPlayerDirectContactDamage()
+    {
+        return playerDirectContactDamage;
+    }
+
+    public void SetPlayerDirectContactDamage(int newDirectContactDamage)
+    {
+        playerDirectContactDamage = newDirectContactDamage;
+    }
+
+    public int GetPlayerBonusDamage()
+    {
+        return playerBonusDamage;
+    }
+
+    public void SetPlayerBonusDamage(int newBonusDamage)
+    {
+        playerBonusDamage = newBonusDamage;
+    }
+
+
+
 }

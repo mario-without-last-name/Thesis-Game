@@ -78,7 +78,10 @@ public class BottomBarController : MonoBehaviour
     [SerializeField] private BattleModeController battleModeController;
     [SerializeField] private TurnController turnController;
 
-    public void OptionToSellPowerups()
+    private List<string> activePowerupsOwned = new List<string>();
+    private List<string> passivePowerupsOwned = new List<string>();
+
+    public void OptionToSellPowerups() // While in the shop
     {
         hotKeyPowerup1.SetActive(false);
         groupCooldown1.SetActive(false);
@@ -125,4 +128,118 @@ public class BottomBarController : MonoBehaviour
         groupPassiveSell3.SetActive(false);
         groupPassiveSell4.SetActive(false);
     }
+
+    void Update()
+    {
+        // Check for key presses and log the appropriate message
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Debug.Log("Q has been pressed");
+            // Activate the 1st active powerup (if it exists, and off-cooldown)
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            Debug.Log("W has been pressed");
+            // Activate the 2nd active powerup (if it exists, and off-cooldown)
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Debug.Log("E has been pressed");
+            // Activate the 3rd active powerup (if it exists, and off-cooldown)
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Debug.Log("R has been pressed");
+            // Activate the 4th active powerup (if it exists, and off-cooldown)
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            Debug.Log("T has been pressed");
+            // Activate the 5th active powerup (if it exists, and off-cooldown)
+        }
+    }
+
+    // MUST CHANGE THE COLOR OF THE POWERUP FRAMES
+    // ACTIVE POWERUPS: MUST BE BLUE WHEN IN COOLDOWN
+    // BOTH ACTIVEAND PASSIVE POWEUPS MUST BE BROWN (NOT BLUE) WHEN IN SELLING MODE.
+
+    public int GetNumberOfOwnedActivePowerups()
+    {
+        return activePowerupsOwned.Count;
+    }
+
+    public void AddNewRecentlyPurchasedActivePowerup(string newPowerupIdentity)
+    {
+        activePowerupsOwned.Add(newPowerupIdentity);
+    }
+
+    public void SellOwnedActivePowerup(int index)
+    {
+        activePowerupsOwned.RemoveAt(index);
+        // Add gold back, maybe slightly add powerup usage when buying this
+    }
+
+    public void resetActivePowerupDisplayOrder()
+    {
+        if (activePowerupsOwned.Count >= 1)
+        {
+
+        }
+        if (activePowerupsOwned.Count >= 2)
+        {
+
+        }
+        if (activePowerupsOwned.Count >= 3)
+        {
+
+        }
+        if (activePowerupsOwned.Count >= 4)
+        {
+
+        }
+        if (activePowerupsOwned.Count >= 5)
+        {
+
+        }
+    }
+
+    public int GetNumberOfOwnedPassivePowerups()
+    {
+        return passivePowerupsOwned.Count;
+    }
+
+    public void AddNewRecentlyPurchasedPassivePowerup(string newPowerupIdentity)
+    {
+        passivePowerupsOwned.Add(newPowerupIdentity);
+    }
+
+    public void SellOwnedPassivePowerup(int index)
+    {
+        passivePowerupsOwned.RemoveAt(index);
+        // Add gold back
+    }
+
+
+    public void resetPassivePowerupDisplayOrder()
+    {
+        if (passivePowerupsOwned.Count >= 1)
+        {
+
+        }
+        if (passivePowerupsOwned.Count >= 2)
+        {
+
+        }
+        if (passivePowerupsOwned.Count >= 3)
+        {
+
+        }
+        if (passivePowerupsOwned.Count >= 4)
+        {
+
+        }
+    }
+
+
+
 }

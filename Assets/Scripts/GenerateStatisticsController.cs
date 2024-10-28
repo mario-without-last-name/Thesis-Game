@@ -3,7 +3,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Networking;
-using static UnityEditor.ShaderData;
+
 using System.Collections;
 
 public class GenerateStatisticsController : MonoBehaviour
@@ -25,9 +25,75 @@ public class GenerateStatisticsController : MonoBehaviour
     [SerializeField] private GenerateStatisticsController generateStatisticsController;
     [SerializeField] private ConfirmQuitBattleController confirmQuitBattleController;
 
+    private string dataLogPerTurnDGBInputDamageReceivedAndDealt;
+    private string dataLogPerTurnDGBInputHealthLeft;
+    private string dataLogPerTurnDGBInputPowerupUsage;
+    private string dataLogPerTurnDGBInputTimeThinkingAndStepsTaken;
+    private string dataLogPerTurnDGBOutputDifficultyIndex;
+
+    private string dataLogPerTurnHpLeft;
+    private string dataLogPerTurnEnemiesKilled;
+    private string dataLogPerTurnEnemyPointsObtained;
+    private string dataLogPerTurnGoldEarned;
+    private string dataLogPerTurnCurrentGold;
+
+    private string dataLogPerRoundDGBInputDamageReceivedAndDealt;
+    private string dataLogPerRoundDGBInputHealthLeft;
+    private string dataLogPerRoundDGBInputPowerupUsage;
+    private string dataLogPerRoundDGBInputTimeThinkingAndStepsTaken;
+    private string dataLogPerRoundDGBOutputDifficultyIndex;
+
+    private string dataLogPerRoundHpLeft;
+    private string dataLogPerRoundEnemiesKilled;
+    private string dataLogPerRoundEnemyPointsObtained;
+    private string dataLogPerRoundGoldEarned;
+    private string dataLogPerRoundCurrentGold;
+
+    private string dataLogPerRoundGoldSpent;
+    private string dataLogPerRoundTotalMoves;
+
+
+    private string selectedDifficulty;
+
+    // I don't think keeping track of exactly which powerups were used will be necessary.
+
+    //private string formUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSddwM-d-9_O-AujSfuFWOQQAsEBXBRjaeacqaCjFY5-g_qx_A/formResponse";
+
     private void Start()
     {
-        inputField.onValueChanged.AddListener(ValidateInput);
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        if (selectedDifficulty == "Adaptive")
+        {
+            dataLogPerTurnDGBInputDamageReceivedAndDealt = "333,";
+            dataLogPerTurnDGBInputHealthLeft = "1000,";
+            dataLogPerTurnDGBInputPowerupUsage = "333,";
+            dataLogPerTurnDGBInputTimeThinkingAndStepsTaken = "333,";
+            dataLogPerTurnDGBOutputDifficultyIndex = "500,";
+
+            dataLogPerTurnHpLeft = "50,";
+            dataLogPerTurnEnemiesKilled = "0,";
+            dataLogPerTurnEnemyPointsObtained = "0,";
+            dataLogPerTurnGoldEarned = "0,"; // This also includes gold earned from selling powerups
+            dataLogPerTurnCurrentGold = "0,";
+
+            dataLogPerRoundDGBInputDamageReceivedAndDealt = "333,";
+            dataLogPerRoundDGBInputHealthLeft = "1000,";
+            dataLogPerRoundDGBInputPowerupUsage = "333,";
+            dataLogPerRoundDGBInputTimeThinkingAndStepsTaken = "333,";
+            dataLogPerRoundDGBOutputDifficultyIndex = "500,";
+
+            dataLogPerRoundHpLeft = "50,";
+            dataLogPerRoundEnemiesKilled = "0,";
+            dataLogPerRoundEnemyPointsObtained = "0,";
+            dataLogPerRoundGoldEarned = "0,";
+            dataLogPerRoundCurrentGold = "0,";
+
+            dataLogPerRoundTotalMoves = "0,";
+            dataLogPerRoundGoldSpent = ""; // this one starts off with no string as at the "get ready" battle mode, it is already set to "0,"
+        }
+
+
+    inputField.onValueChanged.AddListener(ValidateInput);
 
         submitButton.SetActive(false);
         textModeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
@@ -103,7 +169,49 @@ public class GenerateStatisticsController : MonoBehaviour
     //    status.SetActive(true);
     //}
 
-    private string formUrl = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSddwM-d-9_O-AujSfuFWOQQAsEBXBRjaeacqaCjFY5-g_qx_A/formResponse";
+    public void LogPerTurnDGBInputsAndOutputs(string inputDGB1, string inputDGB2, string inputDGB3, string inputDGB4, string outputDGB) // Called in TurnController.NextEnemysTurnOneByOneForYellowTiles() when round is not over, then called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
+    {
+        dataLogPerTurnDGBInputDamageReceivedAndDealt    += inputDGB1 + ",";
+        dataLogPerTurnDGBInputHealthLeft += inputDGB2 + ",";
+        dataLogPerTurnDGBInputPowerupUsage += inputDGB3 + ",";
+        dataLogPerTurnDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
+        dataLogPerTurnDGBOutputDifficultyIndex += outputDGB + ",";
+    }
+
+    public void LogPerTurnHealthKillsPointsGold(string stat1, string stat2, string stat3, string stat4, string stat5) // Called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
+    {
+        dataLogPerTurnHpLeft += stat1 + ",";
+        dataLogPerTurnEnemiesKilled += stat2 + ",";
+        dataLogPerTurnEnemyPointsObtained += stat3 + ",";
+        dataLogPerTurnGoldEarned += stat4 + ",";
+        dataLogPerTurnCurrentGold += stat5 + ",";
+    }
+
+    public void LogPerRoundDGBInputsAndOutputs(string inputDGB1, string inputDGB2, string inputDGB3, string inputDGB4, string outputDGB) // Called in TurnController.NextEnemysTurnOneByOneForYellowTiles() when round is not over, then called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
+    {
+        dataLogPerRoundDGBInputDamageReceivedAndDealt += inputDGB1 + ",";
+        dataLogPerRoundDGBInputHealthLeft += inputDGB2 + ",";
+        dataLogPerRoundDGBInputPowerupUsage += inputDGB3 + ",";
+        dataLogPerRoundDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
+        dataLogPerRoundDGBOutputDifficultyIndex += outputDGB + ",";
+    }
+
+    public void LogPerRoundHealthKillsPointsGoldMoves(string stat1, string stat2, string stat3, string stat4, string stat5, string stat6) // Called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
+    {
+        dataLogPerRoundHpLeft += stat1 + ",";
+        dataLogPerRoundEnemiesKilled += stat2 + ",";
+        dataLogPerRoundEnemyPointsObtained += stat3 + ",";
+        dataLogPerRoundGoldEarned += stat4 + ",";
+        dataLogPerRoundCurrentGold += stat5 + ",";
+
+        dataLogPerRoundTotalMoves += stat6 + ",";
+    }
+
+    public void LogPerRoundTotalSpending(string stat1) // Called every "Get Ready" screen when round begins
+    {
+        dataLogPerRoundGoldSpent += stat1 + ",";
+    }
+
 
     public void SubmitFeedback() // Called in the Submit button's inspector
     {
@@ -120,28 +228,65 @@ public class GenerateStatisticsController : MonoBehaviour
         string totalNumberOfKills = "" + playerAndEnemyStatusController.GetKillCount();
         string totalTimePlayed = PlayerPrefs.GetInt("isTimerChecked", 0) == 1 ? sideBarController.GetSideBarTimerValue() : "-";
         // Store the recorded Dynamic Difficulty Indices Over Time? As well as hp, damage dealt, etc.
-        StartCoroutine(Post(playerName, modeDifficulty, activatedAdaptiveSettings, finalRoundNumber, isGameOverFrom0HpOrManualQuit, totalNumberOfMoves, totalNumberOfKills, totalTimePlayed));
+        StartCoroutine(Post(playerName, modeDifficulty, activatedAdaptiveSettings, finalRoundNumber, isGameOverFrom0HpOrManualQuit, totalNumberOfMoves, totalNumberOfKills, totalTimePlayed,
+                            dataLogPerTurnDGBInputDamageReceivedAndDealt, dataLogPerTurnDGBInputHealthLeft, dataLogPerTurnDGBInputPowerupUsage, dataLogPerTurnDGBInputTimeThinkingAndStepsTaken, dataLogPerTurnDGBOutputDifficultyIndex,
+                            dataLogPerTurnHpLeft, dataLogPerTurnEnemiesKilled, dataLogPerTurnEnemyPointsObtained, dataLogPerTurnGoldEarned, dataLogPerTurnCurrentGold,
+                            dataLogPerRoundDGBInputDamageReceivedAndDealt, dataLogPerRoundDGBInputHealthLeft, dataLogPerRoundDGBInputPowerupUsage, dataLogPerRoundDGBInputTimeThinkingAndStepsTaken, dataLogPerRoundDGBOutputDifficultyIndex,
+                            dataLogPerRoundHpLeft, dataLogPerRoundEnemiesKilled, dataLogPerRoundEnemyPointsObtained, dataLogPerRoundGoldEarned, dataLogPerRoundCurrentGold,
+                            dataLogPerRoundGoldSpent, dataLogPerRoundTotalMoves));
     }
 
-    private IEnumerator Post(string playerName, string modeDifficulty, string activatedAdaptiveSettings, string finalRoundNumber, string isGameOverFrom0HpOrManualQuit, string totalNumberOfMoves, string totalNumberOfKills, string totalTimePlayed)
+    private IEnumerator Post(string playerName, string isGameOverFrom0HpOrManualQuit, string modeDifficulty, string activatedAdaptiveSettings, string finalRoundNumber, string totalNumberOfMoves, string totalNumberOfKills, string totalTimePlayed,
+                             string dataLogPerTurnDGBInputDamageReceivedAndDealt, string dataLogDGBInputHealthLeft, string dataLogDGBInputPowerupUsage, string dataLogDGBInputTimeThinkingAndStepsTaken, string dataLogDGBOutputDifficultyIndex,
+                             string dataLogPerTurnHpLeft, string dataLogPerTurnEnemiesKilled, string dataLogPerTurnEnemyPointsObtained, string dataLogPerTurnGoldEarned, string dataLogPerTurnCurrentGold,
+                             string dataLogPerRoundDGBInputDamageReceivedAndDealt, string dataLogPerRoundDGBInputHealthLeft, string dataLogPerRoundDGBInputPowerupUsage, string dataLogPerRoundDGBInputTimeThinkingAndStepsTaken, string dataLogPerRoundDGBOutputDifficultyIndex,
+                             string dataLogPerRoundHpLeft, string dataLogPerRoundEnemiesKilled, string dataLogPerRoundEnemyPointsObtained, string dataLogPerRoundGoldEarned, string dataLogPerRoundCurrentGold,
+                             string dataLogPerRoundGoldSpent, string dataLogPerRoundTotalMoves)
     {
         WWWForm form = new WWWForm();
         form.AddField("entry.1480577021", playerName);
+        form.AddField("entry.789620607" , isGameOverFrom0HpOrManualQuit);
         form.AddField("entry.2104693377", modeDifficulty);
-        form.AddField("entry.292304105", activatedAdaptiveSettings);
+        form.AddField("entry.292304105" , activatedAdaptiveSettings);
         form.AddField("entry.1085819894", finalRoundNumber);
-        form.AddField("entry.789620607", isGameOverFrom0HpOrManualQuit);
         form.AddField("entry.1165544974", totalNumberOfMoves);
-        form.AddField("entry.209557373", totalNumberOfKills);
+        form.AddField("entry.209557373" , totalNumberOfKills);
         form.AddField("entry.1445793752", totalTimePlayed);
 
-        using (UnityWebRequest www = UnityWebRequest.Post(formUrl, form))
+        form.AddField("entry.95619748"  , dataLogPerTurnDGBInputDamageReceivedAndDealt);
+        form.AddField("entry.1889820499", dataLogDGBInputHealthLeft);
+        form.AddField("entry.525159224" , dataLogDGBInputPowerupUsage);
+        form.AddField("entry.1048428466", dataLogDGBInputTimeThinkingAndStepsTaken);
+        form.AddField("entry.183444338" , dataLogDGBOutputDifficultyIndex);
+
+        form.AddField("entry.1351446707", dataLogPerTurnHpLeft);
+        form.AddField("entry.968578843" , dataLogPerTurnEnemiesKilled);
+        form.AddField("entry.319869713" , dataLogPerTurnEnemyPointsObtained);
+        form.AddField("entry.361863272" , dataLogPerTurnGoldEarned);
+        form.AddField("entry.338449906" , dataLogPerTurnCurrentGold);
+
+        form.AddField("entry.1264335556", dataLogPerRoundDGBInputDamageReceivedAndDealt);
+        form.AddField("entry.1133282211", dataLogPerRoundDGBInputHealthLeft);
+        form.AddField("entry.1421523695", dataLogPerRoundDGBInputPowerupUsage);
+        form.AddField("entry.636112759" , dataLogPerRoundDGBInputTimeThinkingAndStepsTaken);
+        form.AddField("entry.160590269" , dataLogPerRoundDGBOutputDifficultyIndex);
+
+        form.AddField("entry.1233825531", dataLogPerRoundHpLeft);
+        form.AddField("entry.990743365" , dataLogPerRoundEnemiesKilled);
+        form.AddField("entry.1497042868", dataLogPerRoundEnemyPointsObtained);
+        form.AddField("entry.68674253"  , dataLogPerRoundGoldEarned);
+        form.AddField("entry.1072868343", dataLogPerRoundCurrentGold);
+
+        form.AddField("entry.1413542101", dataLogPerRoundTotalMoves);
+
+        form.AddField("entry.1387347716", dataLogPerRoundGoldSpent);
+
+        using (UnityWebRequest www = UnityWebRequest.Post("https://docs.google.com/forms/u/0/d/e/1FAIpQLSddwM-d-9_O-AujSfuFWOQQAsEBXBRjaeacqaCjFY5-g_qx_A/formResponse", form))
         {
             yield return www.SendWebRequest();
 
             if (www.result == UnityWebRequest.Result.Success)
             {
-                //Debug.Log("Feedback submitted successfully.");
                 textStatus.text = "Success! Thank you for your time!";
             }
             else
@@ -153,6 +298,7 @@ public class GenerateStatisticsController : MonoBehaviour
         }
     }
 
-    // https://chatgpt.com/share/bc4dee72-2830-44d0-82f5-1e4f6bd1d687
-    // https://www.youtube.com/watch?v=WM7f4yN4ZHA
+    // ChatGPT code:     https://chatgpt.com/share/bc4dee72-2830-44d0-82f5-1e4f6bd1d687
+    // Youtube Tutorial: https://www.youtube.com/watch?v=WM7f4yN4ZHA
+    // My Google Form:   https://forms.gle/9pQhyKCvxsV8cjR79
 }

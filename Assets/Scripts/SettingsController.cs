@@ -41,6 +41,10 @@ public class SettingsController : MonoBehaviour
     [Header("Controllers")]
     [SerializeField] private MusicController musicController;
 
+    // IMPORTANT NOTE:
+    // WHEN THE UNITY GAME IS BUILT, IT WILL BY DEFAULT TURN OFF ALL CHECKBOXES IN THE SETTINGS.
+    // SO BEFORE SHARING THE GAME FILE TO OTHER PEOPLE, CHECK ALL THOSE BOXES FIRST (AFTER BUILDING IT)
+
     // Start is called before the first frame update
     private void Start()
     {

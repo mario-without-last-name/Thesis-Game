@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Reflection;
-using UnityEditor.U2D.Aseprite;
+
 
 public class CodeForPrefabEnemyOldImageUI : MonoBehaviour
 {

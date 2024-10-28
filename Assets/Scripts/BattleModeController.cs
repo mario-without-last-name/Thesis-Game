@@ -11,7 +11,7 @@ public class BattleModeController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textBonusGold;
     [Header("Battle Modes")]
     [SerializeField] private GameObject GetReadyMode;
-    [SerializeField] private GameObject FightMode;
+    [SerializeField] private GameObject FightMode; // THIS IS JUST FOR THE BLACK TILES FOR THE FULL BOARD IN CASE OF ACTIVE POWERUPS. Also the place where the 4 temporary buttons (to trigger sounds and skip level manually) is stored
     [SerializeField] private GameObject VictoryMode;
     [SerializeField] private GameObject ShopMode;
     [SerializeField] private GameObject gameOverMode;
@@ -24,6 +24,7 @@ public class BattleModeController : MonoBehaviour
     [SerializeField] private BottomBarController bottomBarController;
     [SerializeField] private GameOverController gameOverController;
     [SerializeField] private DynamicDifficultyController dynamicDifficultyController;
+    [SerializeField] private GenerateStatisticsController generateStatisticsController;
     [Header("Temporary")]
     [SerializeField] private ExampleSpawner exampleSpawner; // Temporary
 
@@ -49,6 +50,7 @@ public class BattleModeController : MonoBehaviour
 
         if (battleMode == "GetReady")
         {
+            generateStatisticsController.LogPerRoundTotalSpending(shopController.GetTotalGoldSpentSoFar().ToString());
             bottomBarController.PowerupsAreReadyForBattle(); // Should not be activated until the battle has actually begun
             ShopMode.SetActive(false);
             GetReadyMode.SetActive(true);
@@ -72,7 +74,9 @@ public class BattleModeController : MonoBehaviour
         }
         else if(battleMode == "Shop")
         {
+            dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.05f, false);
             playerAndEnemyStatusController.SetNextRoundNumber();
+            shopController.ResetRerollPrice();
             shopController.RefreshShopPowerupOptions();
             bottomBarController.OptionToSellPowerups();
             VictoryMode.SetActive(false);

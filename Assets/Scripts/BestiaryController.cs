@@ -50,10 +50,10 @@ public class BestiaryController : MonoBehaviour
 
     public int[][] GetEnemyMoveTiles(string thisEnemyVariant)
     { // Slime technically doesn't move, but just make its move delay 99 and add som emove tiles to avoid further code reformatting
-        if      (thisEnemyVariant == "pawnGoblin")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
-        else if (thisEnemyVariant == "pawnSkeleton")       { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
-        else if (thisEnemyVariant == "pawnBandit")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
-        else if (thisEnemyVariant == "pawnSlime")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
+        if      (thisEnemyVariant == "pawnGoblin")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
+        else if (thisEnemyVariant == "pawnSkeleton") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
+        else if (thisEnemyVariant == "pawnBandit") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
+        else if (thisEnemyVariant == "pawnSlime") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookTroll")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookGiant")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookExecutioner")    { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
@@ -113,192 +113,195 @@ public class BestiaryController : MonoBehaviour
         }
     }
 
-    public int[] GetHealthAttackDelayGold(string thisEnemyVariant)
-    {
-        string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
-        if (selectedDifficulty != "Easy" && selectedDifficulty != "Medium" && selectedDifficulty != "Hard" && selectedDifficulty != "Adaptive")
-        {
-            Debug.Log("Unkown Difficuly Selected: " + selectedDifficulty);
-            return new int[] {99,99,99,99};
-        }
 
-        // MUST DETERMINE THESE STATS IF ADAPTIVE DIFFICULTY IS CHOSEN. MAYBE A NEW CONTROLLER?
-        // From left to right, the returned integers in the array is the enemy's health, attack, delay, and gold
+    // This was previously for manually stat determination, now it is dynamically controlled
 
-        if      (thisEnemyVariant == "pawnGoblin")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 4, 1, 5, 1}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 6, 2, 4, 1}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] { 8, 3, 3, 1}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
-        }
-        else if (thisEnemyVariant == "pawnSkeleton")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 3, 2, 4, 1}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 5, 3, 3, 1}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] { 7, 4, 2, 1}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
-        }
-        else if (thisEnemyVariant == "pawnBandit")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 7, 3, 6, 1}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {10, 4, 5, 1}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {13, 5, 4, 1}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
-        }
-        else if (thisEnemyVariant == "pawnSlime")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 1, 3,99, 1}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 2, 4,99, 1}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] { 4, 5,99, 1}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
-        }
-        else if (thisEnemyVariant == "rookTroll")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 8, 4, 4, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {10, 5, 3, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {12, 6, 2, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "rookGiant")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 9, 4, 5, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {12, 5, 4, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 3, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "rookExecutioner")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 8, 4, 4, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {10, 6, 3, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {12, 8, 2, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "rookBeastMan")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {12,12, 6, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {15,15, 6, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {18,18, 4, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "bishopDarkElf")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 4, 4, 5, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 6, 6, 4, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] { 8, 8, 3, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "bishopWarlock")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 6, 4, 5, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 8, 5, 4, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {10, 6, 3, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "bishopElementalist")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {10, 2, 6, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {12, 3, 5, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {14, 4, 4, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "bishopBomber")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 8, 3, 5, 2}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {10, 4, 4, 2}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {12, 5, 3, 2}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
-        }
-        else if (thisEnemyVariant == "knightDireBeast")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 9, 4, 3, 3}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {12, 5, 2, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 2, 3}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
-        }
-        else if (thisEnemyVariant == "knightCentaur")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {12, 5, 4, 3}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {15, 6, 3, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {18, 7, 2, 3}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
-        }
-        else if (thisEnemyVariant == "knightDullahan")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] { 2, 2, 2, 3}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] { 3, 3, 1, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] { 4, 4, 1, 3}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
-        }
-        else if (thisEnemyVariant == "knightGryphon")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {11, 4, 4, 3}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {14, 5, 3, 3}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {17, 6, 2, 3}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
-        }
-        else if (thisEnemyVariant == "queenMinotaur")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 5, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 4, 4}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 3, 4}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
-        }
-        else if (thisEnemyVariant == "queenWyrm")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {15, 7, 6, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {18, 9, 5, 4}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {21,11, 4, 4}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
-        }
-        else if (thisEnemyVariant == "queenAbomination")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {13, 7, 5, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {16, 9, 4, 4}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {19,11, 3, 4}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
-        }
-        else if (thisEnemyVariant == "queenGolem")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {18, 7, 5, 4}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {22,10, 4, 4}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {26,13, 3, 4}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
-        }
-        else if (thisEnemyVariant == "kingLich")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {25, 9, 5, 5}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {30,12, 4, 5}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {35,15, 3, 5}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
-        }
-        else if (thisEnemyVariant == "kingTitan")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {34, 7, 7, 5}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {40,10, 6, 5}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {46,13, 5, 5}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
-        }
-        else if (thisEnemyVariant == "kingDragon")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {18, 1,12, 5}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {22, 1,10, 5}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {26, 1, 8, 5}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
-        }
-        else if (thisEnemyVariant == "kingVampire")
-        {
-            if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 4, 5}; }
-            else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 3, 5}; }
-            else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 2, 5}; }
-            else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
-        }
-        else
-        {
-            Debug.LogWarning("Unknown enemy variant: " + thisEnemyVariant);
-            return new int[] {99,99,99,99};
-        }
-    }
+    //public int[] GetHealthAttackDelayGold(string thisEnemyVariant)
+    //{
+    //    string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+    //    if (selectedDifficulty != "Easy" && selectedDifficulty != "Medium" && selectedDifficulty != "Hard" && selectedDifficulty != "Adaptive")
+    //    {
+    //        Debug.Log("Unkown Difficuly Selected: " + selectedDifficulty);
+    //        return new int[] {99,99,99,99};
+    //    }
+
+    //    // MUST DETERMINE THESE STATS IF ADAPTIVE DIFFICULTY IS CHOSEN. MAYBE A NEW CONTROLLER?
+    //    // From left to right, the returned integers in the array is the enemy's health, attack, delay, and gold
+
+    //    if      (thisEnemyVariant == "pawnGoblin")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 4, 1, 5, 1}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 6, 2, 4, 1}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] { 8, 3, 3, 1}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
+    //    }
+    //    else if (thisEnemyVariant == "pawnSkeleton")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 3, 2, 4, 1}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 5, 3, 3, 1}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] { 7, 4, 2, 1}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
+    //    }
+    //    else if (thisEnemyVariant == "pawnBandit")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 7, 3, 6, 1}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {10, 4, 5, 1}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {13, 5, 4, 1}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
+    //    }
+    //    else if (thisEnemyVariant == "pawnSlime")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 1, 3,99, 1}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 2, 4,99, 1}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] { 4, 5,99, 1}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 1}; }
+    //    }
+    //    else if (thisEnemyVariant == "rookTroll")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 8, 4, 4, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {10, 5, 3, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {12, 6, 2, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "rookGiant")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 9, 4, 5, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {12, 5, 4, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 3, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "rookExecutioner")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 8, 4, 4, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {10, 6, 3, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {12, 8, 2, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "rookBeastMan")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {12,12, 6, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {15,15, 6, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {18,18, 4, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "bishopDarkElf")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 4, 4, 5, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 6, 6, 4, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] { 8, 8, 3, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "bishopWarlock")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 6, 4, 5, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 8, 5, 4, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {10, 6, 3, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "bishopElementalist")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {10, 2, 6, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {12, 3, 5, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {14, 4, 4, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "bishopBomber")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 8, 3, 5, 2}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {10, 4, 4, 2}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {12, 5, 3, 2}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 2}; }
+    //    }
+    //    else if (thisEnemyVariant == "knightDireBeast")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 9, 4, 3, 3}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {12, 5, 2, 3}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {15, 6, 2, 3}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
+    //    }
+    //    else if (thisEnemyVariant == "knightCentaur")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {12, 5, 4, 3}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {15, 6, 3, 3}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {18, 7, 2, 3}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
+    //    }
+    //    else if (thisEnemyVariant == "knightDullahan")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] { 2, 2, 2, 3}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] { 3, 3, 1, 3}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] { 4, 4, 1, 3}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
+    //    }
+    //    else if (thisEnemyVariant == "knightGryphon")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {11, 4, 4, 3}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {14, 5, 3, 3}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {17, 6, 2, 3}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 3}; }
+    //    }
+    //    else if (thisEnemyVariant == "queenMinotaur")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 5, 4}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 4, 4}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 3, 4}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
+    //    }
+    //    else if (thisEnemyVariant == "queenWyrm")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {15, 7, 6, 4}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {18, 9, 5, 4}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {21,11, 4, 4}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
+    //    }
+    //    else if (thisEnemyVariant == "queenAbomination")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {13, 7, 5, 4}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {16, 9, 4, 4}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {19,11, 3, 4}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
+    //    }
+    //    else if (thisEnemyVariant == "queenGolem")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {18, 7, 5, 4}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {22,10, 4, 4}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {26,13, 3, 4}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 4}; }
+    //    }
+    //    else if (thisEnemyVariant == "kingLich")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {25, 9, 5, 5}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {30,12, 4, 5}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {35,15, 3, 5}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
+    //    }
+    //    else if (thisEnemyVariant == "kingTitan")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {34, 7, 7, 5}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {40,10, 6, 5}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {46,13, 5, 5}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
+    //    }
+    //    else if (thisEnemyVariant == "kingDragon")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {18, 1,12, 5}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {22, 1,10, 5}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {26, 1, 8, 5}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
+    //    }
+    //    else if (thisEnemyVariant == "kingVampire")
+    //    {
+    //        if      (selectedDifficulty == "Easy")     { return new int[] {16, 6, 4, 5}; }
+    //        else if (selectedDifficulty == "Medium")   { return new int[] {20, 8, 3, 5}; }
+    //        else if (selectedDifficulty == "Hard")     { return new int[] {24,10, 2, 5}; }
+    //        else    /* Adaptive */                     { return new int[] {99,99,99, 5}; }
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("Unknown enemy variant: " + thisEnemyVariant);
+    //        return new int[] {99,99,99,99};
+    //    }
+    //}
 
     public int[] GetHealthAttackDelayGoldMinAndMax(string thisEnemyVariant)
     {

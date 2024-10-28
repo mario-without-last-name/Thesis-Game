@@ -15,12 +15,14 @@ public class TurnController : MonoBehaviour
 
     private GameObject[] allEnemiesAliveRightNow;
     private int currentEnemyIndex;
+    private string selectedDifficulty;
 
     public void RememberNewlySpawnedPlayerForNewRound()
     {
         // So I don't have to find the player prefab all the time. It's always just 1 anyway.
         prefabPlayer = GameObject.FindWithTag("tagForPrefabPlayer");
         codeForPrefabPlayer = prefabPlayer.GetComponent<CodeForPrefabPlayer>();
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
     }
 
     public void PlayerTurn()
@@ -29,7 +31,6 @@ public class TurnController : MonoBehaviour
         // Or a powerup where you don't have to click on a tile.
         // Timer's up = skip to enemy's turn
         // Enemy left in round = 0, win and go to shop
-        dynamicDifficultyController.PrintAllDGBInputAndOutputIndex();
 ;       playerAndEnemyStatusController.SetTotalMoveCountIncreaseBy1();
         playerAndEnemyStatusController.SetMoveCountThisRoundIncreaseBy1();
         codeForPrefabPlayer.PlayerCanMoveNow();
@@ -76,6 +77,11 @@ public class TurnController : MonoBehaviour
 
         if (currentEnemyIndex >= allEnemiesAliveRightNow.Length)
         {
+            if (selectedDifficulty == "Adaptive")
+            {
+                dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex();
+                playerAndEnemyStatusController.PrintAndLogPerTurnHealthKillsPointsGold();
+            }
             Invoke(nameof(PlayerTurn), 0.5f); // Meaning all enemies have taken their turn moving / reduce delay by 1
         }
         else

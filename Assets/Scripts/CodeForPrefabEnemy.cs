@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Reflection;
-using UnityEditor.U2D.Aseprite;
+
 using System.Linq;
 using DG.Tweening;
 using System.ComponentModel.Design;
@@ -175,13 +175,13 @@ public class CodeForPrefabEnemy : MonoBehaviour
         // Calculate stats based on difficulty index (INTERPOLATION)
         int lowesthighestMaxHealth = pieceHealthDamageDelayGoldMinAndMax[0];
         int highestMaxHealth = pieceHealthDamageDelayGoldMinAndMax[1];
-        maxHealth = (int)(lowesthighestMaxHealth + (highestMaxHealth - lowesthighestMaxHealth) * difficultyIndex);
+        maxHealth = Mathf.RoundToInt(lowesthighestMaxHealth + (highestMaxHealth - lowesthighestMaxHealth) * difficultyIndex);
         int minEnemyDamage = pieceHealthDamageDelayGoldMinAndMax[2];
         int maxEnemyDamage = pieceHealthDamageDelayGoldMinAndMax[3];
-        enemyDamage = (int)(minEnemyDamage + (maxEnemyDamage - minEnemyDamage) * difficultyIndex);
+        enemyDamage = Mathf.RoundToInt(minEnemyDamage + (maxEnemyDamage - minEnemyDamage) * difficultyIndex);
         int slowestMoveDelay = pieceHealthDamageDelayGoldMinAndMax[4];
         int fastestMoveDelay = pieceHealthDamageDelayGoldMinAndMax[5];
-        moveDelay = (int)(slowestMoveDelay + (fastestMoveDelay - slowestMoveDelay) * (1.0f - difficultyIndex));
+        moveDelay = Mathf.RoundToInt(slowestMoveDelay - (slowestMoveDelay - fastestMoveDelay) * difficultyIndex);
         goldOnKill = pieceHealthDamageDelayGoldMinAndMax[6];
     }
 
@@ -427,12 +427,12 @@ public class CodeForPrefabEnemy : MonoBehaviour
                 GameObject currentGameObjectAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX + gridXOffset, currGridY + gridYOffset);
 
                 // EASY ===========================================================
-                // Move to a random yellow tile, try to not to move to the player unless no other options exist. IF A TILE EXIST WHERE THE PLAYER CAN ATTACK IT NEXT TURN, GO TO IT
+                // Prioritize going to a tile the player can land on next turn, avoid the player when possible, else, just move randomly.
                 if (aiMovementDifficulty >= 0.0f && aiMovementDifficulty < 0.25f)
                 {
                     if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
                     {
-                        float currentEuclideanDistance = 100;
+                        float currentEuclideanDistance = 500;
                         if (currentEuclideanDistance < lowestEuclideanDistance)
                         {
                             lowestEuclideanDistance = currentEuclideanDistance;
@@ -441,7 +441,24 @@ public class CodeForPrefabEnemy : MonoBehaviour
                     }
                     else if (currentGameObjectAtThisTile == null)
                     {
-                        float currentEuclideanDistance = UnityEngine.Random.Range(1f, 99f);
+                        int xDifferenceToPlayer = (currGridX + gridXOffset) - playerCurrGridX;
+                        int yDifferenceToPlayer = (currGridY + gridYOffset) - playerCurrGridY;
+
+                        bool playerMayMoveToThisTileNextTurn = false;
+                        for (int j = 0; j < playerCanMoveToTheseMoveTilesNextTurn.Length; j++)
+                        {
+                            if (currGridX + gridXOffset == playerCanMoveToTheseMoveTilesNextTurn[j][0] && currGridY + gridYOffset == playerCanMoveToTheseMoveTilesNextTurn[j][1])
+                            {
+                                playerMayMoveToThisTileNextTurn = true;
+
+                                break;
+                            }
+                        }
+
+                        float currentEuclideanDistance = 0;
+                        if (playerMayMoveToThisTileNextTurn) { currentEuclideanDistance = UnityEngine.Random.Range(1f, 99f); }
+                        else { currentEuclideanDistance = UnityEngine.Random.Range(100f, 199f); }
+
                         if (currentEuclideanDistance < lowestEuclideanDistance)
                         {
                             lowestEuclideanDistance = currentEuclideanDistance;
@@ -451,7 +468,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
                 }
 
                 // EASY 2 ===========================================================
-                // Move to a random yellow tile
+                // Completely random
                 else if (aiMovementDifficulty >= 0.25f && aiMovementDifficulty < 0.5f)
                 {
                     if ( ( currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>() ) || currentGameObjectAtThisTile == null )
@@ -546,14 +563,19 @@ public class CodeForPrefabEnemy : MonoBehaviour
             Invoke(nameof(MoveToThisTileAndAttackPlayerIfItExistsHere), 0.5f);
         }
 
-        if (!alreadyMoved) { Debug.Log(thisEnemyVariant + " cannot move to any one of its yellow tiles"); }
+        if (!alreadyMoved) {
+            Debug.Log(thisEnemyVariant + " cannot move to any one of its yellow tiles");
+            CallForNextEnemysTurnOneByOneForYellowTiles();
+        }
     }
 
     public void MoveToThisTileAndAttackPlayerIfItExistsHere() // Unlike the MoveToThisTileAndAttackEnemyIfItExistsHere() function from the prefab player, the enemy already knows the player is here. no need to check again
-    { // Must differetiate for the easy / medium / hard difficulties?
-        if (lowestEuclideanDistance == 0) // will attatck player
+    {
+        (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
+        //if (lowestEuclideanDistance == 0) // will attatck player: THIS WILL NOT WORK FOR THE 2 EASY MODES
+        if (currGridX == playerCurrGridX && currGridY == playerCurrGridY)
         {
-            codeForPrefabPlayer.PlayerTakesDamage(enemyDamage, true);
+            codeForPrefabPlayer.PlayerTakesDamage(enemyDamage, true); // move the player elsewhere first from knockbak, before marking the enemy's current move tile to this location (even if it has moved here through DOM animation)
             playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, gameObject);
             Invoke(nameof(CallForNextEnemysTurnOneByOneForYellowTiles), 0.5f); // Unlike the one in MoveToThisTileAndAttackEnemyIfItExistsHere(), wecan place the function to call the next turn here.
         }

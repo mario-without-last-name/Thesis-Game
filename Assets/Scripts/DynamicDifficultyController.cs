@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class DynamicDifficultyController : MonoBehaviour
 {
+
+    [Header("Controllers")]
+    [SerializeField] private GenerateStatisticsController generateStatisticsController;
+
     // For all of these 4 dynamic inputs... 0 -> easy (lower bound), 1 -> hard (upper bound), 0.5 -> medium
     private float dynamicInputIndexDamageReceivedAndDealt;
     private float dynamicInputIndexHealthLeft;
@@ -24,16 +28,15 @@ public class DynamicDifficultyController : MonoBehaviour
     { // If the selected difficulty was not Adaptive, then no point of this code doing anything
         selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
 
-        dynamicInputIndexDamageReceivedAndDealt = 0.5f;
+        dynamicInputIndexDamageReceivedAndDealt = 1f / 3f;
         dynamicInputIndexHealthLeft = 1.0f;
-        dynamicInputIndexPowerupUsage = 0.25f;
-        dynamicInputIndexTimeThinkingAndStepsTaken = 0.5f;
+        dynamicInputIndexPowerupUsage = 1f / 3f;
+        dynamicInputIndexTimeThinkingAndStepsTaken = 1f / 3f;
         ResetThisRoundInitialDynamicInputIndices();
-        //dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexHealthLeft + dynamicInputIndexPowerupUsage + dynamicInputIndexTimeThinkingAndStepsTaken) / 4.0f;
-        dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexTimeThinkingAndStepsTaken + dynamicInputIndexTimeThinkingAndStepsTaken) / 3.0f;
+        dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexHealthLeft + dynamicInputIndexPowerupUsage + dynamicInputIndexTimeThinkingAndStepsTaken) / 4.0f;
     }
 
-    public void ResetThisRoundInitialDynamicInputIndices()
+    public void ResetThisRoundInitialDynamicInputIndices() // Ensuring that in each round, every input does not go beyond +/- 0.3 (or whatever thershold). Health left is the only one without this.
     {
         ThisRoundInitialdynamicInputIndexDamageReceived = dynamicInputIndexDamageReceivedAndDealt;
         ThisRoundInitialdynamicInputIndexHealthLeft = dynamicInputIndexHealthLeft;
@@ -55,8 +58,8 @@ public class DynamicDifficultyController : MonoBehaviour
             else if (dynamicInputType == "healthLeft")
             {
                 dynamicInputIndexHealthLeft = overwriteExisitingValue ? change : Mathf.Clamp(dynamicInputIndexHealthLeft + change, 0.0f, 1.0f);
-                dynamicInputIndexHealthLeft = Mathf.Min(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft + 0.3f);
-                dynamicInputIndexHealthLeft = Mathf.Max(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft - 0.3f);
+                //dynamicInputIndexHealthLeft = Mathf.Min(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft + 0.3f);
+                //dynamicInputIndexHealthLeft = Mathf.Max(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft - 0.3f);
             }
             else if (dynamicInputType == "powerupUsage")
             {
@@ -73,8 +76,8 @@ public class DynamicDifficultyController : MonoBehaviour
             else { Debug.LogWarning("unknown dynamic input type:" + dynamicInputType); }
         }
         else { Debug.LogWarning("unknown difficulty setting:" + selectedDifficulty);}
-        //dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexHealthLeft + dynamicInputIndexPowerupUsage + dynamicInputIndexTimeThinkingAndStepsTaken) / 4.0f;
-        dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexTimeThinkingAndStepsTaken + dynamicInputIndexTimeThinkingAndStepsTaken) / 3.0f;
+        dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexHealthLeft + dynamicInputIndexPowerupUsage + dynamicInputIndexTimeThinkingAndStepsTaken) / 4.0f;
+        //dynamicOutputOverallIndex = (dynamicInputIndexDamageReceivedAndDealt + dynamicInputIndexTimeThinkingAndStepsTaken + dynamicInputIndexTimeThinkingAndStepsTaken) / 3.0f;
     }
 
     public float GetDynamicOutput(string dynamicOutputType)
@@ -94,8 +97,15 @@ public class DynamicDifficultyController : MonoBehaviour
         else { Debug.LogWarning("unknown difficulty setting: " + selectedDifficulty); return 0.5f; }
     }
 
-    public void PrintAllDGBInputAndOutputIndex()
+    public void PrintAndLogPerTurnAllDGBInputAndOutputIndex()
     {
-        Debug.Log("OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        Debug.Log("[PER TURN] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        generateStatisticsController.LogPerTurnDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
+    }
+
+    public void PrintAndLogPerRoundAllDGBInputAndOutputIndex()
+    {
+        Debug.Log("[===PER ROUND===] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        generateStatisticsController.LogPerRoundDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
     }
 }

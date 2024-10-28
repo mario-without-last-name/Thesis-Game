@@ -45,6 +45,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
     private int maxHealth;
     private int currHealth;
     private int playerDirectContactDamage;
+    private int playerBonusDamage;
     private bool alreadyKnockbackedFromDamage;
 
     private int[][] moveTilesToSpawn         = new int[][] { new int[] { 1, 2 }, new int[] { 2, 1 }, new int[] { -1, 2 }, new int[] { -2, 1 }, new int[] { 1, -2 }, new int[] { 2, -1 }, new int[] { -1, -2 }, new int[] { -2, -1 } };
@@ -73,6 +74,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         maxHealth = playerAndEnemyStatusController.GetPlayerMaxHealth();
         currHealth = playerAndEnemyStatusController.GetPlayerCurrHealth();
         playerDirectContactDamage = playerAndEnemyStatusController.GetPlayerDirectContactDamage();
+        playerBonusDamage = playerAndEnemyStatusController.GetPlayerBonusDamage();
 
         thisPieceTransform.position = new Vector3(actualXYCoordinates.GetActualXCoordinate(currGridX), actualXYCoordinates.GetActualYCoordinate(currGridY), transform.position.z);
         canvasUITransform.anchoredPosition = new Vector2(actualXYCoordinates.GetActualXCoordinateUIImage(currGridX), actualXYCoordinates.GetActualYCoordinateUIImage(currGridY));
@@ -90,6 +92,9 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
     public void PlayerCanMoveNow()
     {
+        //playerDirectContactDamage = playerAndEnemyStatusController.GetPlayerDirectContactDamage(); // NECESSARY TO UPDATE PER TURN OR NOT?
+        //playerBonusDamage = playerAndEnemyStatusController.GetPlayerBonusDamage(); // NECESSARY TO UPDATE PER TURN OR NOT?
+
         circleTimer.SetActive(true);
         groupMoveTiles.SetActive(true);
 
@@ -133,7 +138,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         GameObject enemyAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX, currGridY);
         if (enemyAtThisTile != null) // If not null, no doubt that this is an enemy, so just call the enemy script. Alternatively use:    if (enemyAtThisTile.GetComponent<CodeForPrefabEnemy>() != null)
         {
-            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerDirectContactDamage, true);
+            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerDirectContactDamage + playerBonusDamage, true);
             playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, gameObject);
             //Invoke(nameof(CallForEnemyTurn), 0.5f); // Don't call it here. Otherwise when the last enemy is killed, it will call for enemy turn, but no enemies so immeadiately call player turn, but the player prefab is already destroyed since we are at the victory screen, leading to an error due to calling a function from a non-existent prefab.
         }   
