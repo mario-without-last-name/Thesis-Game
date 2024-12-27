@@ -23,11 +23,11 @@ public class GameOverController : MonoBehaviour
 
     public void ChangeTextOf5GameOverStatistics()
     {
-        modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
+        modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
         roundNumber.text = "" + playerAndEnemyStatusController.GetRoundNumber();
         moveCount.text = "" + Mathf.Max(playerAndEnemyStatusController.GetTotalMoveCount(),0);
         killCount.text = "" + playerAndEnemyStatusController.GetKillCount();
-        if (PlayerPrefs.GetInt("isTimerChecked", 0) == 1)
+        if (PlayerPrefs.GetInt("isTimerChecked", 1) == 1)
         {
             timeHeaderAndValue.SetActive(true);
         }

@@ -48,6 +48,7 @@ public class PowerupsCatalogController : MonoBehaviour
     [SerializeField] private Sprite imageFlexibleMovementV;
     [SerializeField] private Sprite imageFlexibleMovementVI;
     [SerializeField] private Sprite imageFlexibleMovementVII;
+    [SerializeField] private Sprite imageFlexibleMovementVIII;
     [Header("Stat Buff")]
     [SerializeField] private Sprite imageSmallSnack;
     [SerializeField] private Sprite imageLunchBreak;
@@ -60,7 +61,7 @@ public class PowerupsCatalogController : MonoBehaviour
     [SerializeField] private Sprite imageWeaponProficiency;
     [SerializeField] private Sprite imageWeaponMastery;
     [Header("Missing")]
-    [SerializeField] private Sprite missing;
+    [SerializeField] private Sprite imageMissing;
     [Header("")]
     [Header("Controllers")]
     [SerializeField] private BottomBarController bottomBarController;
@@ -70,46 +71,22 @@ public class PowerupsCatalogController : MonoBehaviour
     private List<string> allPowerupIdentitiesList;
     private string selectedDifficulty;
 
-    /*    
-    Powerup Ideas:
-
-
-
-
-
-
-    Stat Buff [Permanent Buffs]
-
-    [$?-?] Small Snack: heal 5-12 health
-    [$?-?] Lunch Break: Heal 15-30 health
-    [$?-?] Tavern Buffet: Heal to full health
-    [$?-?] Battlecry: Increase all of your damage by ? For the next round
-    [$?-?] Hardened Fists: Permanently Increases your direct contact damage by 2-4
-    [$?-?] Iron Fists: Permanently Increases your direct contact damage by 4-7
-    [$?-?] Diamond Fists: Increases your direct contact damage by 7-10
-    [$?-?] Toughened Heart: Permanently increases your max health by 4-8 And heal 4-8 health
-    [$?-?] Unbreakable Heart: Permanently increases your max health by 8-15 And heal 8-15 health
-    [$?-?] Weapon Proficiency: Permanently increase all of your damage by 1-3
-    [$?-?] 1 More Chance: when health reaches 0, heal ? more hp
-    [$?-?] Pickpocket: Gain $1-3 more per enemy killed
-    */
-
     private void Start()
     {
-        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???"); // CHANGE THIS, MUST NOT START WITH CAPITAL LETTER
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
         allPowerupIdentitiesList = new List<string> {
             // All active powerups
-            //"active-knife", "active-spear", "active-hatchet", "active-slingshot", "active-sniper",
-            //"active-lightningBolt", "active-bomb", "active-fireball", "active-arrowVolley",
-            //"active-acidRain", "active-axe", "active-spikedClub", "active-whip",
-            //"active-eleport", "active-dodge",
+            "active-knife", "active-spear", "active-hatchet", "active-slingshot", "active-sniper",
+            "active-lightningBolt", "active-bomb", "active-fireball", "active-arrowVolley",
+            "active-acidRain", "active-axe", "active-spikedClub", "active-whip",
+            "active-teleport", "active-dodge",
 
             // All passive powerups
-            //"passive-lightArmor", "passive-heavyArmor", "passive-groundPond", "passive-innerHealing",
-            //"passive-vampiric", "passive-wellDeservedRest", "passive-bloodlust",
-            //"passive-mercenaryTools", "passive-pickpocket", "passive-flexibleMovementI", "passive-flexibleMovementII",
-            //"passive-flexibleMovementIII", "passive-flexibleMovementIV", "passive-flexibleMovementV",
-            //"passive-flexibleMovementVI", "passive-flexibleMovementVII",
+            "passive-lightArmor", "passive-heavyArmor", "passive-diamondArmor",
+            "passive-innerHealing", "passive-vampiric", "passive-wellDeservedRest", "passive-bloodlust",
+            //"passive-groundPound", // hard to code
+            "passive-mercenaryTools", "passive-pickpocket",
+            "passive-flexibleMovementI", "passive-flexibleMovementII", "passive-flexibleMovementIII", "passive-flexibleMovementIV", "passive-flexibleMovementV", "passive-flexibleMovementVI", "passive-flexibleMovementVII", "passive-flexibleMovementVIII",
 
             // All stat buff powerups
             "statBuff-smallSnack", "statBuff-lunchBreak", "statBuff-tavernBuffet",
@@ -136,220 +113,180 @@ public class PowerupsCatalogController : MonoBehaviour
         int count = Mathf.Min(4, allPowerupIdentitiesList.Count);
         return allPowerupIdentitiesList.Take(count).ToList();
     }
-
-    public void RemovePowerupsFromList(string powerup) // When Equipped by player. Also Increase DGB input for powerup usage a bit? Reduce per round end
+    public void AddPowerupsToList(string powerup) // When sold by player
     {
-        allPowerupIdentitiesList.Remove(powerup);
+        if (!allPowerupIdentitiesList.Contains(powerup)) { allPowerupIdentitiesList.Add(powerup); }
+        else { Debug.LogWarning("powerup to be added back to powerups list already exists: " + powerup); }
     }
 
-    public void AddPowerupsToList(string powerup) // When sold by player. Also Increase DGB input for powerup usage a bit?  Reduce per round end
+    public void RemovePowerupsFromList(string powerup) // When bought by player.
     {
-        allPowerupIdentitiesList.Add(powerup);
+        if (allPowerupIdentitiesList.Contains(powerup)) { allPowerupIdentitiesList.Remove(powerup); }
+        else { Debug.LogWarning("powerup to be removed from powerups list does not exist: " + powerup); }
     }
 
-    public (string,string, string, Sprite, string, string, (int, int), (int, int), (int, int), (int, int), (int, int)) GetPowerupInfo(string powerupIdentity)
-    { // Powerup Identity, Name, Image, Short Description, Long Description, Easy / Hard Price, Easy / Hard Cooldown, Easy / Hard Number1(health or damage), Easy / Hard Number2(health or damage), Easy / Hard Number3(health or damage) 
+
+    public (string, string, string, Sprite, string, string, (int, int), (int, int), (int, int), (int, int), (int, int)) GetPowerupInfo(string powerupIdentity)
+    { // Powerup Identity, Powerup Type,  Name, Image, Short Description, Long Description,
+      // Easy / Hard Price, Easy / Hard Cooldown, Easy / Hard Number1(heal or damage), Easy / Hard Number2(attack area radius), Easy / Hard Number3(???) 
 
         // ACTIVE POWERUPS ================================================================
-        // [Up to 5 and can be sold, press 1 / 2 / 3 / 4 / 5 key pads or click on them, can only use 1 per tur, each has a cooldown, clicking on them resets the move timer]
+        // [Up to 5 and can be sold, press Q / W / E / R / T key pads ( or click on them too ? ) , can only use 1 per turn, each has a cooldown, clicking on them resets the move timer]
         // ================================================================================
-        // [$3-7]   [2-4 cd]  Knife: Attack an enemy 1 tile adjacent to you, dealing 5-3 damage
-        // [$6-12]  [3-5 cd]  Spear: Attack an enemy up to 2 tiles adjacent to you, dealing 8-5 damage
-        // [$5-10]  [4-6 cd]  Hatchet: Attack an enemy up to 3 tiles adjacent to you, dealing 7-4 damage
-        // [$8-15]  [5-7 cd]  Slingshot: Click a tile further than 3 tiles from you, that enemy takes 6-3 damage
-        // [$12-18] [6-8 cd]  Sniper: Click a tile further than 3 tiles from you, that enemy takes 10-7 damage
-        // [$10-16] [6-8 cd]  Lightning Bolt: Click a tile further than 3 tiles from you, that enemy takes 12-8 damage
-        // [$15-22] [7-9 cd]  Bomb: Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take 6-4 damage
-        // [$18-25] [8-10 cd] Fireball: Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take 10-7 damage
-        // [$20-28] [9-11 cd] Arrow Volley: Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take 8-5 damage
-        // [$14-20] [7-9 cd]  Acid Rain: Deal 6-4 damage to all enemies
-        // [$7-12]  [5-7 cd]  Axe: Deal 8-5 damage to all enemies 1 tile adjacent to you
-        // [$9-14]  [6-8 cd]  Spiked Club: Deal 10-6 damage to all enemies up to 2 tiles adjacent to you
-        // [$12-18] [7-9 cd]  Whip: Deal 12-8 damage to all enemies up to 3 tiles adjacent to you
-        // [$10-16] [6-8 cd]  Teleport: Go to any unoccupied tile
-        // [$8-14]  [5-7 cd]  Dodge: Take no damage this turn
+        // [$12-28] [2-4 cd]  Knife: Attack an enemy 1 tile adjacent to you, dealing 5-3 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$24-48] [3-5 cd]  Spear: Attack an enemy up to 2 tiles adjacent to you, dealing 8-5 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$20-40] [4-6 cd]  Hatchet: Attack an enemy up to 3 tiles adjacent to you, dealing 7-4 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$32-60] [5-7 cd]  Slingshot: Click a tile further than 3 tiles from you, that enemy takes 6-3 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$48-72] [6-8 cd]  Sniper: Click a tile further than 3 tiles from you, that enemy takes 10-7 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$40-64] [6-8 cd]  Lightning Bolt: Click a tile further than 3 tiles from you, that enemy takes 12-8 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$60-88] [7-9 cd]  Bomb: Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take 6-4 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$72-100][8-10 cd] Fireball: Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take 10-7 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$80-112][9-11 cd] Arrow Volley: Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take 8-5 damage
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$28-48] [7-9 cd]  Acid Rain: Deal 6-4 damage to all enemies
+        //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
+        // [$28-48] [5-7 cd]  Axe: Deal 8-5 damage to all enemies 1 tile adjacent to you
+        //                        Effect: deal damage to enemy, end player turn
+        // [$36-56] [6-8 cd]  Spiked Club: Deal 10-6 damage to all enemies up to 2 tiles adjacent to you
+        //                        Effect: deal damage to enemy, end player turn
+        // [$48-72] [7-9 cd]  Whip: Deal 12-8 damage to all enemies up to 3 tiles adjacent to you
+        //                        Effect: deal damage to enemy, end player turn
+        // [$40-64] [6-8 cd]  Teleport: Go to any unoccupied tile
+        //                        Effect: Reset Move Timer, Show new tiles, move there, end player turn
+        // [$32-56] [5-7 cd]  Dodge: Take no damage this turn
+        //                        Effect: make all damage 0 this turn
 
-        if      (powerupIdentity == "active-knife")
-        {
+        if       (powerupIdentity == "active-knife"){
             return (powerupIdentity, "active", "Knife", imageKnife, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy 1 tile adjacent to you, dealing {8} damage",
-                    (3, 7), (2, 4), (5, 3), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-spear")
-        {
+                    (12, 28), (2, 4), (5, 3), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-spear"){
             return (powerupIdentity, "active", "Spear", imageSpear, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy up to 2 tiles adjacent to you, dealing {8} damage",
-                    (6, 12), (3, 5), (8, 5), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-satchet")
-        {
-            return (powerupIdentity, "active", "Hatchet", imageHatchet, "[Active, cooldown: {7}]", "<line-height=130%>Choose any enemy and deal {8} damage",
-                    (5, 10), (4, 6), (7, 4), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-slingshot")
-        {
+                    (24, 48), (3, 5), (8, 5), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-hatchet"){
+            return (powerupIdentity, "active", "Hatchet", imageHatchet, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy up to 3 tiles adjacent to you, dealing {8} damage",
+                    (20, 40), (4, 6), (7, 4), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-slingshot"){
             return (powerupIdentity, "active", "Slingshot", imageSlingshot, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (8, 15), (5, 7), (6, 3), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-sniper")
-        {
+                    (32, 60), (5, 7), (6, 3), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-sniper"){
             return (powerupIdentity, "active", "Sniper", imageSniper, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (12, 18), (6, 8), (10, 7), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-lightningBolt")
-        {
+                    (48, 72), (6, 8), (10, 7), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-lightningBolt"){
             return (powerupIdentity, "active", "Lightning Bolt", imageLightningBolt, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (10, 16), (6, 8), (12, 8), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-bomb")
-        {
+                    (40, 64), (6, 8), (12, 8), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-bomb"){
             return (powerupIdentity, "active", "Bomb", imageBomb, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take {8} damage",
-                    (15, 22), (7, 9), (6, 4), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-fireball")
-        {
+                    (60, 88), (7, 9), (6, 4), (3, 3), (-1, -1));
+        }else if (powerupIdentity == "active-fireball"){
             return (powerupIdentity, "active", "Fireball", imageFireball, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take {8} damage",
-                    (18, 25), (8, 10), (10, 7), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-arrowVolley")
-        {
+                    (72, 100), (8, 10), (10, 7), (5, 5), (-1, -1));
+        }else if (powerupIdentity == "active-arrowVolley"){
             return (powerupIdentity, "active", "Arrow Volley", imageArrowVolley, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take {8} damage",
-                    (20, 28), (9, 11), (8, 5), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-acidRain")
-        {
+                    (80, 112), (9, 11), (8, 5), (7, 7), (-1, -1));
+        }else if (powerupIdentity == "active-acidRain"){
             return (powerupIdentity, "active", "Acid Rain", imageAcidRain, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies",
-                    (14, 20), (7, 9), (6, 4), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-axe")
-        {
+                    (28, 40), (7, 9), (6, 4), (1, 1), (-1, -1));
+        }else if (powerupIdentity == "active-axe"){
             return (powerupIdentity, "active", "Axe", imageAxe, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies 1 tile adjacent to you",
-                    (7, 12), (5, 7), (8, 5), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-spikedlub")
-        {
+                    (28, 48), (5, 7), (8, 5), (3, 3), (-1, -1));
+        }else if (powerupIdentity == "active-spikedClub"){
             return (powerupIdentity, "active", "Spiked Club", imageSpikedClub, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies up to 2 tiles adjacent to you",
-                    (9, 14), (6, 8), (10, 6), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-whip")
-        {
+                    (36, 56), (6, 8), (10, 6), (5, 5), (-1, -1));
+        }else if (powerupIdentity == "active-whip"){
             return (powerupIdentity, "active", "Whip", imageWhip, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies up to 3 tiles adjacent to you",
-                    (12, 18), (7, 9), (12, 8), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-teleport")
-        {
+                    (48, 72), (7, 9), (12, 8), (7, 7), (-1, -1));
+        }else if (powerupIdentity == "active-teleport"){
             return (powerupIdentity, "active", "Teleport", imageTeleport, "[Active, cooldown: {7}]", "<line-height=130%>Go to any unoccupied tile",
-                    (10, 16), (6, 8), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "active-dodge")
-        {
+                    (40, 64), (6, 8), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "active-dodge"){
             return (powerupIdentity, "active", "Dodge", imageDodge, "[Active, cooldown: {7}]", "<line-height=130%>Take no damage this turn",
-                    (8, 14), (5, 7), (-1, -1), (-1, -1), (-1, -1));
+                    (32, 56), (5, 7), (-1, -1), (-1, -1), (-1, -1));
         }
 
         // PASSIVE POWERUPS ===============================================================
         // [Up to 4 and can be sold]
         // ================================================================================ // SEPERATE BETWEEN RED AREA VS YELLOW AREA DAMAGE?
-        //[$3-6]    Light Armor: Take 3 - 1 less damage [min 1] from any source 
-        //[$5-9]    Heavy Armor: Take 4 - 2 less damage [min 1] from any source
-        //[$7-12]   Diamond Armor: Take 6 - 3 less damage [min 1] from any source
-        //[$6-10]   Ground Pound: After moving, all adjacent enemies take 1 - 3 damage
-        //[$4-8]    Inner Healing: Heal 2 - 1 Health every 3 turns (max 5 times per round)
-        //[$8-12]   Vampiric: Heal 3 - 1 health for every enemy killed
-        //[$5-10]   Well-Deserved Rest: Heal 10 - 5 health after every round
-        //[$7-11]   Bloodlust: Gain +1 damage per damage taken. Resets per round
-        //[$10-15]  Mercenary Tools: Lose $1 per turn, Doubles damage dealt, Halves damage taken
-        //[$5-10]   Pickpocket: Gain $3 - 1 more per enemy killed
-        //[$8-16]   Flexible Movement I: You can jump to four new tiles per turn: 1 tile orthogonally from you   // FOR THESE ONES, MAKE THE BUTTONS ALSO ACTIVATE A FUNCTION (IN INSPECTOR) TO INCREASE THE DGB POWERUP USAGE INPUT, EVEN MORE IF IT DAMAGES AN ENEMY (optional)
-        //[$8-16]   Flexible Movement II: You can jump to four new tiles per turn: 1 tile diagonally from you
-        //[$8-16]   Flexible Movement III: You can jump to four new tiles per turn: 2 tiles orthogonally from you
-        //[$8-16]   Flexible Movement IV: You can jump to four new tiles per turn: 2 tiles diagonally from you
-        //[$8-16]   Flexible Movement V: You can jump to four new tiles per turn: 3 tiles orthogonally from you
-        //[$8-16]   Flexible Movement VI: You can jump to four new tiles per turn: 3 tiles diagonally from you
-        //[$?12-24] Flexible Movement VII: You can jump to eight new tiles per turn: Like your 8 knight tiles but even further.
+        //[$12-24]  Light Armor: Take 3 - 1 less damage [min 1] from any source
+        //[$20-36]  Heavy Armor: Take 4 - 2 less damage [min 1] from any source
+        //[$37-48]  Diamond Armor: Take 6 - 3 less damage [min 1] from any source
+        //[$16-32]  Inner Healing: Heal 2 - 1 Health every 3 turns (max 5 times per round)
+        //[$32-48]  Vampiric: Heal 3 - 1 health for every enemy killed\
+        //[$20-40]  Well-Deserved Rest: Heal 10 - 5 health after every round
+        //[$28-44]  Bloodlust: Increase all your damage by 3 - 1 per damage taken. Resets per round
+        //[$24-40]  Ground Pound: After moving, all adjacent enemies take 1 - 3 damage
+        //[$40-60]  Mercenary Tools: Lose $1 per turn, Doubles damage dealt, Halves damage taken
+        //[$20-40]  Pickpocket: Gain $3 - 1 more per enemy killed
+        //[$32-64]  Flexible Movement I: You can jump to four new tiles per turn: 1 tile orthogonally from you   // FOR THESE ONES, MAKE THE BUTTONS ALSO ACTIVATE A FUNCTION (IN INSPECTOR) TO INCREASE THE DGB POWERUP USAGE INPUT, EVEN MORE IF IT DAMAGES AN ENEMY (optional)
+        //[$32-64]  Flexible Movement II: You can jump to four new tiles per turn: 1 tile diagonally from you
+        //[$32-64]  Flexible Movement III: You can jump to four new tiles per turn: 2 tiles orthogonally from you
+        //[$32-64]  Flexible Movement IV: You can jump to four new tiles per turn: 2 tiles diagonally from you
+        //[$32-64]  Flexible Movement V: You can jump to four new tiles per turn: 3 tiles orthogonally from you
+        //[$32-64]  Flexible Movement VI: You can jump to four new tiles per turn: 3 tiles diagonally from you
+        //[$48-96]  Flexible Movement VII: You can jump to eight new tiles per turn: 3 tils orthogonally + 1 tile perpendicular
+        //[$48-96]  Flexible Movement VIII: You can jump to eight new tiles per turn: 3 tils orthogonally + 2 tiles perpendicular
 
-        else if (powerupIdentity == "passive-lightArmor")
-        {
+        else if (powerupIdentity == "passive-lightArmor"){
             return (powerupIdentity, "passive", "Light Armor", imageLightArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (3, 6), (-1, -1), (3, 1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-heavyArmor")
-        {
-            return (powerupIdentity, "passive", "Heavy Armor I", imageHeavyArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (5, 9), (-1, -1), (4, 2), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-diamondArmor")
-        {
-            return (powerupIdentity, "passive", "Heavy Armor II", imageDiamondArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (7, 12), (-1, -1), (6, 3), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-groundPond")
-        {
-            return (powerupIdentity, "passive", "Ground Pound", imageGroundPound, "[Passive]", "<line-height=130%>After moving, all adjacent enemies take {8} damage",
-                    (6, 10), (-1, -1), (1, 3), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-innerHealing")
-        {
+                    (12, 24), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-heavyArmor"){
+            return (powerupIdentity, "passive", "Heavy Armor", imageHeavyArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
+                    (20, 36), (-1, -1), (4, 2), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-diamondArmor"){
+            return (powerupIdentity, "passive", "Diamond Armor", imageDiamondArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
+                    (37, 48), (-1, -1), (6, 3), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-innerHealing"){
             return (powerupIdentity, "passive", "Inner Healing", imageInnerHealing, "[Passive]", "<line-height=130%>Heal {8} health every 3 turns (max 5 times per round)",
-                    (4, 8), (-1, -1), (2, 1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-vampiric")
-        {
+                    (16, 32), (-1, -1), (2, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-vampiric"){
             return (powerupIdentity, "passive", "Vampiric", imageVampiric, "[Passive]", "<line-height=130%>Heal {8} health for every enemy killed",
-                    (8, 12), (-1, -1), (3, 1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-wellDeservedRest")
-        {
+                    (32, 48), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-wellDeservedRest"){
             return (powerupIdentity, "passive", "Well-Deserved Rest", imageWellDeservedRest, "[Passive]", "<line-height=130%>Heal {8} health after every round",
-                    (5, 10), (-1, -1), (10, 5), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-bloodlust")
-        {
-            return (powerupIdentity, "passive", "Bloodlust", imageBloodlust, "[Passive]", "<line-height=130%>Gain 1 damage per damage taken. Resets per round",
-                    (7, 11), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-mercenaryTools")
-        {
+                    (20, 40), (-1, -1), (10, 5), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-bloodlust"){
+            return (powerupIdentity, "passive", "Bloodlust", imageBloodlust, "[Passive]", "<line-height=130%>Increase all your damage by {8} per damage taken. Resets per round",
+                    (28, 44), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-groundPound"){
+            return (powerupIdentity, "passive", "Ground Pound", imageGroundPound, "[Passive]", "<line-height=130%>After moving, all adjacent enemies take {8} damage",
+                    (24, 40), (-1, -1), (1, 3), (3, 3), (-1, -1));
+        }else if (powerupIdentity == "passive-mercenaryTools"){
             return (powerupIdentity, "passive", "Mercenary Tools", imageMercenaryTools, "[Passive]", "<line-height=130%>Lose $1 per turn, doubles damage dealt, halves damage taken",
-                    (10, 15), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-pickpocket")
-        {
-            return (powerupIdentity, "passive", "Pickpocket", imagePickpocket, "[Passive]", "<line-height=130%>Gain {8} more per enemy killed",
-                    (5, 10), (-1, -1), (3, 1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementI")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement I", imageFlexibleMovementI, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 1 tile orthogonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementII")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement II", imageFlexibleMovementII, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 1 tile diagonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementIII")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement III", imageFlexibleMovementIII, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 2 tiles orthogonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementIV")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement IV", imageFlexibleMovementIV, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 2 tiles diagonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementV")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement V", imageFlexibleMovementV, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 3 tiles orthogonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementVI")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement VI", imageFlexibleMovementVI, "[Passive]", "<line-height=130%>You can jump to four new tiles per turn: 3 tiles diagonally from you",
-                    (8, 16), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "passive-flexibleMovementVII")
-        {
-            return (powerupIdentity, "passive", "Flexible Movement VII", imageFlexibleMovementVII, "[Passive]", "<line-height=130%>You can jump to eight new tiles per turn: Like your 8 knight tiles but even further",
-                    (12, 24), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (40, 60), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-pickpocket"){
+            return (powerupIdentity, "passive", "Pickpocket", imagePickpocket, "[Passive]", "<line-height=130%>Gain {8} more gold per enemy killed",
+                    (20, 40), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementI"){
+            return (powerupIdentity, "passive", "Flexible Movement I", imageFlexibleMovementI, "[Passive]", "<line-height=130%>4 new tiles to move: 1 tile orthogonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementII"){
+            return (powerupIdentity, "passive", "Flexible Movement II", imageFlexibleMovementII, "[Passive]", "<line-height=130%>4 new tiles to move: 1 tile diagonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementIII"){
+            return (powerupIdentity, "passive", "Flexible Movement III", imageFlexibleMovementIII, "[Passive]", "<line-height=130%>4 new tiles to move: 2 tiles orthogonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementIV"){
+            return (powerupIdentity, "passive", "Flexible Movement IV", imageFlexibleMovementIV, "[Passive]", "<line-height=130%>4 new tiles to move: 2 tiles diagonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementV"){
+            return (powerupIdentity, "passive", "Flexible Movement V", imageFlexibleMovementV, "[Passive]", "<line-height=130%>4 new tiles to move: 3 tiles orthogonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementVI"){
+            return (powerupIdentity, "passive", "Flexible Movement VI", imageFlexibleMovementVI, "[Passive]", "<line-height=130%>4 new tiles to move: 3 tiles diagonally",
+                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementVII"){
+            return (powerupIdentity, "passive", "Flexible Movement VII", imageFlexibleMovementVII, "[Passive]", "<line-height=130%>8 new tiles to move: 3 tiles orthogonally then 1 tile perpendicular",
+                    (48, 96), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "passive-flexibleMovementVIII"){
+            return (powerupIdentity, "passive", "Flexible Movement VIII", imageFlexibleMovementVIII, "[Passive]", "<line-height=130%>8 new tiles to move: 3 tiles orthogonally then 2 tiles perpendicular",
+                    (48, 96), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }
 
         // STAT BUFF POWEUPS ===============================================================
@@ -357,78 +294,115 @@ public class PowerupsCatalogController : MonoBehaviour
         // Increase DGB Input Powerup Usage a bit upon purchase. 
         // =================================================================================
 
-        //[$3-5]   Small Snack: Heal 5 - 12 health // MAYBE REDUCE DGB INPUT POWERUP USAGE IF BUY HEALTH BUT IS ARLREADY MAXED?
-        //[$6-9]   Lunch Break: Heal 15 - 30 health
-        //[$10-15] Tavern Buffet: Heal to full health
-        //[$4-7]   Hardened Fists: Permanently Increases your direct contact damage by 2 - 4
-        //[$7-11]  Iron Fists: Permanently Increases your direct contact damage by 4 - 7
-        //[$11-17] Diamond Fists: Increases your direct contact damage by 7 - 10
-        //[$4-8]   Toughened Heart: Permanently increases your max health by 4 - 8 And heal 4 - 8 health
-        //[$8-12]  Unbreakable Heart: Permanently increases your max health by 8 - 15 And heal 8 - 15 health
-        //[$4-8]   Weapon Proficiency: Permanently increase all damage you deal by 1 - 2
-        //[$8-12]  Weapon Mastery: Permanently increase all damage you deal by 3 - 4
+        //[$10-16]  Small Snack: Heal 5 - 12 health // MAYBE REDUCE DGB INPUT POWERUP USAGE IF BUY HEALTH BUT IS ARLREADY MAXED?
+        //[$18-28]  Lunch Break: Heal 15 - 30 health
+        //[$30-46]  Tavern Buffet: Heal to full health
+        //[$12-20]  Hardened Fists: Permanently Increases your direct contact damage by 2 - 4
+        //[$20-34]  Iron Fists: Permanently Increases your direct contact damage by 4 - 7
+        //[$34-52]  Diamond Fists: Increases your direct contact damage by 7 - 10
+        //[$12-24]  Toughened Heart: Permanently increases your max health by 4 - 8 And heal 4 - 8 health
+        //[$24-36]  Unbreakable Heart: Permanently increases your max health by 8 - 15 And heal 8 - 15 health
+        //[$12-24]  Weapon Proficiency: Permanently increase all damage you deal by 1 - 2
+        //[$24-36]  Weapon Mastery: Permanently increase all damage you deal by 3 - 4
 
 
-        else if (powerupIdentity == "statBuff-smallSnack")
-        {
+        else if (powerupIdentity == "statBuff-smallSnack"){
             return (powerupIdentity, "statBuff", "Small Snack", imageSmallSnack, "[Stat Buff]", "<line-height=130%>Heal {8} health",
-                    (5, 8), (-1, -1), (12, 5), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-lunchBreak")
-        {
+                    (10, 16), (-1, -1), (12, 5), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-lunchBreak"){
             return (powerupIdentity, "statBuff", "LunchBreak", imageLunchBreak, "[Stat Buff]", "<line-height=130%>Heal {8} health",
-                    (9, 14), (-1, -1), (30, 15), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-tavernBuffet")
-        {
+                    (18, 28), (-1, -1), (30, 15), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-tavernBuffet"){
             return (powerupIdentity, "statBuff", "Tavern Buffet", imageTavernBuffet, "[Stat Buff]", "<line-height=130%>Heal to full health",
-                    (15, 23), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-hardenedFists")
-        {
+                    (30, 46), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-hardenedFists"){
             return (powerupIdentity, "statBuff", "Hardened Fists", imageHardenedFists, "[Stat Buff]", "<line-height=130%>Permanently increases your direct contact damage by {8}",
-                    (6, 10), (-1, -1), (4, 2), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-ironFists")
-        {
+                    (12, 20), (-1, -1), (4, 2), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-ironFists"){
             return (powerupIdentity, "statBuff", "Iron Fists", imageIronFists, "[Stat Buff]", "<line-height=130%>Permanently increases your direct contact damage by {8}",
-                    (10, 17), (-1, -1), (7, 4), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-diamondFists")
-        {
+                    (20, 34), (-1, -1), (7, 4), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-diamondFists"){
             return (powerupIdentity, "statBuff", "Diamond Fists", imageDiamondFists, "[Stat Buff]", "<line-height=130%>Increases your direct contact damage by {8}",
-                    (17, 26), (-1, -1), (10, 7), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-toughenedHeart")
-        {
+                    (34, 52), (-1, -1), (10, 7), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-toughenedHeart"){
             return (powerupIdentity, "statBuff", "Toughened Heart", imageToughenedHeart, "[Stat Buff]", "<line-height=130%>Permanently increases your max health by {8} and heal {9} health",
-                    (6, 12), (-1, -1), (8, 4), (8, 4), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-unbreakableHeart")
-        {
+                    (12, 24), (-1, -1), (8, 4), (8, 4), (-1, -1));
+        }else if (powerupIdentity == "statBuff-unbreakableHeart"){
             return (powerupIdentity, "statBuff", "Unbreakable Heart", imageUnbreakableHeart, "[Stat Buff]", "<line-height=130%>Permanently increases your max health by {8} and heal {9} health",
-                    (12, 18), (-1, -1), (15, 8), (15, 8), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-weaponProficiency")
-        {
+                    (24, 36), (-1, -1), (15, 8), (15, 8), (-1, -1));
+        }else if (powerupIdentity == "statBuff-weaponProficiency"){
             return (powerupIdentity, "statBuff", "Weapon Proficiency", imageWeaponProficiency, "[Stat Buff]", "<line-height=130%>Permanently increase all damage you deal by {8}",
-                    (6, 12), (-1, -1), (2, 1), (-1, -1), (-1, -1));
-        }
-        else if (powerupIdentity == "statBuff-weaponMastery")
-        {
+                    (12, 24), (-1, -1), (2, 1), (-1, -1), (-1, -1));
+        }else if (powerupIdentity == "statBuff-weaponMastery"){
             return (powerupIdentity, "statBuff", "Weapon Mastery", imageWeaponMastery, "[Stat Buff]", "<line-height=130%>Permanently increase all damage you deal by {8}",
-                    (12, 18), (-1, -1), (4, 3), (-1, -1), (-1, -1));
+                    (24, 36), (-1, -1), (4, 3), (-1, -1), (-1, -1));
         }
 
 
 
-        else
-
-        {
-            return (powerupIdentity, "???", "Unkown Powerup Name!!!", missing, "??????????", "??????????",
+        else{
+            Debug.LogWarning("Unknown Powerup Name:" + powerupIdentity);
+            return (powerupIdentity, "???", "Unkown Powerup Name!!!", imageMissing, "??????????", "??????????",
                     (-1, -1), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }
     }
+
+
+
+
+    public Sprite GetPowerupSprite(string powerupIdentity)
+    {
+        if      (powerupIdentity == "active-knife")                { return imageKnife; }
+        else if (powerupIdentity == "active-spear")                { return imageSpear; }
+        else if (powerupIdentity == "active-hatchet")              { return imageHatchet; }
+        else if (powerupIdentity == "active-slingshot")            { return imageSlingshot; }
+        else if (powerupIdentity == "active-sniper")               { return imageSniper; }
+        else if (powerupIdentity == "active-lightningBolt")        { return imageLightningBolt; }
+        else if (powerupIdentity == "active-bomb")                 { return imageBomb; }
+        else if (powerupIdentity == "active-fireball")             { return imageFireball; }
+        else if (powerupIdentity == "active-arrowVolley")          { return imageArrowVolley; }
+        else if (powerupIdentity == "active-acidRain")             { return imageAcidRain; }
+        else if (powerupIdentity == "active-axe")                  { return imageAxe; }
+        else if (powerupIdentity == "active-spikedClub")           { return imageSpikedClub; }
+        else if (powerupIdentity == "active-whip")                 { return imageWhip; }
+        else if (powerupIdentity == "active-teleport")             { return imageTeleport; }
+        else if (powerupIdentity == "active-dodge")                { return imageDodge; }
+
+        else if (powerupIdentity == "passive-lightArmor")          { return imageLightArmor; }
+        else if (powerupIdentity == "passive-heavyArmor")          { return imageHeavyArmor; }
+        else if (powerupIdentity == "passive-diamondArmor")        { return imageDiamondArmor; }
+        else if (powerupIdentity == "passive-innerHealing")        { return imageInnerHealing; }
+        else if (powerupIdentity == "passive-vampiric")            { return imageVampiric; }
+        else if (powerupIdentity == "passive-wellDeservedRest")    { return imageWellDeservedRest; }
+        else if (powerupIdentity == "passive-bloodlust")           { return imageBloodlust; }
+        else if (powerupIdentity == "passive-groundPound")         { return imageGroundPound; }
+        else if (powerupIdentity == "passive-mercenaryTools")      { return imageMercenaryTools; }
+        else if (powerupIdentity == "passive-pickpocket")          { return imagePickpocket; }
+        else if (powerupIdentity == "passive-flexibleMovementI")   { return imageFlexibleMovementI; }
+        else if (powerupIdentity == "passive-flexibleMovementII")  { return imageFlexibleMovementII; }
+        else if (powerupIdentity == "passive-flexibleMovementIII") { return imageFlexibleMovementIII; }
+        else if (powerupIdentity == "passive-flexibleMovementIV")  { return imageFlexibleMovementIV; }
+        else if (powerupIdentity == "passive-flexibleMovementV")   { return imageFlexibleMovementV; }
+        else if (powerupIdentity == "passive-flexibleMovementVI")  { return imageFlexibleMovementVI; }
+        else if (powerupIdentity == "passive-flexibleMovementVII") { return imageFlexibleMovementVII; }
+        else if (powerupIdentity == "passive-flexibleMovementVIII"){ return imageFlexibleMovementVIII; }
+
+        else if (powerupIdentity == "statBuff-smallSnack")         { return imageSmallSnack; }
+        else if (powerupIdentity == "statBuff-lunchBreak")         { return imageLunchBreak; }
+        else if (powerupIdentity == "statBuff-tavernBuffet")       { return imageTavernBuffet; }
+        else if (powerupIdentity == "statBuff-hardenedFists")      { return imageHardenedFists; }
+        else if (powerupIdentity == "statBuff-ironFists")          { return imageIronFists; }
+        else if (powerupIdentity == "statBuff-diamondFists")       { return imageDiamondFists; }
+        else if (powerupIdentity == "statBuff-toughenedHeart")     { return imageToughenedHeart; }
+        else if (powerupIdentity == "statBuff-unbreakableHeart")   { return imageUnbreakableHeart; }
+        else if (powerupIdentity == "statBuff-weaponProficiency")  { return imageWeaponProficiency; }
+        else if (powerupIdentity == "statBuff-weaponMastery")      { return imageWeaponMastery; }
+
+        else                                                       { return imageMissing; }
+    }
+
+
+
 
 
     // FIRST, SET UP ALL ICONS FOR POWERUPS, JUST SET THEM ALL INTO VARIABLES
@@ -463,14 +437,79 @@ public class PowerupsCatalogController : MonoBehaviour
         }
     }
 
-    public void ActivateThisActivePoweup(string powerupIdentity)
-    {
+    public int ActivateThisActivePowerup(string powerupIdentity, string powerupAction) // It's not really "activate" but more of getting an information value from an active powerup
+    {                                                                                  // called when clicked in bottombar controller or for certain damaging powerups in playerandenemystatus controller
+        int cooldownEasy = GetPowerupInfo(powerupIdentity).Item8.Item1;
+        int cooldownHard = GetPowerupInfo(powerupIdentity).Item8.Item2;
+        int valueEasy = GetPowerupInfo(powerupIdentity).Item9.Item1;
+        int valueHard = GetPowerupInfo(powerupIdentity).Item9.Item2;
+        int radius = GetPowerupInfo(powerupIdentity).Item10.Item1;
+        float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("powerupQuality");
+        int cooldownReturn = Mathf.RoundToInt(cooldownEasy + (cooldownHard - cooldownEasy) * difficultyIndex); // the return value if powerupAction == "cooldown"
+        int valueReturn = Mathf.RoundToInt(valueEasy + (valueHard - valueEasy) * difficultyIndex); // the return value if powerupAction == "value"
 
-    }
-    public void ActivateThisPassivePoweup(string powerupIdentity)
-    {
+        if (powerupAction == "cooldown") { return cooldownReturn; }
+        else if (powerupAction == "value") { return valueReturn; }
+        else if (powerupAction == "radius") { return radius; }
+        else { Debug.LogWarning("powerupAction unidentified:" + powerupAction); }
 
+        ////                                                                Called at:
+        //if      (powerupIdentity == "active-knife")                { } // all of these at bottombar controller?
+        //else if (powerupIdentity == "active-spear")                { }
+        //else if (powerupIdentity == "active-hatchet")              { }
+        //else if (powerupIdentity == "active-slingshot")            { }
+        //else if (powerupIdentity == "active-sniper")               { }
+        //else if (powerupIdentity == "active-lightningBolt")        { }
+        //else if (powerupIdentity == "active-bomb")                 { }
+        //else if (powerupIdentity == "active-fireball")             { }
+        //else if (powerupIdentity == "active-arrowVolley")          { }
+        //else if (powerupIdentity == "active-acidRain")             { }
+        //else if (powerupIdentity == "active-axe")                  { }
+        //else if (powerupIdentity == "active-spikedClub")           { }
+        //else if (powerupIdentity == "active-whip")                 { }
+        //else if (powerupIdentity == "active-teleport")             { }
+        //else if (powerupIdentity == "active-dodge")                { }
+
+        //Debug.LogWarning("Canot Find Active Powerup of identity:" + powerupIdentity);
+        return -1;
     }
+
+    private int bloodlustBuff = 0;
+    public int ActivateThisPassivePowerup(string powerupIdentity, string powerupAction)
+    {
+        int valueEasy = GetPowerupInfo(powerupIdentity).Item9.Item1;
+        int valueHard = GetPowerupInfo(powerupIdentity).Item9.Item2;
+        float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("powerupQuality");
+        int valueReturn = Mathf.RoundToInt(valueEasy + (valueHard - valueEasy) * difficultyIndex);
+
+        // the return -1 here just means that these powerups don't give a DGB value.          Called at:
+        if      (powerupIdentity == "passive-lightArmor")          { return valueReturn; } // CodeForPrefabPlayer.PlayerTakesDamage
+        else if (powerupIdentity == "passive-heavyArmor")          { return valueReturn; } // CodeForPrefabPlayer.PlayerTakesDamage
+        else if (powerupIdentity == "passive-diamondArmor")        { return valueReturn; } // CodeForPrefabPlayer.PlayerTakesDamage
+        else if (powerupIdentity == "passive-innerHealing")        { return valueReturn; } // TurnController.PlayerTurn
+        else if (powerupIdentity == "passive-vampiric")            { return valueReturn; } // PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold
+        else if (powerupIdentity == "passive-wellDeservedRest")    { return valueReturn; } // PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold
+        else if (powerupIdentity == "passive-bloodlust")           {                       
+            if (powerupAction == "reset") { bloodlustBuff = 0; return -1;}                 //     PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold
+            else if (powerupAction == "buff") { bloodlustBuff += valueReturn; return -1;}  //     CodeForPrefabPlayer.PlayerTakesDamage
+            else { return bloodlustBuff; }                                                 //     CodeForPrefabEnemy.ThisEnemyTakesDamage
+        }
+        //else if (powerupIdentity == "passive-groundPound")         { return valueReturn; }
+        else if (powerupIdentity == "passive-mercenaryTools")      { return -1; }          // CodeForPrefabPlayer.PlayerTakesDamage , CodeForPrefabEnemy.ThisEnemyTakesDamage , TurnController.PlayerTurn
+        else if (powerupIdentity == "passive-pickpocket")          { return valueReturn; } // PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold
+        else if (powerupIdentity == "passive-flexibleMovementI")   { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementII")  { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementIII") { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementIV")  { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementV")   { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementVI")  { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementVII") { return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+        else if (powerupIdentity == "passive-flexibleMovementVIII"){ return -1; }          // CodeForPrefabPlayer.PlayerCanMoveNow
+
+        Debug.LogWarning("Cannot Find Passive Powerup of identity:" + powerupIdentity);
+        return -1;
+    }
+
     public void ActivateThisStatBuffPoweup(string powerupIdentity)
     {
         float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("powerupQuality");
@@ -479,8 +518,11 @@ public class PowerupsCatalogController : MonoBehaviour
         (int easyNumberB, int hardNumberB) = powerupInfo.Item10;
         int numberA = Mathf.RoundToInt(easyNumberA + (hardNumberA - easyNumberA) * difficultyIndex);
         int numberB = Mathf.RoundToInt(easyNumberB + (hardNumberB - easyNumberB) * difficultyIndex);
+
+        // Player buy a powerup -> slightly increase powerup usage DGB input
         dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.1f, false);
 
+        // Reduce DGB Input powerup usage if player overheals past max health with healing stat buff powerups
         if (powerupIdentity == "statBuff-smallSnack")
         {
             playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);

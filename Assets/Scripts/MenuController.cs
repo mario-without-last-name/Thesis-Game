@@ -206,10 +206,10 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
     {
         PlayerPrefs.SetString("modeDifficulty", difficulty);
         Debug.Log("(Click on this console message to see more of the selected difficuly and settings)" +
-            "\nDifficulty : " + PlayerPrefs.GetString("modeDifficulty", "???") +
-            "\nMusic : " + PlayerPrefs.GetInt("isMusicChecked", 0) +
-            "\nSound Effects : " + PlayerPrefs.GetInt("isSoundEffectsChecked", 0) +
-            "\nShow Timer : " + PlayerPrefs.GetInt("isTimerChecked", 0) +
+            "\nDifficulty : " + PlayerPrefs.GetString("modeDifficulty", "Adaptive") +
+            "\nMusic : " + PlayerPrefs.GetInt("isMusicChecked", 1) +
+            "\nSound Effects : " + PlayerPrefs.GetInt("isSoundEffectsChecked", 1) +
+            "\nShow Timer : " + PlayerPrefs.GetInt("isTimerChecked", 1) +
             "\nEnemy Stats : " + PlayerPrefs.GetInt("isStatsChecked", 0) +
             "\nVisual Hints : " + PlayerPrefs.GetInt("isHintsChecked", 0) +
             "\nPowerup Usage : " + PlayerPrefs.GetInt("isPowerupChecked", 0) +

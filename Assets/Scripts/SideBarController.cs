@@ -33,9 +33,9 @@ public class SideBarController : MonoBehaviour
     void Start()
     {
         SetSideBarRoundNumber(1);
-        modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
+        modeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
 
-        if (PlayerPrefs.GetInt("isTimerChecked", 0) == 1)
+        if (PlayerPrefs.GetInt("isTimerChecked", 1) == 1)
         {
             timeHeaderAndValue.SetActive(true);
         }

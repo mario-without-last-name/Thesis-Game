@@ -61,7 +61,7 @@ public class GenerateStatisticsController : MonoBehaviour
 
     private void Start()
     {
-        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
         if (selectedDifficulty == "Adaptive")
         {
             dataLogPerTurnDGBInputDamageReceivedAndDealt = "333,";
@@ -96,10 +96,10 @@ public class GenerateStatisticsController : MonoBehaviour
     inputField.onValueChanged.AddListener(ValidateInput);
 
         submitButton.SetActive(false);
-        textModeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "???");
+        textModeDifficulty.text = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
 
         textDynamicSettingsActivated.text = "<line-height=130%>";
-        if (PlayerPrefs.GetString("modeDifficulty", "???") != "Adaptive")
+        if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") != "Adaptive")
         {
             textDynamicSettingsActivated.text += "Adaptive difficulty was not selected\n\n\n\n";
         }
@@ -226,7 +226,7 @@ public class GenerateStatisticsController : MonoBehaviour
         string isGameOverFrom0HpOrManualQuit = confirmQuitBattleController.GetQuitBattleManuallyAndNotFrom0Hp() ? "Manual Quit" : "Hp reached 0";
         string totalNumberOfMoves = "" + Mathf.Max(playerAndEnemyStatusController.GetTotalMoveCount(), 0);
         string totalNumberOfKills = "" + playerAndEnemyStatusController.GetKillCount();
-        string totalTimePlayed = PlayerPrefs.GetInt("isTimerChecked", 0) == 1 ? sideBarController.GetSideBarTimerValue() : "-";
+        string totalTimePlayed = PlayerPrefs.GetInt("isTimerChecked", 1) == 1 ? sideBarController.GetSideBarTimerValue() : "-";
         // Store the recorded Dynamic Difficulty Indices Over Time? As well as hp, damage dealt, etc.
         StartCoroutine(Post(playerName, modeDifficulty, activatedAdaptiveSettings, finalRoundNumber, isGameOverFrom0HpOrManualQuit, totalNumberOfMoves, totalNumberOfKills, totalTimePlayed,
                             dataLogPerTurnDGBInputDamageReceivedAndDealt, dataLogPerTurnDGBInputHealthLeft, dataLogPerTurnDGBInputPowerupUsage, dataLogPerTurnDGBInputTimeThinkingAndStepsTaken, dataLogPerTurnDGBOutputDifficultyIndex,

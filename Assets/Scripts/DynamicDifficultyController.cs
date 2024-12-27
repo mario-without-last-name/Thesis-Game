@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DynamicDifficultyController : MonoBehaviour
@@ -26,7 +27,7 @@ public class DynamicDifficultyController : MonoBehaviour
 
     void Start()
     { // If the selected difficulty was not Adaptive, then no point of this code doing anything
-        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
 
         dynamicInputIndexDamageReceivedAndDealt = 1f / 3f;
         dynamicInputIndexHealthLeft = 1.0f;
@@ -44,6 +45,16 @@ public class DynamicDifficultyController : MonoBehaviour
         ThisRoundInitialdynamicInputIndexTimeThinkingAndStepsTaken = dynamicInputIndexTimeThinkingAndStepsTaken;
     }
 
+//DGB for powerup usage increases per:
+//purchase of powerup
+//selling of poweup
+//good use of active powerup
+
+//decreases per:
+//new round
+//overhealed on healling stat buffs
+//wrong use of active powerup
+
     public void SetDynamicInputChange(string dynamicInputType, float change, bool overwriteExisitingValue) // overwriteExisitingValue = just change the value. not overwriteExisitingValue = add the variable to the current amount.
     {
         if (selectedDifficulty != "Adaptive") { return; }
@@ -60,6 +71,7 @@ public class DynamicDifficultyController : MonoBehaviour
                 dynamicInputIndexHealthLeft = overwriteExisitingValue ? change : Mathf.Clamp(dynamicInputIndexHealthLeft + change, 0.0f, 1.0f);
                 //dynamicInputIndexHealthLeft = Mathf.Min(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft + 0.3f);
                 //dynamicInputIndexHealthLeft = Mathf.Max(dynamicInputIndexHealthLeft, ThisRoundInitialdynamicInputIndexHealthLeft - 0.3f);
+                // This is commented because unlike the other DGB Input, no need to worry too much about making the health DGB input increase or decrease fast
             }
             else if (dynamicInputType == "powerupUsage")
             {
@@ -99,13 +111,13 @@ public class DynamicDifficultyController : MonoBehaviour
 
     public void PrintAndLogPerTurnAllDGBInputAndOutputIndex()
     {
-        Debug.Log("[PER TURN] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        //Debug.Log("[PER TURN] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
         generateStatisticsController.LogPerTurnDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
     }
 
     public void PrintAndLogPerRoundAllDGBInputAndOutputIndex()
     {
-        Debug.Log("[===PER ROUND===] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        //Debug.Log("[===PER ROUND===] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
         generateStatisticsController.LogPerRoundDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
     }
 }

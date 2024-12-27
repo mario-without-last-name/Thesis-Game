@@ -39,6 +39,8 @@ public class CodeForPrefabEnemy : MonoBehaviour
     private CodeForPrefabPlayer codeForPrefabPlayer;
     private TurnController turnController;
     private DynamicDifficultyController dynamicDifficultyController;
+    private BottomBarController bottomBarController;
+    private PowerupsCatalogController powerupsCatalogController;
 
     private GameObject prefabPlayerObject;
 
@@ -95,11 +97,15 @@ public class CodeForPrefabEnemy : MonoBehaviour
         turnController = turnControllerObject.GetComponent<TurnController>();
         GameObject dynamicDifficultyControllerObject = GameObject.FindGameObjectWithTag("tagForDynamicDifficultyController");
         dynamicDifficultyController = dynamicDifficultyControllerObject.GetComponent<DynamicDifficultyController>();
+        GameObject bottomBarControllerObject = GameObject.FindGameObjectWithTag("tagForBottomBarController");
+        bottomBarController = bottomBarControllerObject.GetComponent<BottomBarController>();
+        GameObject powwerupsCatalogControllerObject = GameObject.FindGameObjectWithTag("tagForPowerupsCatalogController");
+        powerupsCatalogController = powwerupsCatalogControllerObject.GetComponent<PowerupsCatalogController>();
         // Must know where the player is.
         prefabPlayerObject = GameObject.FindGameObjectWithTag("tagForPrefabPlayer");
         codeForPrefabPlayer = prefabPlayerObject.GetComponent<CodeForPrefabPlayer>();
 
-        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
         numberOfMovesThisRound = 0;
         numberOfTurnsThisRound = 0;
 
@@ -113,16 +119,23 @@ public class CodeForPrefabEnemy : MonoBehaviour
         currDelayLeft = moveDelay;
         cannotAttackNextTurn = false;
 
-        // Ensure that it does not spawn on the same as another enemy or nearby he player (min 4 tiles away)
+        // An enemy must spawn under 3 criteria...
         (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
         Randomize2DArray(allPossibleBoardTileLocations);
         foreach (int[] tile in allPossibleBoardTileLocations)
         {
             currGridX = tile[0];
             currGridY = tile[1];
-            if (playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX, currGridY) == null && (Math.Abs(playerCurrGridX - currGridX) > 3 || Math.Abs(playerCurrGridY - currGridY) > 3))
+
+            // 1. not on an occupied tile
+            // 2. not in the 3 leftmost/rightmost columns,
+            // 3. is between 4-6 tiles away from the player
+            if (playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX, currGridY) == null &&
+                currGridX >= 4 && currGridX <= 13 &&
+                ( ( Math.Abs(playerCurrGridX - currGridX) >= 4 && Math.Abs(playerCurrGridX - currGridX) <= 6 ) || ( Math.Abs(playerCurrGridY - currGridY) >= 4 && Math.Abs(playerCurrGridY - currGridY) <= 7 ) )
+            )
             {
-                break;
+                break; // so stop looking for another coordinate, we already found one that satisfies all spawn criteria
             }
         }
         thisPieceTransform = GetComponent<Transform>();
@@ -239,9 +252,20 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
     public void ThisEnemyTakesDamage(int damageTaken, bool isKnockback)
     { // QUESTION: IF THE ATTACK HAS NO KNOCKBACK? WILL THE DELAY ALSO INCREASE  AND ALSO CANNOT ATTACK NEXT TURN? - I think no?
-        dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", +0.025f, false);
-        playerAndEnemyStatusController.SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1();
+
+        if (!playerAndEnemyStatusController.getHasAnEnemyAlreadyBeenDamagedThisTurn())
+        {
+            dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", +0.025f, false);
+            playerAndEnemyStatusController.setHasAnEnemyAlreadyBeenDamagedThisTurn(true);
+        }
+
+        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-mercenaryTools")) { damageTaken *= 2; }
+        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-bloodlust")) { damageTaken += powerupsCatalogController.ActivateThisPassivePowerup("passive-bloodlust", ""); }
+
+        playerAndEnemyStatusController.SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1AndResetGracePeriodBeforeReducingBonusGold();
         currHealth = currHealth - damageTaken;
+
+        // enemy is dead
         if (currHealth <= 0)
         {
             //Debug.Log("You just killed a " + thisEnemyVariant);
@@ -252,17 +276,21 @@ public class CodeForPrefabEnemy : MonoBehaviour
         else
         {
             //Debug.Log("You dealt " + damageTaken + " damage on a " + thisEnemyVariant);
-            Invoke(nameof(CallForEnemyTurn), 0.5f); // THIS MIGHT BE PROBLEMATIC WITH POWEUPS THAT ATTACK MULTIPLE ENEMIES AT ONCE
+
+            // ACTIVE AND PASSIVE POWERUP
+            // If this enemy is damaged from direct landing damage, call for all enemy turn. Else if it is damaged when player has an active powerup activated (or ground pound), just wait for the player prefab to call all enemy turn
+            if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); }
+
             musicController.PlayDamageSoundEffectSource();
             groupHitpoints.SetActive(true);
             imageGreenHealthBar.fillAmount = Math.Min((float)currHealth / (float)maxHealth, 1);
             textDamageOrHealTaken.text = "-" + damageTaken;
             Invoke(nameof(HideHealthBar), 0.5f);
             // We cannot just setActive the entire move and attack tile groups. It must change depending how close they are to the board's edges
+            currDelayLeft += 1;
 
             if (isKnockback)
             {
-                currDelayLeft += 1;
                 DeactivateAllMoveTiles();
                 Invoke(nameof(ActivateSpecificMoveTiles), 0.5f);
                 DeactivateAllAttackTiles();
@@ -344,7 +372,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
         }
 
         if (playerWasInThisEnemysAttackTile) {
-            codeForPrefabPlayer.PlayerTakesDamage(enemyDamage, false);
+            codeForPrefabPlayer.PlayerTakesDamageOrHealing(-1 * enemyDamage, false);
             Invoke(nameof(CallForNextEnemysTurnOneByOneForRedTiles), 0.5f);
         }
         else { CallForNextEnemysTurnOneByOneForRedTiles(); }
@@ -575,7 +603,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
         //if (lowestEuclideanDistance == 0) // will attatck player: THIS WILL NOT WORK FOR THE 2 EASY MODES
         if (currGridX == playerCurrGridX && currGridY == playerCurrGridY)
         {
-            codeForPrefabPlayer.PlayerTakesDamage(enemyDamage, true); // move the player elsewhere first from knockbak, before marking the enemy's current move tile to this location (even if it has moved here through DOM animation)
+            codeForPrefabPlayer.PlayerTakesDamageOrHealing(-1 * enemyDamage, true); // move the player elsewhere first from knockbak, before marking the enemy's current move tile to this location (even if it has moved here through DOM animation)
             playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, gameObject);
             Invoke(nameof(CallForNextEnemysTurnOneByOneForYellowTiles), 0.5f); // Unlike the one in MoveToThisTileAndAttackEnemyIfItExistsHere(), wecan place the function to call the next turn here.
         }

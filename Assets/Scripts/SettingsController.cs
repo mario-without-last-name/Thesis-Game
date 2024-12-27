@@ -41,10 +41,6 @@ public class SettingsController : MonoBehaviour
     [Header("Controllers")]
     [SerializeField] private MusicController musicController;
 
-    // IMPORTANT NOTE:
-    // WHEN THE UNITY GAME IS BUILT, IT WILL BY DEFAULT TURN OFF ALL CHECKBOXES IN THE SETTINGS.
-    // SO BEFORE SHARING THE GAME FILE TO OTHER PEOPLE, CHECK ALL THOSE BOXES FIRST (AFTER BUILDING IT)
-
     // Start is called before the first frame update
     private void Start()
     {
@@ -57,9 +53,11 @@ public class SettingsController : MonoBehaviour
         imageButtonAI           = buttonAI.GetComponent<Image>();
         imageButtonLimit        = buttonLimit.GetComponent<Image>();
 
-        isMusicChecked        = PlayerPrefs.GetInt("isMusicChecked", 0) == 1;
-        isSoundEffectsChecked = PlayerPrefs.GetInt("isSoundEffectsChecked", 0) == 1;
-        isTimerChecked        = PlayerPrefs.GetInt("isTimerChecked", 0) == 1;
+        // ALL PLAYER PREFS ARE STORED HERE, PLUS ONE MORE WHICH IS PlayerPrefs.GetString("modeDifficulty", "Adaptive")
+
+        isMusicChecked        = PlayerPrefs.GetInt("isMusicChecked", 1) == 1;
+        isSoundEffectsChecked = PlayerPrefs.GetInt("isSoundEffectsChecked", 1) == 1;
+        isTimerChecked        = PlayerPrefs.GetInt("isTimerChecked", 1) == 1;
         isStatsChecked        = PlayerPrefs.GetInt("isStatsChecked", 0) == 1;
         isHintsChecked        = PlayerPrefs.GetInt("isHintsChecked", 0) == 1;
         isPowerupChecked      = PlayerPrefs.GetInt("isPowerupChecked", 0) == 1;

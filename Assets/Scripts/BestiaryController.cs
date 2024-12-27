@@ -50,10 +50,10 @@ public class BestiaryController : MonoBehaviour
 
     public int[][] GetEnemyMoveTiles(string thisEnemyVariant)
     { // Slime technically doesn't move, but just make its move delay 99 and add som emove tiles to avoid further code reformatting
-        if      (thisEnemyVariant == "pawnGoblin")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
-        else if (thisEnemyVariant == "pawnSkeleton") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
-        else if (thisEnemyVariant == "pawnBandit") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] { +1, -1 }, new[] { 0, +1 }, new[] { 0, -1 }, new[] { -1, +1 }, new[] { -1, 0 }, new[] { -1, -1 } }; }
-        else if (thisEnemyVariant == "pawnSlime") { return new int[][] { new[] { +1, +1 }, new[] { +1, 0 }, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
+        if      (thisEnemyVariant == "pawnGoblin")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
+        else if (thisEnemyVariant == "pawnSkeleton")       { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
+        else if (thisEnemyVariant == "pawnBandit")         { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
+        else if (thisEnemyVariant == "pawnSlime")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookTroll")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookGiant")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
         else if (thisEnemyVariant == "rookExecutioner")    { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
@@ -72,8 +72,8 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "queenGolem")         { return new int[][] { new[] {+1,+1}, new[] {+2,+2}, new[] {+3,+3}, new[] {+1,-1}, new[] {+2,-2}, new[] {+3,-3}, new[] {-1,+1}, new[] {-2,+2}, new[] {-3,+3}, new[] {-1,-1}, new[] {-2,-2}, new[] {-3,-3} }; }
         else if (thisEnemyVariant == "kingLich")           { return new int[][] { new[] {+3,+3}, new[] {+3, 0}, new[] {+3,-3}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3,+3}, new[] {-3, 0}, new[] {-3,-3} }; }
         else if (thisEnemyVariant == "kingTitan")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1} }; }
-        else if (thisEnemyVariant == "kingDragon")         { return new int[][] { new[] {+1, 0}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1, 0} }; }
-        else if (thisEnemyVariant == "kingVampire")        { return new int[][] { new[] {-3,-3}, new[] {-2,-3}, new[] {-1,-3}, new[] { 0,-3}, new[] {+1,-3}, new[] {+2,-3}, new[] {+3,-3},                new[] {-3,-2}, new[] {-2,-2}, new[] {-1,-2}, new[] { 0,-2}, new[] {+1,-2}, new[] {+2,-2}, new[] {+3,-2},                new[] {-3,-1}, new[] {-2,-1}, new[] {-1,-1}, new[] { 0,-1}, new[] {+1,-1}, new[] {+2,-1}, new[] {+3,-1},                new[] {-3, 0}, new[] {-2, 0}, new[] {-1, 0},                new[] {+1, 0}, new[] {+2, 0}, new[] {+3, 0},                new[] {-3,+1}, new[] {-2,+1}, new[] {-1,+1}, new[] { 0,+1}, new[] {+1,+1}, new[] {+2,+1}, new[] {+3,+1},                new[] {-3,+2}, new[] {-2,+2}, new[] {-1,+2}, new[] { 0,+2}, new[] {+1,+2}, new[] {+2,+2}, new[] {+3,+2},                new[] {-3,+3}, new[] {-2,+3}, new[] {-1,+3}, new[] { 0,+3}, new[] {+1,+3}, new[] {+2,+3}, new[] {+3,+3} }; }
+        else if (thisEnemyVariant == "kingDragon")         { return new int[][] { new[] {+2,+2}, new[] {+2,+1}, new[] {+2, 0}, new[] {+2,-1}, new[] {+2,-2}, new[] {+1,-2}, new[] { 0,-2}, new[] {-1,-2}, new[] {-2,-2}, new[] {-2,-1}, new[] {-2, 0}, new[] {-2,+1}, new[] {-2,+2}, new[] {-1,+2}, new[] { 0,+2}, new[] {+1,+2} }; }
+        else if (thisEnemyVariant == "kingVampire")        { return new int[][] { new[] { 0,+2}, new[] {+2, 0}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3,+1}, new[] {+3,-1}, new[] {-3,+1}, new[] {-3,-1}, new[] {+1,+3}, new[] {-1,+3}, new[] {+1,-3}, new[] {-1,-3} }; }
         else {
             Debug.LogWarning("Unknown enemy variant: " + thisEnemyVariant);
             return new int[][] { };
@@ -105,8 +105,8 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "queenGolem")         { return new int[][] { new[] {+1,+1}, new[] {+1,-1}, new[] {-1,+1}, new[] {-1,-1}, new[] {+2,+2}, new[] {+2,-2}, new[] {-2,+2}, new[] {-2,-2}, new[] {+3,+3}, new[] {+3,-3}, new[] {-3,+3}, new[] {-3,-3} }; }
         else if (thisEnemyVariant == "kingLich")           { return new int[][] { new[] {+2,+2}, new[] {+2,-2}, new[] {-2,+2}, new[] {-2,-2}, new[] {+2, 0}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2, 0}, new[] {+3, 0}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3, 0}, new[] {+3,+2}, new[] {+2,+3}, new[] {-3,+2}, new[] {-2,+3}, new[] {+3,-2}, new[] {+2,-3}, new[] {-3,-2}, new[] {-2,-3} }; }
         else if (thisEnemyVariant == "kingTitan")          { return new int[][] { new[] {+1,+1}, new[] {+1, 0}, new[] {+1,-1}, new[] { 0,+1}, new[] { 0,-1}, new[] {-1,+1}, new[] {-1, 0}, new[] {-1,-1}, new[] {+2,+2}, new[] {+2, 0}, new[] {+2,-2}, new[] { 0,+2}, new[] { 0,-2}, new[] {-2,+2}, new[] {-2, 0}, new[] {-2,-2}, new[] {+3,+3}, new[] {+3, 0}, new[] {+3,-3}, new[] { 0,+3}, new[] { 0,-3}, new[] {-3,+3}, new[] {-3, 0}, new[] {-3,-3} }; }
-        else if (thisEnemyVariant == "kingDragon")         { return new int[][] { new[] {-3,-3}, new[] {-2,-3}, new[] {-1,-3}, new[] { 0,-3}, new[] {+1,-3}, new[] {+2,-3}, new[] {+3,-3},                new[] {-3,-2}, new[] {-2,-2}, new[] {-1,-2}, new[] { 0,-2}, new[] {+1,-2}, new[] {+2,-2}, new[] {+3,-2},                new[] {-3,-1}, new[] {-2,-1}, new[] {-1,-1}, new[] { 0,-1}, new[] {+1,-1}, new[] {+2,-1}, new[] {+3,-1},                new[] {-3, 0}, new[] {-2, 0}, new[] {-1, 0},                new[] {+1, 0}, new[] {+2, 0}, new[] {+3, 0},                new[] {-3,+1}, new[] {-2,+1}, new[] {-1,+1}, new[] { 0,+1}, new[] {+1,+1}, new[] {+2,+1}, new[] {+3,+1},                new[] {-3,+2}, new[] {-2,+2}, new[] {-1,+2}, new[] { 0,+2}, new[] {+1,+2}, new[] {+2,+2}, new[] {+3,+2},                new[] {-3,+3}, new[] {-2,+3}, new[] {-1,+3}, new[] { 0,+3}, new[] {+1,+3}, new[] {+2,+3}, new[] {+3,+3} }; }
-        else if (thisEnemyVariant == "kingVampire")        { return new int[][] { }; }
+        else if (thisEnemyVariant == "kingDragon")         { return new int[][] { new[] {+3,+3}, new[] {+3,+2}, new[] {+3,+1}, new[] {+3, 0}, new[] {+3,-1}, new[] {+3,-2}, new[] {+3,-3}, new[] {-3,+3}, new[] {-3,+2}, new[] {-3,+1}, new[] {-3, 0}, new[] {-3,-1}, new[] {-3,-2}, new[] {-3,-3}, new[] {+2,+3}, new[] {+1,+3}, new[] { 0,+3}, new[] {-1,+3}, new[] {-2,+3}, new[] {+2,-3}, new[] {+1,-3}, new[] { 0,-3}, new[] {-1,-3}, new[] {-2,-3} }; }
+        else if (thisEnemyVariant == "kingVampire")        { return new int[][] { new[] { 0,+1}, new[] { 0,+2}, new[] { 0,-1}, new[] { 0,-2}, new[] {+1, 0}, new[] {+2, 0}, new[] {-1, 0}, new[] {-2, 0}, new[] {-2,+3}, new[] {-1,+3}, new[] {+1,+3}, new[] {+2,+3}, new[] {-2,-3}, new[] {-1,-3}, new[] {+1,-3}, new[] {+2,-3}, new[] {+3,-2}, new[] {+3,-1}, new[] {+3,+1}, new[] {+3,+2}, new[] {-3,-2}, new[] {-3,-1}, new[] {-3,+1}, new[] {-3,+2} }; }
         else {
             Debug.LogWarning("Unknown enemy variant: " + thisEnemyVariant);
             return new int[][] { };
@@ -118,7 +118,7 @@ public class BestiaryController : MonoBehaviour
 
     //public int[] GetHealthAttackDelayGold(string thisEnemyVariant)
     //{
-    //    string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+    //    string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
     //    if (selectedDifficulty != "Easy" && selectedDifficulty != "Medium" && selectedDifficulty != "Hard" && selectedDifficulty != "Adaptive")
     //    {
     //        Debug.Log("Unkown Difficuly Selected: " + selectedDifficulty);
@@ -305,7 +305,7 @@ public class BestiaryController : MonoBehaviour
 
     public int[] GetHealthAttackDelayGoldMinAndMax(string thisEnemyVariant)
     {
-        string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "???");
+        string selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
         if (selectedDifficulty != "Easy" && selectedDifficulty != "Medium" && selectedDifficulty != "Hard" && selectedDifficulty != "Adaptive")
         {
             Debug.Log("Unkown Difficuly Selected: " + selectedDifficulty);
@@ -314,36 +314,38 @@ public class BestiaryController : MonoBehaviour
 
         // MUST DETERMINE THESE STATS IF ADAPTIVE DIFFICULTY IS CHOSEN. MAYBE A NEW CONTROLLER?
         // From left to right, the returned integers in the array is the enemy's easy / hard max health, easy / hard attack, easy / hard delay, and gold
+        // Easy health and attack is 2/3 of the medium number, whereas hard health and attack is 4/3 of the medium number. hard is -1 medium delay (min:2), easy is +1 medium delay
 
-        if      (thisEnemyVariant == "pawnGoblin")         { return new int[] { 4, 8,    1, 3,    5, 3,    1}; }
-        else if (thisEnemyVariant == "pawnSkeleton")       { return new int[] { 3, 7,    2, 4,    4, 2,    1}; }
-        else if (thisEnemyVariant == "pawnBandit")         { return new int[] { 7,13,    3, 5,    6, 4,    1}; }
-        else if (thisEnemyVariant == "pawnSlime")          { return new int[] { 1, 4,    3, 5,   99,99,    1}; }
+        if      (thisEnemyVariant == "pawnGoblin")         { return new int[] { 8,16,    2, 6,    5, 3,    2}; }
+        else if (thisEnemyVariant == "pawnSkeleton")       { return new int[] { 7,13,    4, 8,    4, 2,    2}; }
+        else if (thisEnemyVariant == "pawnBandit")         { return new int[] {13,27,    5,11,    6, 4,    2}; }
+        else if (thisEnemyVariant == "pawnSlime")          { return new int[] { 1, 1,    5,11,   99,99,    2}; }
 
-        else if (thisEnemyVariant == "rookTroll")          { return new int[] { 8,12,    4, 6,    4, 2,    2}; }
-        else if (thisEnemyVariant == "rookGiant")          { return new int[] { 9,15,    4, 6,    5, 3,    2}; }
-        else if (thisEnemyVariant == "rookExecutioner")    { return new int[] { 8,12,    4, 8,    4, 2,    2}; }
-        else if (thisEnemyVariant == "rookBeastMan")       { return new int[] {12,18,   12,18,    6, 4,    2}; }
+        else if (thisEnemyVariant == "rookTroll")          { return new int[] {15,29,    7,13,    4, 2,    4}; }
+        else if (thisEnemyVariant == "rookGiant")          { return new int[] {19,37,    7,13,    5, 3,    4}; }
+        else if (thisEnemyVariant == "rookExecutioner")    { return new int[] {15,29,    8,16,    4, 2,    4}; }
+        else if (thisEnemyVariant == "rookBeastMan")       { return new int[] {21,43,   17,35,    6, 4,    4}; }
 
-        else if (thisEnemyVariant == "bishopDarkElf")      { return new int[] { 4, 8,    4, 8,    5, 3,    2}; }
-        else if (thisEnemyVariant == "bishopWarlock")      { return new int[] { 6,10,    4, 6,    5, 3,    2}; }
-        else if (thisEnemyVariant == "bishopElementalist") { return new int[] {10,14,    2, 4,    6, 4,    2}; }
-        else if (thisEnemyVariant == "bishopBomber")       { return new int[] { 8,12,    3, 5,    5, 3,    2}; }
+        else if (thisEnemyVariant == "bishopDarkElf")      { return new int[] {13,27,    8,16,    5, 3,    4}; }
+        else if (thisEnemyVariant == "bishopWarlock")      { return new int[] {15,29,    7,13,    5, 3,    4}; }
+        else if (thisEnemyVariant == "bishopElementalist") { return new int[] {19,37,    4, 8,    6, 4,    4}; }
+        else if (thisEnemyVariant == "bishopBomber")       { return new int[] {17,35,    5,11,    5, 3,    4}; }
 
-        else if (thisEnemyVariant == "knightDireBeast")    { return new int[] { 9,15,    4, 6,    3, 2,    3}; }
-        else if (thisEnemyVariant == "knightCentaur")      { return new int[] {12,18,    5, 7,    4, 2,    3}; }
-        else if (thisEnemyVariant == "knightDullahan")     { return new int[] { 2, 4,    2, 4,    2, 1,    3}; }
-        else if (thisEnemyVariant == "knightGryphon")      { return new int[] {11,17,    4, 6,    4, 2,    3}; }
+        else if (thisEnemyVariant == "knightDireBeast")    { return new int[] {24,48,    7,13,    3, 2,    6}; }
+        else if (thisEnemyVariant == "knightCentaur")      { return new int[] {28,46,    8,16,    4, 2,    6}; }
+        else if (thisEnemyVariant == "knightDullahan")     { return new int[] {36,72,   11,21,    3, 2,    6}; }
+        else if (thisEnemyVariant == "knightGryphon")      { return new int[] {23,45,    7,13,    4, 2,    6}; }
 
-        else if (thisEnemyVariant == "queenMinotaur")      { return new int[] {16,24,    6,10,    5, 3,    4}; }
-        else if (thisEnemyVariant == "queenWyrm")          { return new int[] {15,21,    7,11,    6, 4,    4}; }
-        else if (thisEnemyVariant == "queenAbomination")   { return new int[] {13,19,    7,11,    5, 3,    4}; }
-        else if (thisEnemyVariant == "queenGolem")         { return new int[] {18,26,    7,13,    5, 3,    3}; }
+        else if (thisEnemyVariant == "queenMinotaur")      { return new int[] {39,77,   11,21,    5, 3,   10}; }
+        else if (thisEnemyVariant == "queenWyrm")          { return new int[] {33,67,   12,24,    6, 4,   10}; }
+        else if (thisEnemyVariant == "queenAbomination")   { return new int[] {31,61,    8,16,    4, 2,   10}; }
+        else if (thisEnemyVariant == "queenGolem")         { return new int[] {40,80,    9,19,    5, 3,   10}; }
 
-        else if (thisEnemyVariant == "kingLich")           { return new int[] {25,35,    9,15,    5, 3,    5}; }
-        else if (thisEnemyVariant == "kingTitan")          { return new int[] {34,46,    7,13,    7, 5,    5}; }
-        else if (thisEnemyVariant == "kingDragon")         { return new int[] {18,26,    1, 1,   12, 8,    5}; }
-        else if (thisEnemyVariant == "kingVampire")        { return new int[] {16,24,    6,10,    4, 2,    5}; }
+        else if (thisEnemyVariant == "kingLich")           { return new int[] {50,100,  13,27,    5, 3,   20}; }
+        else if (thisEnemyVariant == "kingTitan")          { return new int[] {67,133,  20,30,    7, 5,   20}; }
+        else if (thisEnemyVariant == "kingDragon")         { return new int[] {59,117,  16,32,    6, 4,   20}; }
+        else if (thisEnemyVariant == "kingVampire")        { return new int[] {55,109,  15,29,    6, 4,   20}; }
+
         else
         {
             Debug.LogWarning("Unknown enemy variant: " + thisEnemyVariant);

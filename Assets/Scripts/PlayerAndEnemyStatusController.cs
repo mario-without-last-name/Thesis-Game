@@ -9,6 +9,7 @@ using System.Linq;
 using UnityEditor;
 using System.Xml;
 using Unity.VisualScripting;
+using static UnityEditor.FilePathAttribute;
 
 public class PlayerAndEnemyStatusController : MonoBehaviour
 {
@@ -22,14 +23,20 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab; // Assign the "chessPiece" prefab in the Inspector
     [SerializeField] private GameObject battleBoard; // Assign the "battleBoard" GameObject in the Inspector
 
+    [Header("8x16 Move Tiles")]
+    [SerializeField] GameObject full8x16MoveTiles;
+    [SerializeField] private GameObject[] individual8x16MoveTiles;
+
     [Header("Controllers")]
     [SerializeField] private TurnController turnController;
     [SerializeField] private SideBarController sideBarController;
-    [SerializeField] private ActualXYCoordinatesController coordinateScript;
+    [SerializeField] private ActualXYCoordinatesController actualXYCoordinates;
     [SerializeField] private BattleModeController battleModeController;
     [SerializeField] private BestiaryController bestiaryController;
     [SerializeField] private DynamicDifficultyController dynamicDifficultyController;
     [SerializeField] private GenerateStatisticsController generateStatisticsController;
+    [SerializeField] private BottomBarController bottomBarController;
+    [SerializeField] private PowerupsCatalogController powerupsCatalogController;
 
     private int roundNumber;
     private int killCount;
@@ -40,6 +47,8 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int maxNoOfEnemiesAtAnyPoint;
     private int enemyPointsToAllocate;
     private int numberOfTimesEnemiesTookDamageThisRound;
+    private int gracePeriodBeforeReducingBonusGold;
+    private int numberOfTimesToDecreaseBonusGold;
     private int currPlayerHealthPoint;
     private int maxPlayerHealthPoint;
     private int currGold;
@@ -50,12 +59,17 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int playerBonusDamage;
     private int[,] playerMoveTiles;
     CodeForPrefabPlayer codeForPrefabPlayer;
+    private bool hasAnEnemyAlreadyBeenDamagedThisTurn;
+    private bool hasPlayerAlreadyBeenDamagedThisTurn;
 
     //private int enemiesAlreadySpawnedThisRound;
     private string[] enemyVariantsToBeSpawnedThisRound;
     private int enemiesSpawnedSoFarThisRound;
     private string whichEnemyVariantToSpawn;
     private GameObject[,] identitiesOfPiecesInBoard; // Make an array of game objects
+    private int[][] individual8x16MoveTilesToSpawn = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+    private int[][] individual8x16MoveTilesToAvoid = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+    private string currentActivePowerupIdentity = "";
 
     // When accessing a specific gameobject prefab in the 2d array, you can just access one of its function, like getting damaged.
     // Move a piece, move the reference to the other tile coordinates.
@@ -68,19 +82,19 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     {
         // Set several variables, and also display them in the SideBar
         roundNumber = 1;
-        currPlayerHealthPoint = 50;
-        maxPlayerHealthPoint = 50;
-        currGold = 0;
+        currPlayerHealthPoint = 100;
+        maxPlayerHealthPoint = 100;
+        currGold = 10020; // TEMPORARY GOLD START XXXXXXXXXXXXXX
         goldGainedSoFar = 0;
-        //if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
+        //if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Easy")
         //{
         //    timeToMove = 6.0f;
         //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
+        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Medium" || PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Adaptive")
         //{
         //    timeToMove = 3.0f;
         //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
+        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Hard")
         //{
         //    timeToMove = 1.5f;
         //}
@@ -89,7 +103,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         sideBarController.SetSideBarMaxPlayerHealthPointValue(maxPlayerHealthPoint);
         sideBarController.SetSideBarCurrGoldValue(currGold);
 
-        playerDirectContactDamage = 5; // The damage the player deals upon DirectContact on another enemy
+        playerDirectContactDamage = 10; // The damage the player deals upon DirectContact on another enemy
         playerBonusDamage = 0; // Bonus damage applied to both direct contact or from powerups
 
         killCount = 0;
@@ -123,22 +137,22 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("enemyStats");
         maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)((difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
         enemyPointsToAllocate = (int)Math.Round((double)((difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1)));
-        //if (PlayerPrefs.GetString("modeDifficulty", "???") == "Easy")
+        //if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Easy")
         //{
         //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(2 + roundNumber * 0.333)));
         //    enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 1));
         //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Medium")
+        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Medium")
         //{
         //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 0.66666)));
         //    enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 2));
         //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Hard")
+        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Hard")
         //{
         //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(4 + roundNumber * 1)));
         //    enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 3));
         //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "???") == "Adaptive")
+        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Adaptive")
         //{
         //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)( (difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
         //    enemyPointsToAllocate = (int)Math.Round((double)( (difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1) ));
@@ -153,9 +167,12 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         enemyVariantsToBeSpawnedThisRound = bestiaryController.DecideWhatEnemiesToSpawnThisRound(enemyPointsToAllocate);
         currEnemiesLeft = enemyVariantsToBeSpawnedThisRound.Length;
         totalEnemiesThisRound = currEnemiesLeft;
+        hasAnEnemyAlreadyBeenDamagedThisTurn = false;
 
         sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
         sideBarController.SetSideBarTotalEnemiesThisRoundValue(totalEnemiesThisRound);
+
+        full8x16MoveTiles.SetActive(false);
 
         enemiesSpawnedSoFarThisRound = 0;
         while (enemiesSpawnedSoFarThisRound < totalEnemiesThisRound && enemiesSpawnedSoFarThisRound < maxNoOfEnemiesAtAnyPoint)
@@ -165,9 +182,12 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             enemiesSpawnedSoFarThisRound += 1;
         }
 
-        //The faster the player finishes a level (depending on enemyPointsToAllocate)
-        bonusGoldAtEndOfRound = enemyPointsToAllocate * 2; // Initial max reward or clearing levels faster
+        // Player gets more bonus gold (after clearing a round) for finishing in less moves
+        bonusGoldAtEndOfRound = 7 + roundNumber * 3; // might be better to make it dependant on round number than enemyPointsToAllocate
+        //bonusGoldAtEndOfRound = enemyPointsToAllocate * 2;
         numberOfTimesEnemiesTookDamageThisRound = 0;
+        gracePeriodBeforeReducingBonusGold = 3; // actually supposed to be 2-move grace period, but new round starts with player's turn, which immeadiately decreases it by 1
+        numberOfTimesToDecreaseBonusGold = 0;
 
         //Finally, start with the player's turn
         turnController.RememberNewlySpawnedPlayerForNewRound();
@@ -213,7 +233,9 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
         SetKillCountIncreaseBy1();
 
-        SetCurrGold(currGold + goldEarned);
+        // PASSIVE POWERUP
+        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-pickpocket")) { goldEarned += powerupsCatalogController.ActivateThisPassivePowerup("passive-pickpocket", ""); }
+        SetChangeInCurrGold(goldEarned);
         codeForPrefabPlayer.ShowGoldEarned(goldEarned);
 
         if (currEnemiesLeft == 0) // All enemies killed, victory for this round
@@ -224,27 +246,56 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             PrintAndLogPerRoundHealthKillsPointsGoldMoves();
             dynamicDifficultyController.PrintAndLogPerRoundAllDGBInputAndOutputIndex();
 
-            // CHANGE THE BONUS GOLD CALCULATION. WHENEVER AN ENEMY IS DAMAGED, THE BONUS GOLD REDUCTION IS HALTED FOR 2 TURNS
-            // MAYBE ALSO CHANGE IT SO THAT IT IS INDEPENDENT OF THE enemyPointsToAllocate. PERHAPS MAKE IT DEPENDENT ON ROUND NUMBER, THEN THE MORE THE enemyPointsToAllocate, THEN THE SLOWE IT IS REDUCED
-            float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5) / 10), -0.3f, 0.3f);
+
+            // then, based on the moves, update the DGB input TimeThinkingAndStepsTaken and award the bonus gold
+            float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Lerp(-0.3f, 0.3f, Mathf.Max(bonusGoldAtEndOfRound - numberOfTimesToDecreaseBonusGold, 0) / bonusGoldAtEndOfRound);
+            //float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5) / 10), -0.3f, 0.3f);
+            bonusGoldAtEndOfRound = Mathf.Max(bonusGoldAtEndOfRound - numberOfTimesToDecreaseBonusGold, 0);
+            //bonusGoldAtEndOfRound = Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0);
             dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", changeToDynamicInputIndexTimeThinkingAndStepsTaken, false);
-            bonusGoldAtEndOfRound = Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0);
             battleModeController.SetTextBonusGold(bonusGoldAtEndOfRound);
-            SetCurrGold(currGold + bonusGoldAtEndOfRound);
-            Invoke(nameof(VictoryBattle), 0.5f);
+            SetChangeInCurrGold(bonusGoldAtEndOfRound);
+
+            //Debug.Log("Bonus Gold:" + bonusGoldAtEndOfRound + " , Potential maxx bonus gold:" + (10 + roundNumber * 5) + " , Change in DGB Input TimeThinkingAndStepsTaken:" + changeToDynamicInputIndexTimeThinkingAndStepsTaken);
+
+            // PASSIVE POWERUP
+            if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-bloodlust")) { int dummyVariable = powerupsCatalogController.ActivateThisPassivePowerup("passive-bloodlust", "reset"); }
+
+            // Proceed to the victory screen
+            // PASSIVE POWERUP
+            ResetMoveCountThisRound(); // for the inner healing powerup
+            if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-vampiric") && bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-wellDeservedRest")) { Invoke(nameof(PassiveVampiric), 0.5f); Invoke(nameof(PassiveWellDeservedRrest), 1.0f); Invoke(nameof(VictoryBattle), 1.5f); }
+            else if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-vampiric")) { Invoke(nameof(PassiveVampiric), 0.5f); Invoke(nameof(VictoryBattle), 1.0f); }
+            else if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-wellDeservedRest")){ Invoke(nameof(PassiveWellDeservedRrest), 0.5f); Invoke(nameof(VictoryBattle), 1.0f); }
+            else { Invoke(nameof(VictoryBattle), 0.5f); }
+            
         }
         else
         {
             if (enemiesSpawnedSoFarThisRound < totalEnemiesThisRound) // If there are still more enemies to spawn this round, replace the dead enemy with a new one
             {
                 whichEnemyVariantToSpawn = enemyVariantsToBeSpawnedThisRound[enemiesSpawnedSoFarThisRound];
-                Instantiate(enemyPrefab, battleBoard.transform);
+                Instantiate(enemyPrefab, battleBoard.transform); // not too far nor too close from player
                 enemiesSpawnedSoFarThisRound += 1;
             }
 
-            Invoke(nameof(CallForEnemyTurn), 0.5f);
+            // PASSIVE POWERUP
+            if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-vampiric")) { Invoke(nameof(PassiveVampiric), 0.5f); Invoke(nameof(CallForEnemyTurn), 1.0f); }
+            
+            else { if (currentActivePowerupIdentity == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); } } // If player kills an enemy with an active powerup, the player prefab will call the enemy turn themselves
+
         }
 
+    }
+
+    public void PassiveWellDeservedRrest()
+    {
+        codeForPrefabPlayer.PlayerTakesDamageOrHealing(powerupsCatalogController.ActivateThisPassivePowerup("passive-wellDeservedRest", ""), false);
+    }
+
+    public void PassiveVampiric()
+    {
+        codeForPrefabPlayer.PlayerTakesDamageOrHealing(powerupsCatalogController.ActivateThisPassivePowerup("passive-vampiric", ""), false);
     }
 
     public void VictoryBattle()
@@ -264,20 +315,187 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     public void PrintAndLogPerTurnHealthKillsPointsGold() // ENEMY POINTS GAINED NOT YET FIXED
     {
-        Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
+        //Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
         generateStatisticsController.LogPerTurnHealthKillsPointsGold(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString());
     }
 
     public void PrintAndLogPerRoundHealthKillsPointsGoldMoves() // ENEMY POINTS GAINED NOT YET FIXED
     {
-        Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
+        //Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
         generateStatisticsController.LogPerRoundHealthKillsPointsGoldMoves(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString(), totalMoveCount.ToString());
     }
 
 
+    public void AnActivePowerupWasActivated(string powerupIdentity)
+    {
+        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.05f, false); 
+        currentActivePowerupIdentity = powerupIdentity;
+        codeForPrefabPlayer.DeactivateMoveTiles();
+
+        // TEMPORARY: just skip to the enemy's turn immeadiately
+        //codeForPrefabPlayer.EndMoveTimerFromActivePowerup();
+        //Debug.Log("TurnController has received the active Powerup:" + powerupIdentity);
+
+        // Click on a move tile to activate specific abilities, reset the player timer. Timer's up = skip to enemy's turn
+        if (powerupIdentity == "active-knife" || powerupIdentity == "active-spear" || powerupIdentity == "active-hatchet" || powerupIdentity == "active-slingshot" || powerupIdentity == "active-sniper" || powerupIdentity == "active-lightningBolt" ||
+            powerupIdentity == "active-bomb" || powerupIdentity == "active-fireball" || powerupIdentity == "active-arrowVolley")
+        {
+            codeForPrefabPlayer.RestartTimer();
+            //codeForPrefabPlayer.DeactivateMoveTiles(true);
+            //codeForPrefabPlayer.ActivateMoveTiles(false, powerupIdentity);
+            full8x16MoveTiles.SetActive(true); // the 8x16 tiles can appear, but which specific tiles to appear depends
+            bool trueSpawnTilesFalseAvoidTiles = false;
+
+            if (powerupIdentity == "active-knife")
+            {
+                trueSpawnTilesFalseAvoidTiles = true;
+                individual8x16MoveTilesToSpawn = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}};
+            }
+            else if (powerupIdentity == "active-spear")
+            {
+                trueSpawnTilesFalseAvoidTiles = true;
+                individual8x16MoveTilesToSpawn = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2} };
+            }
+            else if (powerupIdentity == "active-hatchet")
+            {
+                trueSpawnTilesFalseAvoidTiles = true;
+                individual8x16MoveTilesToSpawn = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-slingshot")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-sniper")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-lightningBolt")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-bomb")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-fireball")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+            else if (powerupIdentity == "active-arrowVolley")
+            {
+                trueSpawnTilesFalseAvoidTiles = false;
+                individual8x16MoveTilesToAvoid = new int[][] { new int[] { 0, 0}, new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1}, new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2}, new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3}};
+            }
+
+            // Do we spawn tiles that are near the player or spawn tiles away from player?
+            if (trueSpawnTilesFalseAvoidTiles) // activate close to player
+            {
+                for (int i = 0; i < individual8x16MoveTiles.Length; i++)
+                {
+                    individual8x16MoveTiles[i].SetActive(false);
+                }
+
+                (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
+                foreach (int[] offset in individual8x16MoveTilesToSpawn)
+                {
+                    int gridXOffset = offset[0];
+                    int gridYOffset = offset[1];
+
+                    if (actualXYCoordinates.IsThisStillInsideTheBoard(playerCurrGridX + gridXOffset, playerCurrGridY + gridYOffset))
+                    {
+                        int index = (playerCurrGridX + gridXOffset - 1) + (playerCurrGridY + gridYOffset - 1) * 16;
+                        individual8x16MoveTiles[index].SetActive(true);
+                    }
+                }
+            }
+            else  // activate far from player
+            {
+                for (int i = 0; i < individual8x16MoveTiles.Length; i++)
+                {
+                    individual8x16MoveTiles[i].SetActive(true);
+                }
+
+                (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
+                foreach (int[] offset in individual8x16MoveTilesToAvoid)
+                {
+                    int gridXOffset = offset[0];
+                    int gridYOffset = offset[1];
+
+                    if (actualXYCoordinates.IsThisStillInsideTheBoard(playerCurrGridX + gridXOffset, playerCurrGridY + gridYOffset))
+                    {
+                        int index = (playerCurrGridX + gridXOffset - 1) + (playerCurrGridY + gridYOffset - 1) * 16;
+                        individual8x16MoveTiles[index].SetActive(false);
+                    }
+                }
+            }
+
+
+
+        }
+
+        // Can just do and effect immeadiately (ex: damaging enemies around the player), then it's the enemy's turn
+        // Or some other effects
+        else if (powerupIdentity == "active-acidRain" || powerupIdentity == "active-axe" || powerupIdentity == "active-spikedClub" || powerupIdentity == "active-whip" )
+        {
+            //codeForPrefabPlayer.EndMoveTimerFromActivePowerup(); // CHANGE THIS, JUST TEMPORARY
+
+            (int playerCurrGridX, int playerCurrGridY) = codeForPrefabPlayer.GetPlayerCurrGridXAndCurrGridY();
+            codeForPrefabPlayer.ActivateAreaDamageWithRadius(playerCurrGridX, playerCurrGridY, powerupsCatalogController.ActivateThisActivePowerup(currentActivePowerupIdentity, "value"), powerupsCatalogController.ActivateThisActivePowerup(currentActivePowerupIdentity, "radius"));
+        }
+
+        else if (powerupIdentity == "active-teleport") // done - EXCEPT SOME DGB INPUT XXXXX
+        {
+            codeForPrefabPlayer.RestartTimer();
+            full8x16MoveTiles.SetActive(true); // the 8x16 tiles can appear, but which specific tiles to appear depends
+            for (int i = 0; i < individual8x16MoveTiles.Length; i++)
+            {
+                GameObject pieceAtThisTile = GetIdentityOfPieceAtThisBoardTile((i % 16) + 1, (int)(i / 16) + 1);
+                if (pieceAtThisTile == null) { individual8x16MoveTiles[i].SetActive(true); }
+                else { individual8x16MoveTiles[i].SetActive(false); }
+                
+            }
+        }
+
+        else if (powerupIdentity == "active-dodge") // done - EXCEPT SOME DGB INPUT XXXXX
+        {
+            codeForPrefabPlayer.EndMoveTimerFromActivePowerup();
+        }
+
+
+        else
+        {
+            Debug.LogWarning("Active Powerup Identity Not Found:" + powerupIdentity);
+        }
+    }
+
+    public void ATileFromTheFull8x16MoveTilesWasClicked(int xAndYLocation) // called by the 128 move tile buttons for active powerups
+    {
+        int xLocation = (int)(xAndYLocation / 10);
+        int yLocation = xAndYLocation % 10;
+        int individual8x16MoveTilesIndex = (yLocation - 1) * 16 + (xLocation - 1);
+        //Debug.Log("x: " + xLocation + " , y: " + yLocation + " , tile index: " + individual8x16MoveTilesIndex);
+        full8x16MoveTiles.SetActive(false);
+
+        if (currentActivePowerupIdentity == "active-teleport")
+        {
+            codeForPrefabPlayer.PlayerMoveTileWasClicked(xAndYLocation);
+            return;
+        }
+
+        codeForPrefabPlayer.ActivateAreaDamageWithRadius(xLocation, yLocation, powerupsCatalogController.ActivateThisActivePowerup(currentActivePowerupIdentity, "value"), powerupsCatalogController.ActivateThisActivePowerup(currentActivePowerupIdentity, "radius"));
+
+        // TEMPORARY to just move on with the enemy's turn
+        //codeForPrefabPlayer.EndMoveTimerFromActivePowerup();
+    }
 
     // ====================================================
     // GETTER, SETTER
+
     //public float GetTimeToMove()
     //{
     //    return timeToMove;
@@ -324,19 +542,27 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         return totalMoveCount;
     }
 
-    public void SetTotalMoveCountIncreaseBy1()
-    {
-        totalMoveCount += 1;
-    }
+    //public void SetTotalMoveCountIncreaseBy1()
+    //{
+    //    totalMoveCount += 1;
+    //}
 
     public int GetMoveCountThisRound()
     {
         return moveCountThisRound;
     }
 
-    public void SetMoveCountThisRoundIncreaseBy1()
+    public void SetMoveCountIncreaseBy1AndMaybeDeductBonusGold()
     {
         moveCountThisRound += 1;
+        totalMoveCount += 1;
+        if (gracePeriodBeforeReducingBonusGold == 0) { numberOfTimesToDecreaseBonusGold += 1; }
+        else { gracePeriodBeforeReducingBonusGold -= 1; }
+    }
+
+    public void ResetMoveCountThisRound()
+    {
+        moveCountThisRound = 0;
     }
 
     public int GetCurrGold()
@@ -344,16 +570,17 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         return currGold;
     }
 
-    public void SetCurrGold(int newGoldValue)
+    public void SetChangeInCurrGold(int changeInCurrGold)
     {
-        currGold = newGoldValue;
-        goldGainedSoFar += currGold;
+        goldGainedSoFar += changeInCurrGold;
+        currGold += changeInCurrGold;
         sideBarController.SetSideBarCurrGoldValue(currGold);
     }
 
-    public void SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1()
+    public void SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1AndResetGracePeriodBeforeReducingBonusGold() // called anytime an enemy takes damage
     {
         numberOfTimesEnemiesTookDamageThisRound += 1;
+        gracePeriodBeforeReducingBonusGold = 2;
     }
 
     public int GetPlayerMaxHealth()
@@ -399,6 +626,40 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         playerBonusDamage = newBonusDamage;
     }
 
+    public void setActiveFull8x16MoveTiles(bool newBool)
+    {
+        full8x16MoveTiles.SetActive(newBool);
+    }
+
+    public bool getHasAnEnemyAlreadyBeenDamagedThisTurn()
+    {
+        return hasAnEnemyAlreadyBeenDamagedThisTurn;
+    }
+
+    public void setHasAnEnemyAlreadyBeenDamagedThisTurn( bool newBool)
+    {
+        hasAnEnemyAlreadyBeenDamagedThisTurn = newBool;
+    }
+
+    public bool getHasPlayerAlreadyBeenDamagedThisTurn()
+    {
+        return hasPlayerAlreadyBeenDamagedThisTurn;
+    }
+
+    public void setHasPlayerAlreadyBeenDamagedThisTurn(bool newBool)
+    {
+        hasPlayerAlreadyBeenDamagedThisTurn = newBool;
+    }
+
+    public string getCurrentActivePowerupIdentity()
+    {
+        return currentActivePowerupIdentity;
+    }
+
+    public void setCurrentActivePowerupIdentity(string newString)
+    {
+        currentActivePowerupIdentity = newString;
+    }
 
 
 }
