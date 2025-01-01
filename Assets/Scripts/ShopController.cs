@@ -108,7 +108,7 @@ public class ShopController : MonoBehaviour
 
     public void ResetRerollPrice()
     {
-        RerollPrice = 4;
+        RerollPrice = 2;
         rerollText.text = "Reroll ($" + RerollPrice + ")";
     }
 

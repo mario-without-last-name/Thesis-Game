@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Reflection;
+using System.Linq;
 
 public class BottomBarController : MonoBehaviour
 {
@@ -188,8 +189,8 @@ public class BottomBarController : MonoBehaviour
 
     private void Start()
     {
-        updateActivePowerupDisplayOrder();
-        updatePassivePowerupDisplayOrder();
+        UpdateActivePowerupDisplayOrder();
+        UpdatePassivePowerupDisplayOrder();
     }
 
     void Update() // Players can type on their keyboard to activate an active powerup ...
@@ -307,6 +308,15 @@ public class BottomBarController : MonoBehaviour
         }
     }
 
+    public void MakeActivePowerupSquaresBlueTemporarilyBecauseItsNotPlayerTurn() // called by turn controller
+    {
+        activepowerupButtonColor1.sprite = powerupButtonInactiveSprite;
+        activepowerupButtonColor2.sprite = powerupButtonInactiveSprite;
+        activepowerupButtonColor3.sprite = powerupButtonInactiveSprite;
+        activepowerupButtonColor4.sprite = powerupButtonInactiveSprite;
+        activepowerupButtonColor5.sprite = powerupButtonInactiveSprite;
+    }
+
     public void ActivePowerupsCannotBeClickedNow()
     {
         hotKeyPowerup1.SetActive(false);
@@ -321,40 +331,19 @@ public class BottomBarController : MonoBehaviour
         activepowerupButtonColor5.sprite = powerupButtonInactiveSprite;
     }
 
-    // DIFFERENTIATE BETWEEN CLICKING A POWERUP TO ACTIVATE (ACTIVE POWERUPS) OR SELL POWERUP
-
-    // MUST CHANGE THE COLOR OF THE POWERUP FRAMES
-    // ACTIVE POWERUPS: MUST BE BLUE WHEN IN COOLDOWN
-    // BOTH ACTIVEAND PASSIVE POWEUPS MUST BE BROWN (NOT BLUE) WHEN IN SELLING MODE.
-
-    public int GetNumberOfOwnedActivePowerups()
-    {
-        return activePowerupsOwned.Count;
-    }
-
-    public bool CheckIfThisActivePowerUpIsOwned(string powerupIdentity)
-    {
-        return activePowerupsOwned.Contains(powerupIdentity);
-    }
-
-    public void AddNewRecentlyPurchasedActivePowerup(string newPowerupIdentity)
-    {
-        activePowerupsOwned.Add(newPowerupIdentity);
-        updateActivePowerupDisplayOrder();
-    }
 
     public void SellOwnedActivePowerup(int index) // called by the sell powerup buttons
     {
         powerupsCatalogController.AddPowerupsToList(activePowerupsOwned[index]);
         activePowerupsOwned.RemoveAt(index);
         playerAndEnemyStatusController.SetChangeInCurrGold(powerupSellingPrice);
-        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.025f, false);
+        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.025f, false); // sell powerup
         musicController.PlayBuySellSoundEffectSource();
-        updateActivePowerupDisplayOrder();
+        UpdateActivePowerupDisplayOrder();
         shopController.DetermineIfEachPurchaseButtonCanBeClicked();
     }
 
-    public void updateActivePowerupDisplayOrder()
+    public void UpdateActivePowerupDisplayOrder()
     {
         groupActivePowerupSlot1.SetActive(false);
         groupActivePowerupSlot2.SetActive(false);
@@ -394,20 +383,13 @@ public class BottomBarController : MonoBehaviour
         }
     }
 
-    public int GetNumberOfOwnedPassivePowerups()
-    {
-        return passivePowerupsOwned.Count;
-    }
-
-    public bool CheckIfThisPassivePowerUpIsOwned(string powerupIdentity)
-    {
-        return passivePowerupsOwned.Contains(powerupIdentity);
-    }
 
     public void AddNewRecentlyPurchasedPassivePowerup(string newPowerupIdentity)
     {
+        if (newPowerupIdentity == "passive-lightArmor" || newPowerupIdentity == "passive-heavyArmor" || newPowerupIdentity == "passive-diamondArmor" || newPowerupIdentity == "passive-innerHealing" || newPowerupIdentity == "passive-vampiric" || newPowerupIdentity == "passive-wellDeservedRest" || newPowerupIdentity == "passive-bloodlust" || newPowerupIdentity == "passive-mercenaryTools" || newPowerupIdentity == "passive-pickpocket")
+        { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.1f, false); }
         passivePowerupsOwned.Add(newPowerupIdentity);
-        updatePassivePowerupDisplayOrder();
+        UpdatePassivePowerupDisplayOrder();
     }
 
     public void SellOwnedPassivePowerup(int index) // called by the sell powerup buttons
@@ -415,14 +397,14 @@ public class BottomBarController : MonoBehaviour
         powerupsCatalogController.AddPowerupsToList(passivePowerupsOwned[index]);
         passivePowerupsOwned.RemoveAt(index);
         playerAndEnemyStatusController.SetChangeInCurrGold(powerupSellingPrice);
-        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.025f, false);
+        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.025f, false); // sell powerup
         musicController.PlayBuySellSoundEffectSource();
-        updatePassivePowerupDisplayOrder();
+        UpdatePassivePowerupDisplayOrder();
         shopController.DetermineIfEachPurchaseButtonCanBeClicked();
     }
 
 
-    public void updatePassivePowerupDisplayOrder()
+    public void UpdatePassivePowerupDisplayOrder()
     {
         groupPassivePowerupSlot1.SetActive(false);
         groupPassivePowerupSlot2.SetActive(false);
@@ -455,10 +437,43 @@ public class BottomBarController : MonoBehaviour
         }
     }
 
+    // ====================================================
+    // GETTER, SETTER
 
-    public int GetPowwwerupSellPrice()
+    public int GetNumberOfOwnedActivePowerups()
+    {
+        return activePowerupsOwned.Count;
+    }
+
+    public bool CheckIfThisActivePowerUpIsOwned(string powerupIdentity)
+    {
+        return activePowerupsOwned.Contains(powerupIdentity);
+    }
+
+    public void AddNewRecentlyPurchasedActivePowerup(string newPowerupIdentity)
+    {
+        activePowerupsOwned.Add(newPowerupIdentity);
+        UpdateActivePowerupDisplayOrder();
+    }
+
+    public int GetNumberOfOwnedPassivePowerups()
+    {
+        return passivePowerupsOwned.Count;
+    }
+
+    public bool CheckIfThisPassivePowerUpIsOwned(string powerupIdentity)
+    {
+        return passivePowerupsOwned.Contains(powerupIdentity);
+    }
+
+    public int GetPowerupSellPrice()
     {
         return powerupSellingPrice;
+    }
+
+    public bool GetIsAnyActivePowerupOffCooldown()
+    {
+        return (activePowerupsOwned.Count >= 1 && activeCooldown1 <= 0) || (activePowerupsOwned.Count >= 2 && activeCooldown2 <= 0) || (activePowerupsOwned.Count >= 3 && activeCooldown3 <= 0) || (activePowerupsOwned.Count >= 4 && activeCooldown4 <= 0) || (activePowerupsOwned.Count >= 5 && activeCooldown5 <= 0);
     }
 
 

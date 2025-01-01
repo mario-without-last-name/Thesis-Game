@@ -50,9 +50,11 @@ public class CodeForPrefabPlayer : MonoBehaviour
     private int playerDirectContactDamage;
     private int playerBonusDamage;
     private bool alreadyKnockbackedFromDamage;
+    private bool playerMovedFromPassivePowerupExtraMoveTiles;
     //private bool stopTimerButNoChangeToDGBInputTime;
 
     private int[][] moveTilesToSpawn                      = new int[][] { new int[] { 1, 2}, new int[] { 2, 1}, new int[] {-1, 2}, new int[] {-2, 1}, new int[] { 1,-2}, new int[] { 2,-1}, new int[] {-1,-2}, new int[] {-2,-1} };
+    private int[][] original8moveTilesToSpawn             = new int[][] { new int[] { 1, 2}, new int[] { 2, 1}, new int[] {-1, 2}, new int[] {-2, 1}, new int[] { 1,-2}, new int[] { 2,-1}, new int[] {-1,-2}, new int[] {-2,-1} };
     private int[][] knockbackDirections1Tile              = new int[][] { new int[] { 1, 1}, new int[] { 1, 0}, new int[] { 1,-1}, new int[] { 0,-1}, new int[] {-1,-1}, new int[] {-1, 0}, new int[] {-1, 1}, new int[] { 0, 1} };
     private int[][] knockbackDirections2Tile              = new int[][] { new int[] { 2, 2}, new int[] { 2, 1}, new int[] { 2, 0}, new int[] { 2,-1}, new int[] { 2,-2}, new int[] { 1,-2}, new int[] { 0,-2}, new int[] {-1,-2}, new int[] {-2,-2}, new int[] {-2,-1}, new int[] {-2, 0}, new int[] {-2, 1}, new int[] {-2, 2}, new int[] {-1, 2}, new int[] { 0, 2}, new int[] { 1, 2} };
     private int[][] knockbackDirections3Tile              = new int[][] { new int[] { 3, 3}, new int[] { 3, 2}, new int[] { 3, 1}, new int[] { 3, 0}, new int[] { 3,-1}, new int[] { 3,-2}, new int[] { 3,-3}, new int[] { 2,-3}, new int[] { 1,-3}, new int[] { 0,-3}, new int[] {-1,-3}, new int[] {-2,-3}, new int[] {-3,-3}, new int[] {-3,-2}, new int[] {-3,-1}, new int[] {-3, 0}, new int[] {-3, 1}, new int[] {-3, 2}, new int[] {-3, 3}, new int[] {-2, 3}, new int[] {-1, 3}, new int[] { 0, 3}, new int[] { 1, 3}, new int[] { 2, 3} };
@@ -102,11 +104,13 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
     public void PlayerCanMoveNow()
     {
+        if (playerAndEnemyStatusController.GetCurrEnemiesLeftThisRound() == 0) { return; } // sometimes this PlayerCanMoveNow function is still called even though all enemies are dead?
+
         playerDirectContactDamage = playerAndEnemyStatusController.GetPlayerDirectContactDamage(); // maybe necessary to update per turn due to some powerups
         playerBonusDamage = playerAndEnemyStatusController.GetPlayerBonusDamage(); // maybe necessary to update per turn due to some powerups
-
         circleTimer.SetActive(true);
         groupMoveTiles.SetActive(true);
+        playerMovedFromPassivePowerupExtraMoveTiles = false;
 
         //RestartTimer(playerAndEnemyStatusController.GetTimeToMove());
 
@@ -124,7 +128,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementIII")) { moveTilesList.Add(new int[] { 2, 0}); moveTilesList.Add(new int[] { 0, 2}); moveTilesList.Add(new int[] {-2, 0}); moveTilesList.Add(new int[] { 0,-2}); }
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementIV"))  { moveTilesList.Add(new int[] { 2, 2}); moveTilesList.Add(new int[] { 2,-2}); moveTilesList.Add(new int[] {-2, 2}); moveTilesList.Add(new int[] {-2,-2}); }
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementV"))   { moveTilesList.Add(new int[] { 3, 0}); moveTilesList.Add(new int[] { 0, 3}); moveTilesList.Add(new int[] {-3, 0}); moveTilesList.Add(new int[] { 0,-3}); }
-        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementVI"))  { moveTilesList.Add(new int[] { 3, 3}); moveTilesList.Add(new int[] { 3,-3}); moveTilesList.Add(new int[] {-3, 2}); moveTilesList.Add(new int[] {-3,-3}); }
+        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementVI"))  { moveTilesList.Add(new int[] { 3, 3}); moveTilesList.Add(new int[] { 3,-3}); moveTilesList.Add(new int[] {-3, 3}); moveTilesList.Add(new int[] {-3,-3}); }
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementVII")) { moveTilesList.Add(new int[] { 3, 1}); moveTilesList.Add(new int[] { 3,-1}); moveTilesList.Add(new int[] { 1, 3}); moveTilesList.Add(new int[] {-1, 3}); moveTilesList.Add(new int[] {-3, 1}); moveTilesList.Add(new int[] {-3,-1}); moveTilesList.Add(new int[] { 1,-3}); moveTilesList.Add(new int[] {-1,-3}); }
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-flexibleMovementVIII")){ moveTilesList.Add(new int[] { 3, 2}); moveTilesList.Add(new int[] { 3,-2}); moveTilesList.Add(new int[] { 2, 3}); moveTilesList.Add(new int[] {-2, 3}); moveTilesList.Add(new int[] {-3, 2}); moveTilesList.Add(new int[] {-3,-2}); moveTilesList.Add(new int[] { 2,-3}); moveTilesList.Add(new int[] {-2,-3}); }
         moveTilesToSpawn = moveTilesList.ToArray();
@@ -135,6 +139,8 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
     public void PlayerMoveTileWasClicked(int xAndYOffset) // Activated by clicking one of the player's move tiles or from ACTIVE POWERUP: "teleport". The xAndYOffest variable is the x and y offset values combined into 1 number
     {
+        // TODO: IF THE MOVE TILE CLICKED WAS NOT IN THE  original8moveTilesToSpawn, THEN INREASE DGB IF LAND A HIT AND DECREASE DGB IF GETS DAMAGED
+
         turnController.PlayerIsMovingToATile(); // just a signal so that player cannot select active powerups anymore until it's their turn again
 
         circleTimer.SetActive(false);
@@ -150,11 +156,18 @@ public class CodeForPrefabPlayer : MonoBehaviour
         int gridYOffset = (xAndYOffset % 10) - 4;
 
         // ACTIVE POWERUP : if teleport ability was used, use a different calculation for gridXOffset and gridYOffset
-        if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "active-teleport")
+        if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-teleport")
         {
             gridXOffset = xAndYOffset / 10 - currGridX;
             gridYOffset = xAndYOffset % 10 - currGridY;
         }
+        // PASSIVE POWERUP : ones that give you extra move tiles
+        else if (xAndYOffset != 32 && xAndYOffset != 23 && xAndYOffset != 52 && xAndYOffset != 63 && xAndYOffset != 25 && xAndYOffset != 36 && xAndYOffset != 65 && xAndYOffset != 56)
+        {
+            playerMovedFromPassivePowerupExtraMoveTiles = true;
+        }
+
+        
 
         DeactivateMoveTiles(); //DeactivateMoveTiles(true); DeactivateMoveTiles(false);
         thisPieceTransform.DOMove(new Vector3(actualXYCoordinates.GetActualXCoordinate(currGridX + gridXOffset), actualXYCoordinates.GetActualYCoordinate(currGridY + gridYOffset), transform.position.z), 0.5f);
@@ -172,7 +185,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         GameObject enemyAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX, currGridY);
         if (enemyAtThisTile != null) // If not null, no doubt that this is an enemy, so just call the enemy script. If one day there are other map entities other than player or enemies, then alternatively use:    enemyAtThisTile != null && enemyAtThisTile.GetComponent<CodeForPrefabEnemy>() != null
         {
-            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerDirectContactDamage + playerBonusDamage, true);
+            enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(playerDirectContactDamage + playerBonusDamage, true, playerMovedFromPassivePowerupExtraMoveTiles);
             playerAndEnemyStatusController.SetIdentityOfPieceAtThisBoardTile(currGridX, currGridY, gameObject);
             //Invoke(nameof(CallForEnemyTurn), 0.5f); // Don't call it here. Otherwise when the last enemy is killed, it will call for enemy turn, but no enemies so it will immeadiately call for player turn, but the player prefab is already destroyed since we are at the victory screen, leading to an error due to calling a function from a now non-existent player prefab.
 
@@ -186,6 +199,9 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
     public void PlayerTakesDamageOrHealing(int damageOrHealingTaken, bool isKnockback) // Make this function also accept healing?
     {
+        // PASSIVE POWERUP : ones that give you extra move tiles
+        if (playerMovedFromPassivePowerupExtraMoveTiles) { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.02f, false); }
+
         //currHealth = playerAndEnemyStatusController.GetPlayerCurrHealth();
 
         if (damageOrHealingTaken <= 0) // negative value means taking damage. 0 means using the dodge active powerup
@@ -199,21 +215,21 @@ public class CodeForPrefabPlayer : MonoBehaviour
             if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-bloodlust")) { int dummyVariable = powerupsCatalogController.ActivateThisPassivePowerup("passive-bloodlust", "buff"); }
 
             //ACTIVE POWERUPS - dodge, teleport
-            if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "active-dodge")
+            if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-dodge")
             {
                 damageTaken = 0;
-                dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.15f, false); // use dodge when you'll get damaged otherwise = good
+                dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.05f, false); // use dodge when you'll get damaged otherwise = good
             }
-            else if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "active-teleport")
+            else if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-teleport")
             {
-                dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.15f, false); // use teleport but get damaged = bad
+                dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.2f, false); // use teleport but get damaged = bad
             }
 
             musicController.PlayDamageSoundEffectSource();
             currHealth -= damageTaken;
-            if (damageTaken != 0 && !playerAndEnemyStatusController.getHasPlayerAlreadyBeenDamagedThisTurn()) {
+            if (damageTaken != 0 && !playerAndEnemyStatusController.GetHasPlayerAlreadyBeenDamagedThisTurn()) {
                 dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", -0.2f, false);
-                playerAndEnemyStatusController.setHasPlayerAlreadyBeenDamagedThisTurn(true);
+                playerAndEnemyStatusController.SetHasPlayerAlreadyBeenDamagedThisTurn(true);
             }
             dynamicDifficultyController.SetDynamicInputChange("healthLeft", (float)(Mathf.Max(currHealth, 100)) / 100, true);
 
@@ -419,9 +435,13 @@ public class CodeForPrefabPlayer : MonoBehaviour
             //else                                    { dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", -0.02f, false); }
 
             dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", -0.02f, false);
+            
+            // ACTIVE POWERUPS - had an active powerup but time is up
+            if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() != "") { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.1f, false); }
+
             DeactivateMoveTiles(); //DeactivateMoveTiles(true); DeactivateMoveTiles(false);
             //playerAndEnemyStatusController.SetTotalMoveCountIncreaseBy1();
-            isMoveTimeLlimitActive = false;
+            isMoveTimeLlimitActive = false; // So that the "else if" will not be triggered infinitely
             CallForEnemyTurn();
         }
     }
@@ -443,7 +463,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
 
 
 
-    // ACTIVE POWERUPS + ground pound PASSIVE?
+    // ACTIVE POWERUPS
     public void ActivateAreaDamageWithRadius(int xLocation, int yLocation, int damage, int radius) // Attack enemies found at a radius around a coordinate (ignore if the player is found in 1 of the tiles)
     {
         circleTimer.SetActive(false);
@@ -468,14 +488,14 @@ public class CodeForPrefabPlayer : MonoBehaviour
         //    EndMoveTimerFromActivePowerup();
         //}
 
-        if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "active-acidRain") // If acid rain, attack every tile
+        if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-acidRain") // If acid rain, attack every tile
         {
             for (int i = 0; i < 128; i++)
             {
                 GameObject enemyAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile((i % 16) + 1, (int)(i / 16) + 1);
                 if (enemyAtThisTile != null && enemyAtThisTile.GetComponent<CodeForPrefabEnemy>() != null) // must actually check if it is an enemy, skip if it is the player
                 {
-                    enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(damage + playerBonusDamage, false);
+                    enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(damage + playerBonusDamage, false, playerMovedFromPassivePowerupExtraMoveTiles);
                 }
             }
         }
@@ -491,18 +511,12 @@ public class CodeForPrefabPlayer : MonoBehaviour
                     GameObject enemyAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(xLocation + gridXOffset, yLocation + gridYOffset);
                     if (enemyAtThisTile != null && enemyAtThisTile.GetComponent<CodeForPrefabEnemy>() != null) // must actually check if it is an enemy, skip if it is the player
                     {
-                        enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(damage + playerBonusDamage, false);
+                        enemyAtThisTile.GetComponent<CodeForPrefabEnemy>().ThisEnemyTakesDamage(damage + playerBonusDamage, false, playerMovedFromPassivePowerupExtraMoveTiles);
                     }
                 }
             }
         }
-        Invoke(nameof(EndMoveTimerFromActivePowerup), 0.5f);
-
-        // make a seperate function for radius > 1 (attacking multiple tiles) to check + attack enemies for each tlie.
-        // if enemy not found here, go to next tile and instantly call that seperate function.
-        // If enemy exists, call the seperate function 0.5 seconds later (unless all enemies are dead).
-        // Also somehow ensure that when multiple tiles are being attacked, the enemy prefab will not call the function to activate all enemy turn after taking damage
-        // (could be solved by making the enemy prefab read the currentActivePowerupIdentity variable from the playerandenemystatuscontroller)
+        Invoke(nameof(EndMoveTimerFromActivePowerup), 0.5f); // end move timer in a special way to call all enemy turn
     }
 
 
@@ -521,7 +535,7 @@ public class CodeForPrefabPlayer : MonoBehaviour
         return moveTilesToSpawn;
     }
 
-    public void setElapsedTime(int newElapsedTime)
+    public void SetElapsedTime(int newElapsedTime)
     {
         elapsedTime = newElapsedTime;
         imageCircleTimer.fillAmount = 0;

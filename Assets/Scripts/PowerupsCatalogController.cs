@@ -132,210 +132,252 @@ public class PowerupsCatalogController : MonoBehaviour
 
         // ACTIVE POWERUPS ================================================================
         // [Up to 5 and can be sold, press Q / W / E / R / T key pads ( or click on them too ? ) , can only use 1 per turn, each has a cooldown, clicking on them resets the move timer]
+        // V DGB UP [+0.025]: Sell
+        //   DGB DOWN [-0.005]: Not using any active powerup (off-cooldown) for 2 turns straight.
+        // V DGB DOWN [-0.1]: Using a timed active powerup but didn't click on any tile until the move timer ended.
         // ================================================================================
-        // [$12-28] [2-4 cd]  Knife: Attack an enemy 1 tile adjacent to you, dealing 5-3 damage
+        // [$10-20] [4-8 cd]  Knife: Attack an enemy 1 tile adjacent to you, dealing 15-10 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$24-48] [3-5 cd]  Spear: Attack an enemy up to 2 tiles adjacent to you, dealing 8-5 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$13-26] [5-9 cd]  Spear: Attack an enemy up to 2 tiles adjacent to you, dealing 14-9 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$20-40] [4-6 cd]  Hatchet: Attack an enemy up to 3 tiles adjacent to you, dealing 7-4 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$16-32] [6-10 cd] Hatchet: Attack an enemy up to 3 tiles adjacent to you, dealing 13-8 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$32-60] [5-7 cd]  Slingshot: Click a tile further than 3 tiles from you, that enemy takes 6-3 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$18-36] [6-10 cd] Slingshot: Click a tile further than 3 tiles from you, that enemy takes 10-5 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$48-72] [6-8 cd]  Sniper: Click a tile further than 3 tiles from you, that enemy takes 10-7 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$22-42] [7-11 cd] Sniper: Click a tile further than 3 tiles from you, that enemy takes 14-8 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$40-64] [6-8 cd]  Lightning Bolt: Click a tile further than 3 tiles from you, that enemy takes 12-8 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$26-52] [8-12 cd] Lightning Bolt: Click a tile further than 3 tiles from you, that enemy takes 18-10 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$60-88] [7-9 cd]  Bomb: Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take 6-4 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$22-44] [7-11 cd] Bomb: Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take 10-5 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$72-100][8-10 cd] Fireball: Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take 10-7 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$24-48] [8-12 cd] Fireball: Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take 9-4 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$80-112][9-11 cd] Arrow Volley: Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take 8-5 damage
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$26-52] [9-13 cd] Arrow Volley: Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take 8-3 damage
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$28-48] [7-9 cd]  Acid Rain: Deal 6-4 damage to all enemies
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$28-56] [10-14 cd]Acid Rain: Deal 7-2 damage to all enemies
         //                        Effect: Reset Move Timer, Show new tiles, deal damage to enemy, end player turn
-        // [$28-48] [5-7 cd]  Axe: Deal 8-5 damage to all enemies 1 tile adjacent to you
+        //                    V   DGB UP [+0.02]: Hitting an enemy
+        // [$15-30] [5-9 cd]  Axe: Deal 15-10 damage to all enemies 1 tile adjacent to you
         //                        Effect: deal damage to enemy, end player turn
-        // [$36-56] [6-8 cd]  Spiked Club: Deal 10-6 damage to all enemies up to 2 tiles adjacent to you
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$18-36] [6-10 cd] Spiked Club: Deal 14-9 damage to all enemies up to 2 tiles adjacent to you
         //                        Effect: deal damage to enemy, end player turn
-        // [$48-72] [7-9 cd]  Whip: Deal 12-8 damage to all enemies up to 3 tiles adjacent to you
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$21-42] [7-11 cd] Whip: Deal 13-8 damage to all enemies up to 3 tiles adjacent to you
         //                        Effect: deal damage to enemy, end player turn
-        // [$40-64] [6-8 cd]  Teleport: Go to any unoccupied tile
+        //                    V   DGB UP [+0.02]: Hitting an enemy - DGB DOWN [-0.15]: no enemies hit
+        // [$20-40] [8-12 cd] Teleport: Go to any empty tile
         //                        Effect: Reset Move Timer, Show new tiles, move there, end player turn
-        // [$32-56] [5-7 cd]  Dodge: Take no damage this turn
+        //                    V   DGB UP [+0.05]: Landing on a tile without taking damage - DGB Down [-0.2]: Landing on a tile then taking damage
+        // [$10-20] [2-6 cd]  Dodge: Take no damage this turn
         //                        Effect: make all damage 0 this turn
+        //                    V   DGB UP [+0.05]: At least 1 enemy tried damaging you this turn - DGB DOWN [-0.05]: No enemy tried damaging you this turn
 
-        if       (powerupIdentity == "active-knife"){
+        if (powerupIdentity == "active-knife"){
             return (powerupIdentity, "active", "Knife", imageKnife, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy 1 tile adjacent to you, dealing {8} damage",
-                    (12, 28), (2, 4), (5, 3), (1, 1), (-1, -1));
+                    (10, 20), (4, 8), (15, 10), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-spear"){
             return (powerupIdentity, "active", "Spear", imageSpear, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy up to 2 tiles adjacent to you, dealing {8} damage",
-                    (24, 48), (3, 5), (8, 5), (1, 1), (-1, -1));
+                    (13, 26), (5, 9), (14, 9), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-hatchet"){
             return (powerupIdentity, "active", "Hatchet", imageHatchet, "[Active, cooldown: {7}]", "<line-height=130%>Attack an enemy up to 3 tiles adjacent to you, dealing {8} damage",
-                    (20, 40), (4, 6), (7, 4), (1, 1), (-1, -1));
+                    (16, 32), (6, 10), (13, 8), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-slingshot"){
             return (powerupIdentity, "active", "Slingshot", imageSlingshot, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (32, 60), (5, 7), (6, 3), (1, 1), (-1, -1));
+                    (18, 36), (6, 10), (10, 5), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-sniper"){
             return (powerupIdentity, "active", "Sniper", imageSniper, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (48, 72), (6, 8), (10, 7), (1, 1), (-1, -1));
+                    (22, 42), (7, 11), (14, 8), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-lightningBolt"){
             return (powerupIdentity, "active", "Lightning Bolt", imageLightningBolt, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you, that enemy takes {8} damage",
-                    (40, 64), (6, 8), (12, 8), (1, 1), (-1, -1));
+                    (26, 52), (8, 12), (18, 10), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-bomb"){
             return (powerupIdentity, "active", "Bomb", imageBomb, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 3x3 area of it take {8} damage",
-                    (60, 88), (7, 9), (6, 4), (3, 3), (-1, -1));
+                    (22, 44), (7, 11), (10, 5), (3, 3), (-1, -1));
         }else if (powerupIdentity == "active-fireball"){
             return (powerupIdentity, "active", "Fireball", imageFireball, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 5x5 area of it take {8} damage",
-                    (72, 100), (8, 10), (10, 7), (5, 5), (-1, -1));
+                    (24, 48), (8, 12), (9, 4), (5, 5), (-1, -1));
         }else if (powerupIdentity == "active-arrowVolley"){
             return (powerupIdentity, "active", "Arrow Volley", imageArrowVolley, "[Active, cooldown: {7}]", "<line-height=130%>Click a tile further than 3 tiles from you. All pieces within 7x7 area of it take {8} damage",
-                    (80, 112), (9, 11), (8, 5), (7, 7), (-1, -1));
+                    (26, 52), (9, 13), (8, 3), (7, 7), (-1, -1));
         }else if (powerupIdentity == "active-acidRain"){
             return (powerupIdentity, "active", "Acid Rain", imageAcidRain, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies",
-                    (28, 40), (7, 9), (6, 4), (1, 1), (-1, -1));
+                    (28, 56), (10, 14), (7, 2), (1, 1), (-1, -1));
         }else if (powerupIdentity == "active-axe"){
             return (powerupIdentity, "active", "Axe", imageAxe, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies 1 tile adjacent to you",
-                    (28, 48), (5, 7), (8, 5), (3, 3), (-1, -1));
+                    (15, 30), (5, 9), (15, 10), (3, 3), (-1, -1));
         }else if (powerupIdentity == "active-spikedClub"){
             return (powerupIdentity, "active", "Spiked Club", imageSpikedClub, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies up to 2 tiles adjacent to you",
-                    (36, 56), (6, 8), (10, 6), (5, 5), (-1, -1));
+                    (18, 36), (6, 10), (14, 9), (5, 5), (-1, -1));
         }else if (powerupIdentity == "active-whip"){
             return (powerupIdentity, "active", "Whip", imageWhip, "[Active, cooldown: {7}]", "<line-height=130%>Deal {8} damage to all enemies up to 3 tiles adjacent to you",
-                    (48, 72), (7, 9), (12, 8), (7, 7), (-1, -1));
+                    (21, 42), (7, 11), (13, 8), (7, 7), (-1, -1));
         }else if (powerupIdentity == "active-teleport"){
-            return (powerupIdentity, "active", "Teleport", imageTeleport, "[Active, cooldown: {7}]", "<line-height=130%>Go to any unoccupied tile",
-                    (40, 64), (6, 8), (-1, -1), (-1, -1), (-1, -1));
+            return (powerupIdentity, "active", "Teleport", imageTeleport, "[Active, cooldown: {7}]", "<line-height=130%>Go to any empty tile",
+                    (20, 40), (8, 12), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "active-dodge"){
             return (powerupIdentity, "active", "Dodge", imageDodge, "[Active, cooldown: {7}]", "<line-height=130%>Take no damage this turn",
-                    (32, 56), (5, 7), (-1, -1), (-1, -1), (-1, -1));
+                    (10, 20), (2, 6), (-1, -1), (-1, -1), (-1, -1));
         }
 
         // PASSIVE POWERUPS ===============================================================
         // [Up to 4 and can be sold]
+        // V DGB UP [+0.025]: Sell
         // ================================================================================ // SEPERATE BETWEEN RED AREA VS YELLOW AREA DAMAGE?
-        //[$12-24]  Light Armor: Take 3 - 1 less damage [min 1] from any source
-        //[$20-36]  Heavy Armor: Take 4 - 2 less damage [min 1] from any source
-        //[$37-48]  Diamond Armor: Take 6 - 3 less damage [min 1] from any source
-        //[$16-32]  Inner Healing: Heal 2 - 1 Health every 3 turns (max 5 times per round)
-        //[$32-48]  Vampiric: Heal 3 - 1 health for every enemy killed\
+        //[$10-20]  Light Armor: Take 3 - 1 less damage [min 1] from any source
+        //          V   DGB UP [+0.1]: Buy
+        //[$15-30]  Heavy Armor: Take 4 - 2 less damage [min 1] from any source
+        //          V   DGB UP [+0.1]: Buy
+        //[$20-40]  Diamond Armor: Take 6 - 3 less damage [min 1] from any source
+        //          V   DGB UP [+0.1]: Buy
+        //[$20-40]  Inner Healing: Heal 2 - 1 Health every 3 turns (max 5 times per round)
+        //          V   DGB UP [+0.1]: Buy
+        //[$30-60]  Vampiric: Heal 3 - 1 health for every enemy killed
+        //          V   DGB UP [+0.1]: Buy
         //[$20-40]  Well-Deserved Rest: Heal 10 - 5 health after every round
-        //[$28-44]  Bloodlust: Increase all your damage by 3 - 1 per damage taken. Resets per round
-        //[$24-40]  Ground Pound: After moving, all adjacent enemies take 1 - 3 damage
-        //[$40-60]  Mercenary Tools: Lose $1 per turn, Doubles damage dealt, Halves damage taken
-        //[$20-40]  Pickpocket: Gain $3 - 1 more per enemy killed
-        //[$32-64]  Flexible Movement I: You can jump to four new tiles per turn: 1 tile orthogonally from you   // FOR THESE ONES, MAKE THE BUTTONS ALSO ACTIVATE A FUNCTION (IN INSPECTOR) TO INCREASE THE DGB POWERUP USAGE INPUT, EVEN MORE IF IT DAMAGES AN ENEMY (optional)
-        //[$32-64]  Flexible Movement II: You can jump to four new tiles per turn: 1 tile diagonally from you
-        //[$32-64]  Flexible Movement III: You can jump to four new tiles per turn: 2 tiles orthogonally from you
-        //[$32-64]  Flexible Movement IV: You can jump to four new tiles per turn: 2 tiles diagonally from you
-        //[$32-64]  Flexible Movement V: You can jump to four new tiles per turn: 3 tiles orthogonally from you
-        //[$32-64]  Flexible Movement VI: You can jump to four new tiles per turn: 3 tiles diagonally from you
-        //[$48-96]  Flexible Movement VII: You can jump to eight new tiles per turn: 3 tils orthogonally + 1 tile perpendicular
-        //[$48-96]  Flexible Movement VIII: You can jump to eight new tiles per turn: 3 tils orthogonally + 2 tiles perpendicular
+        //          V   DGB UP [+0.1]: Buy
+        //[$10-20]  Bloodlust: Increase all your damage by 3 - 1 per damage taken. Resets per round
+        //          V   DGB UP [+0.1]: Buy
+        //[$10-20]  Ground Pound: After moving, all adjacent enemies take 1 - 3 damage
+        //          v   DGB UP [+0.1]: Buy
+        //[$10-20]  Mercenary Tools: Lose $1 per turn, Doubles damage dealt, Halves damage taken
+        //          V   DGB UP [+0.1]: Buy
+        //[$14-28]  Pickpocket: Gain $3 - 1 more per enemy killed
+        //          V   DGB UP [+0.1]: Buy
+
+        // These movement ones do not increase DGB upon purchase
+        //[$34-68]  Flexible Movement I: You can jump to four new tiles per turn: 1 tile orthogonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$34-68]  Flexible Movement II: You can jump to four new tiles per turn: 1 tile diagonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$22-44]  Flexible Movement III: You can jump to four new tiles per turn: 2 tiles orthogonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$22-44]  Flexible Movement IV: You can jump to four new tiles per turn: 2 tiles diagonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$22-44]  Flexible Movement V: You can jump to four new tiles per turn: 3 tiles orthogonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$22-44]  Flexible Movement VI: You can jump to four new tiles per turn: 3 tiles diagonally from you
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$34-68]  Flexible Movement VII: You can jump to eight new tiles per turn: 3 tiles orthogonally + 1 tile perpendicular
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
+        //[$34-68]  Flexible Movement VIII: You can jump to eight new tiles per turn: 3 tiles orthogonally + 2 tiles perpendicular
+        //          V   DGB UP [+0.005]: Landing an enemy with the extra tile - DGB DOWN [-0.02]: Getting damaged by an enemy after the extra tile.
 
         else if (powerupIdentity == "passive-lightArmor"){
             return (powerupIdentity, "passive", "Light Armor", imageLightArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (12, 24), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+                    (10, 20), (-1, -1), (3, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-heavyArmor"){
             return (powerupIdentity, "passive", "Heavy Armor", imageHeavyArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (20, 36), (-1, -1), (4, 2), (-1, -1), (-1, -1));
+                    (15, 30), (-1, -1), (4, 2), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-diamondArmor"){
             return (powerupIdentity, "passive", "Diamond Armor", imageDiamondArmor, "[Passive]", "<line-height=130%>Take {8} less damage [min 1] from any source",
-                    (37, 48), (-1, -1), (6, 3), (-1, -1), (-1, -1));
+                    (20, 40), (-1, -1), (6, 3), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-innerHealing"){
             return (powerupIdentity, "passive", "Inner Healing", imageInnerHealing, "[Passive]", "<line-height=130%>Heal {8} health every 3 turns (max 5 times per round)",
-                    (16, 32), (-1, -1), (2, 1), (-1, -1), (-1, -1));
+                    (20, 40), (-1, -1), (2, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-vampiric"){
             return (powerupIdentity, "passive", "Vampiric", imageVampiric, "[Passive]", "<line-height=130%>Heal {8} health for every enemy killed",
-                    (32, 48), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+                    (30, 60), (-1, -1), (3, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-wellDeservedRest"){
             return (powerupIdentity, "passive", "Well-Deserved Rest", imageWellDeservedRest, "[Passive]", "<line-height=130%>Heal {8} health after every round",
                     (20, 40), (-1, -1), (10, 5), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-bloodlust"){
             return (powerupIdentity, "passive", "Bloodlust", imageBloodlust, "[Passive]", "<line-height=130%>Increase all your damage by {8} per damage taken. Resets per round",
-                    (28, 44), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+                    (10, 20), (-1, -1), (3, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-groundPound"){
             return (powerupIdentity, "passive", "Ground Pound", imageGroundPound, "[Passive]", "<line-height=130%>After moving, all adjacent enemies take {8} damage",
-                    (24, 40), (-1, -1), (1, 3), (3, 3), (-1, -1));
+                    (10, 20), (-1, -1), (1, 3), (3, 3), (-1, -1));
         }else if (powerupIdentity == "passive-mercenaryTools"){
             return (powerupIdentity, "passive", "Mercenary Tools", imageMercenaryTools, "[Passive]", "<line-height=130%>Lose $1 per turn, doubles damage dealt, halves damage taken",
-                    (40, 60), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (10, 20), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-pickpocket"){
             return (powerupIdentity, "passive", "Pickpocket", imagePickpocket, "[Passive]", "<line-height=130%>Gain {8} more gold per enemy killed",
-                    (20, 40), (-1, -1), (3, 1), (-1, -1), (-1, -1));
+                    (14, 28), (-1, -1), (3, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementI"){
             return (powerupIdentity, "passive", "Flexible Movement I", imageFlexibleMovementI, "[Passive]", "<line-height=130%>4 new tiles to move: 1 tile orthogonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (34, 68), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementII"){
             return (powerupIdentity, "passive", "Flexible Movement II", imageFlexibleMovementII, "[Passive]", "<line-height=130%>4 new tiles to move: 1 tile diagonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (34, 68), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementIII"){
             return (powerupIdentity, "passive", "Flexible Movement III", imageFlexibleMovementIII, "[Passive]", "<line-height=130%>4 new tiles to move: 2 tiles orthogonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (22, 44), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementIV"){
             return (powerupIdentity, "passive", "Flexible Movement IV", imageFlexibleMovementIV, "[Passive]", "<line-height=130%>4 new tiles to move: 2 tiles diagonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (22, 44), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementV"){
             return (powerupIdentity, "passive", "Flexible Movement V", imageFlexibleMovementV, "[Passive]", "<line-height=130%>4 new tiles to move: 3 tiles orthogonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (22, 44), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementVI"){
             return (powerupIdentity, "passive", "Flexible Movement VI", imageFlexibleMovementVI, "[Passive]", "<line-height=130%>4 new tiles to move: 3 tiles diagonally",
-                    (32, 64), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (22, 44), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementVII"){
             return (powerupIdentity, "passive", "Flexible Movement VII", imageFlexibleMovementVII, "[Passive]", "<line-height=130%>8 new tiles to move: 3 tiles orthogonally then 1 tile perpendicular",
-                    (48, 96), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (34, 68), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "passive-flexibleMovementVIII"){
             return (powerupIdentity, "passive", "Flexible Movement VIII", imageFlexibleMovementVIII, "[Passive]", "<line-height=130%>8 new tiles to move: 3 tiles orthogonally then 2 tiles perpendicular",
-                    (48, 96), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (34, 68), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }
 
-        // STAT BUFF POWEUPS ===============================================================
+        // STAT BUFF POWERUPS ===============================================================
         // [Permanent Buffs or one-time use]
-        // Increase DGB Input Powerup Usage a bit upon purchase. 
+        // V DGB UP [+0.1]: Buy
         // =================================================================================
 
-        //[$10-16]  Small Snack: Heal 5 - 12 health // MAYBE REDUCE DGB INPUT POWERUP USAGE IF BUY HEALTH BUT IS ARLREADY MAXED?
-        //[$18-28]  Lunch Break: Heal 15 - 30 health
-        //[$30-46]  Tavern Buffet: Heal to full health
-        //[$12-20]  Hardened Fists: Permanently Increases your direct contact damage by 2 - 4
-        //[$20-34]  Iron Fists: Permanently Increases your direct contact damage by 4 - 7
-        //[$34-52]  Diamond Fists: Increases your direct contact damage by 7 - 10
-        //[$12-24]  Toughened Heart: Permanently increases your max health by 4 - 8 And heal 4 - 8 health
-        //[$24-36]  Unbreakable Heart: Permanently increases your max health by 8 - 15 And heal 8 - 15 health
-        //[$12-24]  Weapon Proficiency: Permanently increase all damage you deal by 1 - 2
-        //[$24-36]  Weapon Mastery: Permanently increase all damage you deal by 3 - 4
+        //[$10-20]  Small Snack: Heal 15 - 8 health
+        //          V   DGB DOWN [depends]: Overheal
+        //[$16-32]  Lunch Break: Heal 40 - 20 health
+        //          V   DGB DOWN [depends]: Overheal
+        //[$25-50]  Tavern Buffet: Heal to full health
+        //          V   DGB DOWN [depends]: only healed less than 40 hp
+        //[$12-24]  Hardened Fists: Permanently Increases your direct contact damage by 6 - 2
+        //[$18-36]  Iron Fists: Permanently Increases your direct contact damage by 8 - 4
+        //[$24-48]  Diamond Fists: Increases your direct contact damage by 12 - 6
+        //[$12-24]  Toughened Heart: Permanently increases your max health by 10 - 6 and heal 10 - 6 health
+        //[$16-32]  Unbreakable Heart: Permanently increases your max health by 20 - 10 and heal 20 - 10 health
+        //[$14-28]  Weapon Proficiency: Permanently increase any damage you deal by 3 - 1
+        //[$20-40]  Weapon Mastery: Permanently increase any damage you deal by 5 - 3
 
 
         else if (powerupIdentity == "statBuff-smallSnack"){
             return (powerupIdentity, "statBuff", "Small Snack", imageSmallSnack, "[Stat Buff]", "<line-height=130%>Heal {8} health",
-                    (10, 16), (-1, -1), (12, 5), (-1, -1), (-1, -1));
+                    (10, 20), (-1, -1), (15, 8), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-lunchBreak"){
             return (powerupIdentity, "statBuff", "LunchBreak", imageLunchBreak, "[Stat Buff]", "<line-height=130%>Heal {8} health",
-                    (18, 28), (-1, -1), (30, 15), (-1, -1), (-1, -1));
+                    (16, 32), (-1, -1), (40, 20), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-tavernBuffet"){
             return (powerupIdentity, "statBuff", "Tavern Buffet", imageTavernBuffet, "[Stat Buff]", "<line-height=130%>Heal to full health",
-                    (30, 46), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+                    (25, 50), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-hardenedFists"){
             return (powerupIdentity, "statBuff", "Hardened Fists", imageHardenedFists, "[Stat Buff]", "<line-height=130%>Permanently increases your direct contact damage by {8}",
-                    (12, 20), (-1, -1), (4, 2), (-1, -1), (-1, -1));
+                    (12, 24), (-1, -1), (6, 2), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-ironFists"){
             return (powerupIdentity, "statBuff", "Iron Fists", imageIronFists, "[Stat Buff]", "<line-height=130%>Permanently increases your direct contact damage by {8}",
-                    (20, 34), (-1, -1), (7, 4), (-1, -1), (-1, -1));
+                    (18, 36), (-1, -1), (8, 4), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-diamondFists"){
             return (powerupIdentity, "statBuff", "Diamond Fists", imageDiamondFists, "[Stat Buff]", "<line-height=130%>Increases your direct contact damage by {8}",
-                    (34, 52), (-1, -1), (10, 7), (-1, -1), (-1, -1));
+                    (24, 48), (-1, -1), (12, 6), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-toughenedHeart"){
             return (powerupIdentity, "statBuff", "Toughened Heart", imageToughenedHeart, "[Stat Buff]", "<line-height=130%>Permanently increases your max health by {8} and heal {9} health",
-                    (12, 24), (-1, -1), (8, 4), (8, 4), (-1, -1));
+                    (12, 24), (-1, -1), (10, 6), (10, 6), (-1, -1));
         }else if (powerupIdentity == "statBuff-unbreakableHeart"){
             return (powerupIdentity, "statBuff", "Unbreakable Heart", imageUnbreakableHeart, "[Stat Buff]", "<line-height=130%>Permanently increases your max health by {8} and heal {9} health",
-                    (24, 36), (-1, -1), (15, 8), (15, 8), (-1, -1));
+                    (16, 32), (-1, -1), (20, 10), (20, 10), (-1, -1));
         }else if (powerupIdentity == "statBuff-weaponProficiency"){
             return (powerupIdentity, "statBuff", "Weapon Proficiency", imageWeaponProficiency, "[Stat Buff]", "<line-height=130%>Permanently increase all damage you deal by {8}",
-                    (12, 24), (-1, -1), (2, 1), (-1, -1), (-1, -1));
+                    (14, 28), (-1, -1), (3, 1), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-weaponMastery"){
             return (powerupIdentity, "statBuff", "Weapon Mastery", imageWeaponMastery, "[Stat Buff]", "<line-height=130%>Permanently increase all damage you deal by {8}",
-                    (24, 36), (-1, -1), (4, 3), (-1, -1), (-1, -1));
+                    (20, 40), (-1, -1), (5, 3), (-1, -1), (-1, -1));
         }
 
 
@@ -439,6 +481,7 @@ public class PowerupsCatalogController : MonoBehaviour
 
     public int ActivateThisActivePowerup(string powerupIdentity, string powerupAction) // It's not really "activate" but more of getting an information value from an active powerup
     {                                                                                  // called when clicked in bottombar controller or for certain damaging powerups in playerandenemystatus controller
+        // Don't call DGB Input for powerup usage here, as this may be called several times for one powerup.
         int cooldownEasy = GetPowerupInfo(powerupIdentity).Item8.Item1;
         int cooldownHard = GetPowerupInfo(powerupIdentity).Item8.Item2;
         int valueEasy = GetPowerupInfo(powerupIdentity).Item9.Item1;
@@ -454,7 +497,7 @@ public class PowerupsCatalogController : MonoBehaviour
         else { Debug.LogWarning("powerupAction unidentified:" + powerupAction); }
 
         ////                                                                Called at:
-        //if      (powerupIdentity == "active-knife")                { } // all of these at bottombar controller?
+        //if      (powerupIdentity == "active-knife")                { } // all of these at playerandenemystatuscontroller, codeforprefabplayer, codeforprefabenemy, turncontroller
         //else if (powerupIdentity == "active-spear")                { }
         //else if (powerupIdentity == "active-hatchet")              { }
         //else if (powerupIdentity == "active-slingshot")            { }
@@ -470,7 +513,7 @@ public class PowerupsCatalogController : MonoBehaviour
         //else if (powerupIdentity == "active-teleport")             { }
         //else if (powerupIdentity == "active-dodge")                { }
 
-        //Debug.LogWarning("Canot Find Active Powerup of identity:" + powerupIdentity);
+        //Debug.LogWarning("Canot Find Active Powerup of identity:" + powerupIdentity); // Error message already called elsewhere
         return -1;
     }
 
@@ -519,30 +562,30 @@ public class PowerupsCatalogController : MonoBehaviour
         int numberA = Mathf.RoundToInt(easyNumberA + (hardNumberA - easyNumberA) * difficultyIndex);
         int numberB = Mathf.RoundToInt(easyNumberB + (hardNumberB - easyNumberB) * difficultyIndex);
 
-        // Player buy a powerup -> slightly increase powerup usage DGB input
+        // Player buy a stat buff powerup -> slightly increase powerup usage DGB input
         dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.1f, false);
 
         // Reduce DGB Input powerup usage if player overheals past max health with healing stat buff powerups
         if (powerupIdentity == "statBuff-smallSnack")
         {
-            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);
             int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA - playerAndEnemyStatusController.GetPlayerMaxHealth() , 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
-            float DGBInputToDeductPowerupUsage = Mathf.Max( (healthOverflow / numberA) - 0.5f , 0) / 5;
+            float DGBInputToDeductPowerupUsage = (float)(Mathf.Max( (healthOverflow / numberA) - 0.5f , 0) / 2.5);
             dynamicDifficultyController.SetDynamicInputChange("powerupUsage", - DGBInputToDeductPowerupUsage, false);
+            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);
         }
         else if (powerupIdentity == "statBuff-lunchBreak")
         {
-            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);
             int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA - playerAndEnemyStatusController.GetPlayerMaxHealth(), 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
-            float DGBInputToDeductPowerupUsage = Mathf.Max((healthOverflow / numberA) - 0.5f, 0) / 5;
+            float DGBInputToDeductPowerupUsage = (float)(Mathf.Max((healthOverflow / numberA) - 0.5f, 0) / 2.5);
             dynamicDifficultyController.SetDynamicInputChange("powerupUsage", - DGBInputToDeductPowerupUsage, false);
+            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);
         }
         else if (powerupIdentity == "statBuff-tavernBuffet")
         {
-            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerMaxHealth());
-            int healthOverflow = playerAndEnemyStatusController.GetPlayerCurrHealth(); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
-            float DGBInputToDeductPowerupUsage = Mathf.Max((healthOverflow / numberA) - 0.5f, 0) / 5;
+            int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + 40 - playerAndEnemyStatusController.GetPlayerMaxHealth(), 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
+            float DGBInputToDeductPowerupUsage = (float)(Mathf.Max((healthOverflow / 40) - 0.5f, 0) / 2.5); // This one is different than the other 2 passive healing: 
             dynamicDifficultyController.SetDynamicInputChange("powerupUsage", - DGBInputToDeductPowerupUsage, false);
+            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerMaxHealth());
         }
         else if (powerupIdentity == "statBuff-hardenedFists")
         {

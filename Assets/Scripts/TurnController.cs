@@ -31,30 +31,45 @@ public class TurnController : MonoBehaviour
 
     public void PlayerTurn()
     {
-        // Player can choose one of their active powerups (if off cooldown)
-        canPlayerSelectActivePowerup = true;
-        bottomBarController.ActivePowerupsReduceCooldownBy1AndMaybeCanBeClickedNow();
+        // ACTIVE POWERUP: dodge, teleport
+        if (!playerAndEnemyStatusController.GetHasPlayerAlreadyBeenDamagedThisTurn() && playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-dodge") { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.05f, false); }
+        else if(!playerAndEnemyStatusController.GetHasPlayerAlreadyBeenDamagedThisTurn() && playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "active-teleport") { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.05f, false); }
+        // ACTIVE POWERUP: all except dodge and teleport
+        if (!playerAndEnemyStatusController.GetHasAnEnemyAlreadyBeenDamagedThisTurn() && playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() != "") { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.005f, false); }
+
+        // Check if player has not been using an active powerup off-cooldown for multiple turns in a row
+        if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() != "") { playerAndEnemyStatusController.SetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown(0); }
+        if (playerAndEnemyStatusController.GetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown() >= 2) { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.15f, false); Debug.Log("You have not played an active powerup for 2+ turns now"); }
+        if (bottomBarController.GetIsAnyActivePowerupOffCooldown()) { playerAndEnemyStatusController.SetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown(playerAndEnemyStatusController.GetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown() + 1); }
+
+
 
         // Click on a move tile = move there and maybe damage + knockback enemy + add 1 to their delay counter, and maybe kill for gold
         // Or a powerup where you don't have to click on a tile.
         // Timer's up = skip to enemy's turn
-        // Enemy left in round = 0, win and go to shop
+        // Enemy left in round = 0, win and go to sho
         playerAndEnemyStatusController.SetMoveCountIncreaseBy1AndMaybeDeductBonusGold();
-        playerAndEnemyStatusController.setCurrentActivePowerupIdentity("");
-        playerAndEnemyStatusController.setHasAnEnemyAlreadyBeenDamagedThisTurn(false);
-        playerAndEnemyStatusController.setHasPlayerAlreadyBeenDamagedThisTurn(false);
+        playerAndEnemyStatusController.SetCurrentActivePowerupIdentity(""); // Reset, so no active powerup is in effect now
+        playerAndEnemyStatusController.SetHasAnEnemyAlreadyBeenDamagedThisTurn(false);
+        playerAndEnemyStatusController.SetHasPlayerAlreadyBeenDamagedThisTurn(false);
 
         // player's turn to move
         // PASSIVE POWERUP
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-mercenaryTools")) { playerAndEnemyStatusController.SetChangeInCurrGold(-1); }
         int turnsSoFar = playerAndEnemyStatusController.GetMoveCountThisRound();
-        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-innerHealing") && (turnsSoFar % 3 == 0) && (turnsSoFar <= 15)) { codeForPrefabPlayer.PlayerTakesDamageOrHealing(powerupsCatalogController.ActivateThisPassivePowerup("passive-innerHealing", ""), false); ; Invoke(nameof(CallPlayerCanMoveNow), 0.5f); }
-        else { codeForPrefabPlayer.PlayerCanMoveNow(); }
+        if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-innerHealing") && (turnsSoFar % 3 == 0) && (turnsSoFar <= 15))
+        {
+            codeForPrefabPlayer.PlayerTakesDamageOrHealing(powerupsCatalogController.ActivateThisPassivePowerup("passive-innerHealing", ""), false); ; Invoke(nameof(CallPlayerCanMoveNow), 0.5f);
+        }
+        else { CallPlayerCanMoveNow(); }
     }
 
 
-    public void CallPlayerCanMoveNow() // just in case this needs to be called 0.5 seconds later due to healing powerup
+    public void CallPlayerCanMoveNow() // Built into a seperate function, just in case this needs to be called 0.5 seconds later due to healing powerup
     {
+        // Player can choose one of their active powerups (if off cooldown)
+        canPlayerSelectActivePowerup = true;
+        bottomBarController.ActivePowerupsReduceCooldownBy1AndMaybeCanBeClickedNow();
         codeForPrefabPlayer.PlayerCanMoveNow();
     }
 
@@ -62,15 +77,16 @@ public class TurnController : MonoBehaviour
     {
         // Player cannot choose one of their active powerups anymore
         canPlayerSelectActivePowerup = false;
+        bottomBarController.MakeActivePowerupSquaresBlueTemporarilyBecauseItsNotPlayerTurn();
         // turn off the 8x16 move tiles from active powerups
-        playerAndEnemyStatusController.setActiveFull8x16MoveTiles(false);
+        playerAndEnemyStatusController.SetActiveFull8x16MoveTiles(false);
     }
 
     public void PlayerTurnButActivePowerupWasActivated(string powerupIdentity)
     {
         // Player cannot choose one of their active powerups anymore
         canPlayerSelectActivePowerup = false;
-
+        bottomBarController.MakeActivePowerupSquaresBlueTemporarilyBecauseItsNotPlayerTurn();
         // OTHER THAN THE 1 CODE ABOVE, EVERYTHING ELSE MUST BE CALLED AT PLAYER AND ENEMY STATUS CONTROLLER
         playerAndEnemyStatusController.AnActivePowerupWasActivated(powerupIdentity);        
     }
@@ -79,8 +95,9 @@ public class TurnController : MonoBehaviour
     {
         // Player cannot choose one of their active powerups anymore
         canPlayerSelectActivePowerup = false;
+        bottomBarController.MakeActivePowerupSquaresBlueTemporarilyBecauseItsNotPlayerTurn();
         // turn off the 8x16 move tiles from active powerups
-        playerAndEnemyStatusController.setActiveFull8x16MoveTiles(false);
+        playerAndEnemyStatusController.SetActiveFull8x16MoveTiles(false);
 
         // For every enemy... reduce delay counter by 1
         // If counter = 1, show yellow tiles

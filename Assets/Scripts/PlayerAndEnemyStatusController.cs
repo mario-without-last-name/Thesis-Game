@@ -7,9 +7,9 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using System.Linq;
 using UnityEditor;
-using System.Xml;
-using Unity.VisualScripting;
-using static UnityEditor.FilePathAttribute;
+//using System.Xml;
+//using Unity.VisualScripting;
+//using static UnityEditor.FilePathAttribute;
 
 public class PlayerAndEnemyStatusController : MonoBehaviour
 {
@@ -42,7 +42,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int killCount;
     private int totalMoveCount;
     private int moveCountThisRound;
-    private int currEnemiesLeft;
+    private int currEnemiesLeftThisRound;
     private int totalEnemiesThisRound;
     private int maxNoOfEnemiesAtAnyPoint;
     private int enemyPointsToAllocate;
@@ -61,6 +61,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     CodeForPrefabPlayer codeForPrefabPlayer;
     private bool hasAnEnemyAlreadyBeenDamagedThisTurn;
     private bool hasPlayerAlreadyBeenDamagedThisTurn;
+    private int turnsPassedWithoutUsingActivePowerupThatIsOffCooldown;
 
     //private int enemiesAlreadySpawnedThisRound;
     private string[] enemyVariantsToBeSpawnedThisRound;
@@ -136,40 +137,14 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         // Now Randomize the instantiation of enemies
         float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("enemyStats");
         maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)((difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
-        enemyPointsToAllocate = (int)Math.Round((double)((difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1)));
-        //if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Easy")
-        //{
-        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(2 + roundNumber * 0.333)));
-        //    enemyPointsToAllocate = (int)Math.Round((double)(1 + roundNumber * 1));
-        //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Medium")
-        //{
-        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(3 + roundNumber * 0.66666)));
-        //    enemyPointsToAllocate = (int)Math.Round((double)(2 + roundNumber * 2));
-        //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Hard")
-        //{
-        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)(4 + roundNumber * 1)));
-        //    enemyPointsToAllocate = (int)Math.Round((double)(3 + roundNumber * 3));
-        //}
-        //else if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Adaptive")
-        //{
-        //    maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)( (difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
-        //    enemyPointsToAllocate = (int)Math.Round((double)( (difficultyIndex * 2 + 1) + roundNumber * (difficultyIndex * 2 + 1) ));
-        //}
-        //else
-        //{
-        //    maxNoOfEnemiesAtAnyPoint = 1;
-        //    enemyPointsToAllocate = 1;
-        //    Debug.LogWarning("Unkown mode difficulty");
-        //}
+        enemyPointsToAllocate = (int)Math.Round((double)( (roundNumber + 1) * (difficultyIndex * 2 + 1)) + 0.03 * Math.Pow(roundNumber, 1 + 3 * difficultyIndex));
 
         enemyVariantsToBeSpawnedThisRound = bestiaryController.DecideWhatEnemiesToSpawnThisRound(enemyPointsToAllocate);
-        currEnemiesLeft = enemyVariantsToBeSpawnedThisRound.Length;
-        totalEnemiesThisRound = currEnemiesLeft;
+        currEnemiesLeftThisRound = enemyVariantsToBeSpawnedThisRound.Length;
+        totalEnemiesThisRound = currEnemiesLeftThisRound;
         hasAnEnemyAlreadyBeenDamagedThisTurn = false;
 
-        sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
+        sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeftThisRound);
         sideBarController.SetSideBarTotalEnemiesThisRoundValue(totalEnemiesThisRound);
 
         full8x16MoveTiles.SetActive(false);
@@ -183,11 +158,12 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         }
 
         // Player gets more bonus gold (after clearing a round) for finishing in less moves
-        bonusGoldAtEndOfRound = 7 + roundNumber * 3; // might be better to make it dependant on round number than enemyPointsToAllocate
+        bonusGoldAtEndOfRound = 4 + roundNumber * 4; // might be better to make it dependant on round number than enemyPointsToAllocate
         //bonusGoldAtEndOfRound = enemyPointsToAllocate * 2;
         numberOfTimesEnemiesTookDamageThisRound = 0;
-        gracePeriodBeforeReducingBonusGold = 3; // actually supposed to be 2-move grace period, but new round starts with player's turn, which immeadiately decreases it by 1
+        gracePeriodBeforeReducingBonusGold = 6; // actually supposed to be 3-move grace period, but new round starts with player's turn, which immeadiately decreases it by 1. Also give players more time to attack an enemy if they are far away before reducing their bonus gold
         numberOfTimesToDecreaseBonusGold = 0;
+        turnsPassedWithoutUsingActivePowerupThatIsOffCooldown = -1; // actually supposed to be 0, but new round starts with player's turn, which immeadiately sets it to 0
 
         //Finally, start with the player's turn
         turnController.RememberNewlySpawnedPlayerForNewRound();
@@ -229,8 +205,8 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     public void AnEnemyWasKilledAndEarnGold(int goldEarned)
     {
         //Debug.Log(Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0));
-        currEnemiesLeft -= 1;
-        sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeft);
+        currEnemiesLeftThisRound -= 1;
+        sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeftThisRound);
         SetKillCountIncreaseBy1();
 
         // PASSIVE POWERUP
@@ -238,7 +214,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         SetChangeInCurrGold(goldEarned);
         codeForPrefabPlayer.ShowGoldEarned(goldEarned);
 
-        if (currEnemiesLeft == 0) // All enemies killed, victory for this round
+        if (currEnemiesLeftThisRound == 0) // All enemies killed, victory for this round
         {
             // at end of each round, update the logs of both per turn and per round
             PrintAndLogPerTurnHealthKillsPointsGold();
@@ -270,7 +246,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             else { Invoke(nameof(VictoryBattle), 0.5f); }
             
         }
-        else
+        else // there are still enemies left this round
         {
             if (enemiesSpawnedSoFarThisRound < totalEnemiesThisRound) // If there are still more enemies to spawn this round, replace the dead enemy with a new one
             {
@@ -282,7 +258,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
             // PASSIVE POWERUP
             if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-vampiric")) { Invoke(nameof(PassiveVampiric), 0.5f); Invoke(nameof(CallForEnemyTurn), 1.0f); }
             
-            else { if (currentActivePowerupIdentity == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); } } // If player kills an enemy with an active powerup, the player prefab will call the enemy turn themselves
+            else { if (currentActivePowerupIdentity == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); } } // If player kills an enemy with an active powerup, the player prefab will call the enemy turn themselves. else, this controller will call it
 
         }
 
@@ -315,20 +291,20 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     public void PrintAndLogPerTurnHealthKillsPointsGold() // ENEMY POINTS GAINED NOT YET FIXED
     {
-        //Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
+        Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
         generateStatisticsController.LogPerTurnHealthKillsPointsGold(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString());
     }
 
     public void PrintAndLogPerRoundHealthKillsPointsGoldMoves() // ENEMY POINTS GAINED NOT YET FIXED
     {
-        //Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
+        Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
         generateStatisticsController.LogPerRoundHealthKillsPointsGoldMoves(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString(), totalMoveCount.ToString());
     }
 
 
     public void AnActivePowerupWasActivated(string powerupIdentity)
     {
-        dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.05f, false); 
+        //dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.05f, false); // Probably Don't change DGB here? change it depending on how the powerup was used, like hitting or missing an enemy
         currentActivePowerupIdentity = powerupIdentity;
         codeForPrefabPlayer.DeactivateMoveTiles();
 
@@ -580,7 +556,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     public void SetNumberOfTimesEnemiesTookDamageThisRoundIncreaseBy1AndResetGracePeriodBeforeReducingBonusGold() // called anytime an enemy takes damage
     {
         numberOfTimesEnemiesTookDamageThisRound += 1;
-        gracePeriodBeforeReducingBonusGold = 2;
+        if (currentActivePowerupIdentity == "") { gracePeriodBeforeReducingBonusGold = 3; } // Only reset grace period if player attacks an enemy with landing damage. so staying far away and spamming ranged attacks is discouraged.
     }
 
     public int GetPlayerMaxHealth()
@@ -626,40 +602,54 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         playerBonusDamage = newBonusDamage;
     }
 
-    public void setActiveFull8x16MoveTiles(bool newBool)
+    public void SetActiveFull8x16MoveTiles(bool newBool)
     {
         full8x16MoveTiles.SetActive(newBool);
     }
 
-    public bool getHasAnEnemyAlreadyBeenDamagedThisTurn()
+    public bool GetHasAnEnemyAlreadyBeenDamagedThisTurn()
     {
         return hasAnEnemyAlreadyBeenDamagedThisTurn;
     }
 
-    public void setHasAnEnemyAlreadyBeenDamagedThisTurn( bool newBool)
+    public void SetHasAnEnemyAlreadyBeenDamagedThisTurn( bool newBool)
     {
         hasAnEnemyAlreadyBeenDamagedThisTurn = newBool;
     }
 
-    public bool getHasPlayerAlreadyBeenDamagedThisTurn()
+    public bool GetHasPlayerAlreadyBeenDamagedThisTurn()
     {
         return hasPlayerAlreadyBeenDamagedThisTurn;
     }
 
-    public void setHasPlayerAlreadyBeenDamagedThisTurn(bool newBool)
+    public void SetHasPlayerAlreadyBeenDamagedThisTurn(bool newBool)
     {
         hasPlayerAlreadyBeenDamagedThisTurn = newBool;
     }
 
-    public string getCurrentActivePowerupIdentity()
+    public string GetCurrentActivePowerupIdentity()
     {
         return currentActivePowerupIdentity;
     }
 
-    public void setCurrentActivePowerupIdentity(string newString)
+    public void SetCurrentActivePowerupIdentity(string newString)
     {
         currentActivePowerupIdentity = newString;
     }
 
+    public int GetCurrEnemiesLeftThisRound()
+    {
+        return currEnemiesLeftThisRound;
+    }
+
+    public int GetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown()
+    {
+        return turnsPassedWithoutUsingActivePowerupThatIsOffCooldown;
+    }
+
+    public void SetTurnsPassedWithoutUsingActivePowerupThatIsOffCooldown(int newInt)
+    {
+        turnsPassedWithoutUsingActivePowerupThatIsOffCooldown = newInt;
+    }
 
 }

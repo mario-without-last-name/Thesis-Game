@@ -16,6 +16,9 @@ public class BestiaryController : MonoBehaviour
                                     spriteQueenMinotaur, spriteQueenWyrm, spriteQueenAbomination, spriteQueenGolem,
                                     spriteKingLich, spriteKingTitan, spriteKingDragon, spriteKingVampire,
                                     spriteBlank;
+
+    [Header("Controllers")]
+    [SerializeField] private PlayerAndEnemyStatusController playerAndEnemyStatusController;
     public Sprite GetEnemySprite(string thisEnemyVariant)
     {
         if      (thisEnemyVariant == "pawnGoblin")         { return spritePawnGoblin; }
@@ -353,7 +356,7 @@ public class BestiaryController : MonoBehaviour
         }
     }
 
-    // pawn = 1, rook = 2, bishop = 2, knight = 3, queen = 5, king = 10
+    // pawn = 1, rook = 2, bishop = 2, knight = 3, queen = 5, king = 8
     public string[] DecideWhatEnemiesToSpawnThisRound(int enemyPointsToAllocate)
     {
         List<string> enemiesToDeploy = new List<string>();
@@ -365,7 +368,13 @@ public class BestiaryController : MonoBehaviour
         string[] queenEnemies = { "queenMinotaur", "queenWyrm", "queenAbomination", "queenGolem" };
         string[] kingEnemies = { "kingLich", "kingTitan", "kingDragon", "kingVampire" };
 
-        int[] pointValues = { 1, 1, 2, 2, 3, 5, 8 };
+        int[] pointValues = { };
+        if      (playerAndEnemyStatusController.GetRoundNumber() <= 3)  { pointValues = new int[] { 1, 1, 1, 2, 2, 3, 5 }; }
+        else if (playerAndEnemyStatusController.GetRoundNumber() <= 6)  { pointValues = new int[] { 1, 2, 2, 3, 5, 8 }; }
+        else if (playerAndEnemyStatusController.GetRoundNumber() <= 9)  { pointValues = new int[] { 1, 2, 2, 2, 3, 3, 3, 5, 5, 5, 8, 8 }; }
+        else if (playerAndEnemyStatusController.GetRoundNumber() <= 12) { pointValues = new int[] { 1, 2, 2, 3, 3, 3, 5, 5, 5, 5, 8, 8, 8, 8 }; }
+        else                                                            { pointValues = new int[] { 1, 2, 3, 3, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 8 }; }
+
 
         // Continue until all points are allocated
         while (enemyPointsToAllocate > 0)

@@ -111,13 +111,13 @@ public class DynamicDifficultyController : MonoBehaviour
 
     public void PrintAndLogPerTurnAllDGBInputAndOutputIndex()
     {
-        //Debug.Log("[PER TURN] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        Debug.Log("[PER TURN] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
         generateStatisticsController.LogPerTurnDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
     }
 
     public void PrintAndLogPerRoundAllDGBInputAndOutputIndex()
     {
-        //Debug.Log("[===PER ROUND===] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
+        Debug.Log("[===PER ROUND===] OUTPUT DGB INDEX: " + dynamicOutputOverallIndex + " --- Damage Received: " + dynamicInputIndexDamageReceivedAndDealt + ", Health Left: " + dynamicInputIndexHealthLeft + ", Powerup Usage: " + dynamicInputIndexPowerupUsage + ", Time + Steps Taken: " + dynamicInputIndexTimeThinkingAndStepsTaken);
         generateStatisticsController.LogPerRoundDGBInputsAndOutputs(Mathf.RoundToInt(dynamicInputIndexDamageReceivedAndDealt * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexHealthLeft * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexPowerupUsage * 1000).ToString(), Mathf.RoundToInt(dynamicInputIndexTimeThinkingAndStepsTaken * 1000).ToString(), Mathf.RoundToInt(dynamicOutputOverallIndex * 1000).ToString());
     }
 }

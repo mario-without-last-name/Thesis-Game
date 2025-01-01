@@ -250,13 +250,19 @@ public class CodeForPrefabEnemy : MonoBehaviour
         }
     }
 
-    public void ThisEnemyTakesDamage(int damageTaken, bool isKnockback)
-    { // QUESTION: IF THE ATTACK HAS NO KNOCKBACK? WILL THE DELAY ALSO INCREASE  AND ALSO CANNOT ATTACK NEXT TURN? - I think no?
+    public void ThisEnemyTakesDamage(int damageTaken, bool isKnockback, bool playerMovedFromPassivePowerupExtraMoveTiles)
+    { // QUESTION: IF THE ATTACK HAS NO KNOCKBACK? WILL THE DELAY ALSO INCREASE  AND ALSO CANNOT ATTACK THIS TURN? - no, they can still move and attack
 
-        if (!playerAndEnemyStatusController.getHasAnEnemyAlreadyBeenDamagedThisTurn())
+        // PASSIVE POWERUP : ones that give you extra move tiles
+        if (playerMovedFromPassivePowerupExtraMoveTiles) { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.005f, false); }
+
+        if (!playerAndEnemyStatusController.GetHasAnEnemyAlreadyBeenDamagedThisTurn())
         {
             dynamicDifficultyController.SetDynamicInputChange("damageReceivedAndDealt", +0.025f, false);
-            playerAndEnemyStatusController.setHasAnEnemyAlreadyBeenDamagedThisTurn(true);
+            playerAndEnemyStatusController.SetHasAnEnemyAlreadyBeenDamagedThisTurn(true);
+
+            // ACTIVE POWERUP: all except dodge or teleport
+            if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() != "") { dynamicDifficultyController.SetDynamicInputChange("powerupUsage", +0.02f, false); }
         }
 
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-mercenaryTools")) { damageTaken *= 2; }
@@ -279,7 +285,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
             // ACTIVE AND PASSIVE POWERUP
             // If this enemy is damaged from direct landing damage, call for all enemy turn. Else if it is damaged when player has an active powerup activated (or ground pound), just wait for the player prefab to call all enemy turn
-            if (playerAndEnemyStatusController.getCurrentActivePowerupIdentity() == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); }
+            if (playerAndEnemyStatusController.GetCurrentActivePowerupIdentity() == "") { Invoke(nameof(CallForEnemyTurn), 0.5f); }
 
             musicController.PlayDamageSoundEffectSource();
             groupHitpoints.SetActive(true);
@@ -287,10 +293,10 @@ public class CodeForPrefabEnemy : MonoBehaviour
             textDamageOrHealTaken.text = "-" + damageTaken;
             Invoke(nameof(HideHealthBar), 0.5f);
             // We cannot just setActive the entire move and attack tile groups. It must change depending how close they are to the board's edges
-            currDelayLeft += 1;
 
             if (isKnockback)
             {
+                currDelayLeft += 1;
                 DeactivateAllMoveTiles();
                 Invoke(nameof(ActivateSpecificMoveTiles), 0.5f);
                 DeactivateAllAttackTiles();
@@ -440,23 +446,51 @@ public class CodeForPrefabEnemy : MonoBehaviour
             playerCanMoveToTheseMoveTilesNextTurn[i][1] = originalPlayerMoveTiles[i][1] + playerCurrGridY;
         }
 
+
+        // Determining which of the 4 AI difficulty mode to use.
+        float aiMovementDifficulty = 0.0f;
+        aiMovementDifficulty = selectedDifficulty == "Easy" ? 0.0f : selectedDifficulty == "Medium" ? 0.5f : selectedDifficulty == "Hard" ? 1.0f : 0.5f;
+        if (selectedDifficulty == "Adaptive") { aiMovementDifficulty = dynamicDifficultyController.GetDynamicOutput("enemyAI"); } 
+        // If selected difficulty is adaptive, then switch between Very Easy / Easy / Medium / Hard ai movements
+        float randomValue = UnityEngine.Random.value; // Generate a random value between 0 and 1
+        float probabilityVeryEasy, probabilityEasy, probabilityMedium, probabilityHard;
+        if (aiMovementDifficulty <= 0.333f) // Transition between Very Easy and Easy
+        {
+            probabilityVeryEasy = 1.0f - (aiMovementDifficulty / 0.333f); // 100% VeryEasy at 0, 0% at 0.333
+            probabilityEasy = aiMovementDifficulty / 0.333f;              // 0% Easy at 0, 100% at 0.333
+            probabilityMedium = 0.0f;
+            probabilityHard = 0.0f;
+        }
+        else if (aiMovementDifficulty <= 0.667f) // Transition between Easy and Medium
+        {
+            probabilityVeryEasy = 0.0f;
+            probabilityEasy = 1.0f - ((aiMovementDifficulty - 0.333f) / 0.333f); // 100% Easy at 0.333, 0% at 0.667
+            probabilityMedium = (aiMovementDifficulty - 0.333f) / 0.333f;        // 0% Medium at 0.333, 100% at 0.667
+            probabilityHard = 0.0f;
+        }
+        else // Transition between Medium and Hard
+        {
+            probabilityVeryEasy = 0.0f;
+            probabilityEasy = 0.0f;
+            probabilityMedium = 1.0f - ((aiMovementDifficulty - 0.667f) / 0.333f); // 100% Medium at 0.667, 0% at 1.0
+            probabilityHard = (aiMovementDifficulty - 0.667f) / 0.333f;            // 0% Hard at 0.667, 100% at 1.0
+        }
+        
+
         for (int i = 0; i < tilesThatTheEnemyWillMoveTo.Length; i++)
             {
             int gridXOffset = tilesThatTheEnemyWillMoveTo[i][0];
             int gridYOffset = tilesThatTheEnemyWillMoveTo[i][1];
-            float aiMovementDifficulty = 0.0f;
-            aiMovementDifficulty = selectedDifficulty == "Easy" ? 0.0f : selectedDifficulty == "Medium" ? 0.5f : selectedDifficulty == "Hard" ? 1.0f : 0.5f;
-            if (selectedDifficulty == "Adaptive") { aiMovementDifficulty = dynamicDifficultyController.GetDynamicOutput("enemyAI"); } 
-            // If selected difficulty is adaptive, then switch between easy / easy 2 / medium / hard ai movements
 
 
             if (actualXYCoordinates.IsThisStillInsideTheBoard(currGridX + gridXOffset, currGridY + gridYOffset))
             {
                 GameObject currentGameObjectAtThisTile = playerAndEnemyStatusController.GetIdentityOfPieceAtThisBoardTile(currGridX + gridXOffset, currGridY + gridYOffset);
 
-                // EASY ===========================================================
+
+                // Very Easy ===========================================================
                 // Prioritize going to a tile the player can land on next turn, avoid the player when possible, else, just move randomly.
-                if (aiMovementDifficulty >= 0.0f && aiMovementDifficulty < 0.25f)
+                if (randomValue < probabilityVeryEasy)
                 {
                     if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
                     {
@@ -495,9 +529,9 @@ public class CodeForPrefabEnemy : MonoBehaviour
                     }
                 }
 
-                // EASY 2 ===========================================================
+                // EASY ===========================================================
                 // Completely random
-                else if (aiMovementDifficulty >= 0.25f && aiMovementDifficulty < 0.5f)
+                else if (randomValue < probabilityVeryEasy + probabilityEasy)
                 {
                     if ( ( currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>() ) || currentGameObjectAtThisTile == null )
                     {
@@ -512,7 +546,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
 
                 // MEDIUM ===========================================================
                 // Move to the yellow tile with the lowest euclidean distance to the player
-                else if (aiMovementDifficulty >= 0.5f && aiMovementDifficulty < 0.75f)
+                else if (randomValue < probabilityVeryEasy + probabilityEasy + probabilityMedium)
                 {
                     if (currentGameObjectAtThisTile != null && currentGameObjectAtThisTile.GetComponent<CodeForPrefabPlayer>())
                     {
