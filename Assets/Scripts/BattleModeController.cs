@@ -46,7 +46,6 @@ public class BattleModeController : MonoBehaviour
         BattleModeChanger("GetReady");
     }
 
-    // Update is called once per frame
     public void BattleModeChanger(string battleMode) // GetReady - Fight - Victory - Shop
     {
         musicController.PlayClickSoundEffect();
@@ -58,7 +57,8 @@ public class BattleModeController : MonoBehaviour
             bottomBarController.PowerupsAreReadyForBattle(); // Should not be activated until the battle has actually begun
             ShopMode.SetActive(false);
             GetReadyMode.SetActive(true);
-            // A function to PowerupsCatalogController to reset the status of some powerups
+            sideBarController.SetSideBarRoundNumber(playerAndEnemyStatusController.GetRoundNumber() + 1); // display the next round number, but the variable of the round number is not actually increased yet, so as to not mess with the generated statistics.
+            sideBarController.SetSideBarUnknownEnemyCount();
         }
         else if (battleMode == "Fight")
         {
@@ -67,6 +67,7 @@ public class BattleModeController : MonoBehaviour
             FightMode.SetActive(true);
             sideBarController.SetSideBarIsTimerRunning(true);
             //exampleSpawner.ExampleSpawnPlayerPiece(); // Temporary
+            playerAndEnemyStatusController.SetNextRoundNumber();
             playerAndEnemyStatusController.SpawnPlayerAndEnemiesForNewRound();
             dynamicDifficultyController.ResetThisRoundInitialDynamicInputIndices();
         }
@@ -74,6 +75,13 @@ public class BattleModeController : MonoBehaviour
         {
             currentBattleMode = "Victory";
             //DestoryAllExampleTags(); // Temporary
+
+            // at end of each round, update the logs of both per turn (player and enemystatus controller) and per round (HERE). The ones printed at round end does not account for change in powerup DGB input from buying/selling powerups
+            //playerAndEnemyStatusController.PrintAndLogPerTurnHealthKillsPointsGold();
+            //dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex();
+            playerAndEnemyStatusController.PrintAndLogPerRoundHealthKillsPointsGoldMoves();
+            dynamicDifficultyController.PrintAndLogPerRoundAllDGBInputAndOutputIndex();
+
             playerAndEnemyStatusController.DestroyAllPlayerAndEnemyPrefabs();
             FightMode.SetActive(false);
             VictoryMode.SetActive(true);
@@ -84,7 +92,6 @@ public class BattleModeController : MonoBehaviour
         {
             currentBattleMode = "Shop";
             dynamicDifficultyController.SetDynamicInputChange("powerupUsage", -0.05f, false);
-            playerAndEnemyStatusController.SetNextRoundNumber();
             shopController.ResetRerollPrice();
             shopController.ActivateAndRerollShopPowerupOptions();
             bottomBarController.OptionToSellPowerups();

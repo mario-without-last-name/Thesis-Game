@@ -40,6 +40,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     private int roundNumber;
     private int killCount;
+    private int enemyPointsGained;
     private int totalMoveCount;
     private int moveCountThisRound;
     private int currEnemiesLeftThisRound;
@@ -53,6 +54,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     private int maxPlayerHealthPoint;
     private int currGold;
     private int goldGainedSoFar;
+    private int maxBonusGoldAtEndOfRound;
     private int bonusGoldAtEndOfRound;
     //private float timeToMove;
     private int playerDirectContactDamage;
@@ -82,10 +84,10 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
     void Start()
     {
         // Set several variables, and also display them in the SideBar
-        roundNumber = 1;
+        roundNumber = 0; // will eventually start at 1 from BattleModeController
         currPlayerHealthPoint = 100;
         maxPlayerHealthPoint = 100;
-        currGold = 10020; // TEMPORARY GOLD START XXXXXXXXXXXXXX
+        currGold = 20; // TEMPORARY GOLD START XXXXXXXXXXXXXX, MUST ALSO CHANGE IT IN generate statistics controller
         goldGainedSoFar = 0;
         //if (PlayerPrefs.GetString("modeDifficulty", "Adaptive") == "Easy")
         //{
@@ -109,6 +111,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
         killCount = 0;
         totalMoveCount = -1;
+        enemyPointsGained = 0;
 
 
         //enemiesAlreadySpawnedThisRound = 0;
@@ -116,6 +119,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         // Start with a clean empty 2d string array
         ResetTheIdentitiesOfPiecesInBoardToBlank();
     }
+
     public void SpawnPlayerAndEnemiesForNewRound()
     {
         //// Instantiate the chessPiece prefab
@@ -136,7 +140,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
         // Now Randomize the instantiation of enemies
         float difficultyIndex = dynamicDifficultyController.GetDynamicOutput("enemyStats");
-        maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)((difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex * 0.33333 + 0.33333))));
+        maxNoOfEnemiesAtAnyPoint = Math.Min(14, (int)Math.Round((double)((difficultyIndex * 2 + 2) + roundNumber * (difficultyIndex + 0.5))));
         enemyPointsToAllocate = (int)Math.Round((double)( (roundNumber + 1) * (difficultyIndex * 2 + 1)) + 0.03 * Math.Pow(roundNumber, 1 + 3 * difficultyIndex));
 
         enemyVariantsToBeSpawnedThisRound = bestiaryController.DecideWhatEnemiesToSpawnThisRound(enemyPointsToAllocate);
@@ -158,7 +162,8 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         }
 
         // Player gets more bonus gold (after clearing a round) for finishing in less moves
-        bonusGoldAtEndOfRound = 4 + roundNumber * 4; // might be better to make it dependant on round number than enemyPointsToAllocate
+        maxBonusGoldAtEndOfRound = 4 + roundNumber * 4; // might be better to make it dependant on round number than enemyPointsToAllocate
+        bonusGoldAtEndOfRound = maxBonusGoldAtEndOfRound;
         //bonusGoldAtEndOfRound = enemyPointsToAllocate * 2;
         numberOfTimesEnemiesTookDamageThisRound = 0;
         gracePeriodBeforeReducingBonusGold = 6; // actually supposed to be 3-move grace period, but new round starts with player's turn, which immeadiately decreases it by 1. Also give players more time to attack an enemy if they are far away before reducing their bonus gold
@@ -208,6 +213,7 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         currEnemiesLeftThisRound -= 1;
         sideBarController.SetSideBarCurrEnemiesLeftValue(currEnemiesLeftThisRound);
         SetKillCountIncreaseBy1();
+        enemyPointsGained += goldEarned / 2; // right now, enemy points is half of gold earned
 
         // PASSIVE POWERUP
         if (bottomBarController.CheckIfThisPassivePowerUpIsOwned("passive-pickpocket")) { goldEarned += powerupsCatalogController.ActivateThisPassivePowerup("passive-pickpocket", ""); }
@@ -216,18 +222,17 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
         if (currEnemiesLeftThisRound == 0) // All enemies killed, victory for this round
         {
-            // at end of each round, update the logs of both per turn and per round
-            PrintAndLogPerTurnHealthKillsPointsGold();
+            // at end of each round, update the logs of both per turn (HERE) and per round (battle mode controller)
             dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex();
-            PrintAndLogPerRoundHealthKillsPointsGoldMoves();
-            dynamicDifficultyController.PrintAndLogPerRoundAllDGBInputAndOutputIndex();
-
+            PrintAndLogPerTurnHealthKillsPointsGold();
 
             // then, based on the moves, update the DGB input TimeThinkingAndStepsTaken and award the bonus gold
-            float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Lerp(-0.3f, 0.3f, Mathf.Max(bonusGoldAtEndOfRound - numberOfTimesToDecreaseBonusGold, 0) / bonusGoldAtEndOfRound);
-            //float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5) / 10), -0.3f, 0.3f);
             bonusGoldAtEndOfRound = Mathf.Max(bonusGoldAtEndOfRound - numberOfTimesToDecreaseBonusGold, 0);
             //bonusGoldAtEndOfRound = Mathf.Max((int)(bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5), 0);
+            float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Lerp(-0.3f,+0.3f, (float)((float)bonusGoldAtEndOfRound / (float)maxBonusGoldAtEndOfRound));
+            //float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Lerp(-0.3f, 0.3f, Mathf.Max(bonusGoldAtEndOfRound - numberOfTimesToDecreaseBonusGold, 0) / bonusGoldAtEndOfRound);
+            //float changeToDynamicInputIndexTimeThinkingAndStepsTaken = Mathf.Clamp((float)((bonusGoldAtEndOfRound - moveCountThisRound * 0.25 + numberOfTimesEnemiesTookDamageThisRound * 0.5) / 10), -0.3f, 0.3f);
+            Debug.Log("bonusGoldAtEndOfRound:" + bonusGoldAtEndOfRound + "  ,maxBonusGoldAtEndOfRound:" + maxBonusGoldAtEndOfRound + "  , changeToDynamicInputIndexTimeThinkingAndStepsTaken:" + changeToDynamicInputIndexTimeThinkingAndStepsTaken);
             dynamicDifficultyController.SetDynamicInputChange("TimeThinkingAndStepsTaken", changeToDynamicInputIndexTimeThinkingAndStepsTaken, false);
             battleModeController.SetTextBonusGold(bonusGoldAtEndOfRound);
             SetChangeInCurrGold(bonusGoldAtEndOfRound);
@@ -289,16 +294,16 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
         turnController.AllEnemiesTurn();
     }
 
-    public void PrintAndLogPerTurnHealthKillsPointsGold() // ENEMY POINTS GAINED NOT YET FIXED
+    public void PrintAndLogPerTurnHealthKillsPointsGold()
     {
-        Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
-        generateStatisticsController.LogPerTurnHealthKillsPointsGold(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString());
+        Debug.Log("[PER TURN] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + enemyPointsGained + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold);
+        generateStatisticsController.LogPerTurnHealthKillsPointsGold(currPlayerHealthPoint.ToString(), killCount.ToString(), enemyPointsGained.ToString(), goldGainedSoFar.ToString(), currGold.ToString());
     }
 
-    public void PrintAndLogPerRoundHealthKillsPointsGoldMoves() // ENEMY POINTS GAINED NOT YET FIXED
+    public void PrintAndLogPerRoundHealthKillsPointsGoldMoves()
     {
-        Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + killCount + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
-        generateStatisticsController.LogPerRoundHealthKillsPointsGoldMoves(currPlayerHealthPoint.ToString(), killCount.ToString(), killCount.ToString(), goldGainedSoFar.ToString(), currGold.ToString(), totalMoveCount.ToString());
+        Debug.Log("[===PER ROUND===] Player Hp: " + currPlayerHealthPoint + " --- Kill Count: " + killCount + ", Enemy Points Gained: " + enemyPointsGained + ", Gold Gained So Far: " + goldGainedSoFar + ", Currrent Gold: " + currGold + ", Total Moves: " + totalMoveCount);
+        generateStatisticsController.LogPerRoundHealthKillsPointsGoldMoves(currPlayerHealthPoint.ToString(), killCount.ToString(), enemyPointsGained.ToString(), goldGainedSoFar.ToString(), currGold.ToString(), totalMoveCount.ToString());
     }
 
 
@@ -548,8 +553,8 @@ public class PlayerAndEnemyStatusController : MonoBehaviour
 
     public void SetChangeInCurrGold(int changeInCurrGold)
     {
-        goldGainedSoFar += changeInCurrGold;
-        currGold += changeInCurrGold;
+        if (changeInCurrGold > 0) { goldGainedSoFar += changeInCurrGold; } // includes killing enemies, bonus gold at round emnd, and selling powerup
+        currGold = Mathf.Max(currGold + changeInCurrGold, 0);
         sideBarController.SetSideBarCurrGoldValue(currGold);
     }
 

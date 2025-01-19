@@ -344,10 +344,10 @@ public class BestiaryController : MonoBehaviour
         else if (thisEnemyVariant == "queenAbomination")   { return new int[] {31,61,    8,16,    4, 2,   10}; }
         else if (thisEnemyVariant == "queenGolem")         { return new int[] {40,80,    9,19,    5, 3,   10}; }
 
-        else if (thisEnemyVariant == "kingLich")           { return new int[] {50,100,  13,27,    5, 3,   20}; }
-        else if (thisEnemyVariant == "kingTitan")          { return new int[] {67,133,  20,30,    7, 5,   20}; }
-        else if (thisEnemyVariant == "kingDragon")         { return new int[] {59,117,  16,32,    6, 4,   20}; }
-        else if (thisEnemyVariant == "kingVampire")        { return new int[] {55,109,  15,29,    6, 4,   20}; }
+        else if (thisEnemyVariant == "kingLich")           { return new int[] {50,100,  13,27,    5, 3,   16}; }
+        else if (thisEnemyVariant == "kingTitan")          { return new int[] {67,133,  20,30,    7, 5,   16}; }
+        else if (thisEnemyVariant == "kingDragon")         { return new int[] {59,117,  16,32,    6, 4,   16}; }
+        else if (thisEnemyVariant == "kingVampire")        { return new int[] {55,109,  15,29,    6, 4,   16}; }
 
         else
         {
@@ -368,12 +368,14 @@ public class BestiaryController : MonoBehaviour
         string[] queenEnemies = { "queenMinotaur", "queenWyrm", "queenAbomination", "queenGolem" };
         string[] kingEnemies = { "kingLich", "kingTitan", "kingDragon", "kingVampire" };
 
-        int[] pointValues = { };
-        if      (playerAndEnemyStatusController.GetRoundNumber() <= 3)  { pointValues = new int[] { 1, 1, 1, 2, 2, 3, 5 }; }
-        else if (playerAndEnemyStatusController.GetRoundNumber() <= 6)  { pointValues = new int[] { 1, 2, 2, 3, 5, 8 }; }
-        else if (playerAndEnemyStatusController.GetRoundNumber() <= 9)  { pointValues = new int[] { 1, 2, 2, 2, 3, 3, 3, 5, 5, 5, 8, 8 }; }
-        else if (playerAndEnemyStatusController.GetRoundNumber() <= 12) { pointValues = new int[] { 1, 2, 2, 3, 3, 3, 5, 5, 5, 5, 8, 8, 8, 8 }; }
-        else                                                            { pointValues = new int[] { 1, 2, 3, 3, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 8 }; }
+        // The higher the round number, the chances of meeting harder enemy variants is higher
+        int[] pointValues = { };                                            // culmulative percent: 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100
+        if      (enemyPointsToAllocate <= 5)    { pointValues = new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 5, 5 }; }
+        else if (enemyPointsToAllocate <= 12)   { pointValues = new int[] { 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 5, 5, 5, 5, 8, 8 }; }
+        else if (enemyPointsToAllocate <= 20)   { pointValues = new int[] { 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 5, 5, 5, 5, 5, 8, 8, 8, 8 }; }
+        else if (enemyPointsToAllocate <= 35)   { pointValues = new int[] { 1, 2, 2, 2, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8 }; }
+        else if (enemyPointsToAllocate <= 50)   { pointValues = new int[] { 1, 2, 3, 3, 3, 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }; }
+        else                                    { pointValues = new int[] { 1, 2, 3, 5, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }; }
 
 
         // Continue until all points are allocated

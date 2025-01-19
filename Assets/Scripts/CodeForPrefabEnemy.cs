@@ -235,7 +235,7 @@ public class CodeForPrefabEnemy : MonoBehaviour
     public void ActivateSpecificAttackTiles()
     {
         if (numberOfTurnsThisRound == 0) { opacityOfMoveTilesAndAttackTiles = 1.0f; }
-        else { opacityOfMoveTilesAndAttackTiles = Math.Max(1.0f - dynamicDifficultyController.GetDynamicOutput("visualHint") * 1.0f, 0); }
+        else { opacityOfMoveTilesAndAttackTiles = Math.Clamp(1.3f - dynamicDifficultyController.GetDynamicOutput("visualHint") * 1.6f, 0, 1); }
         foreach (int[] offset in attackTilesToSpawn)
         {
             int gridXOffset = offset[0];

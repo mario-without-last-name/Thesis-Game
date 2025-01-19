@@ -3250,7 +3250,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 325, y: -201}
+  m_AnchoredPosition: {x: 0, y: -201}
   m_SizeDelta: {x: 434, y: 260}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &242577496
@@ -4292,7 +4292,7 @@ MonoBehaviour:
 
     attack
     areas or a tile that they will move to. You lose the game once your health reaches
-    0'
+    0.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -9406,8 +9406,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 19, y: 212}
-  m_SizeDelta: {x: 1400, y: 67.4343}
+  m_AnchoredPosition: {x: -209.2, y: 212}
+  m_SizeDelta: {x: 931, y: 67.4343}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &681761247
 MonoBehaviour:
@@ -9429,25 +9429,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<line-height=130%>In simple terms, Dynamic game balancing (DGB) refers
-    to
-
-    games that can automatically adjust the game''s difficulty
-
-    level
-    to match the player''s skill, hence minimizing
-
-    frustration (too difficult)
-    and boredom (too easy).
-
-
-    Essentially, my thesis research aims to explore
-    how DGB
-
-    techniques can be used to improve the gaming experience
-
-    of
-    a turn-based, chess-styled game.'
+  m_text: "<line-height=130%>Dynamic game balancing (DGB) refers to techniques that
+    automatically adjust a game\u2019s difficulty level to match the player\u2019s
+    skill, minimizing frustration (too difficult) and boredom (too easy). Essentially,
+    my thesis research aims to explore how DGB techniques can be used to improve
+    the gaming experience of a Chess Survival Roguelike game."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -12010,6 +11996,7 @@ MonoBehaviour:
   clickSoundEffectSource: {fileID: 820270821}
   moveSoundEffectSource: {fileID: 820270827}
   damageSoundEffectSource: {fileID: 820270826}
+  healSoundEffectSource: {fileID: 0}
   buySellSoundEffectSource: {fileID: 820270825}
   gameOverSoundEffectSource: {fileID: 820270824}
   audioMixer: {fileID: 24100000, guid: 0afbf95c5f1e00d4d916a245bafab08f, type: 2}
@@ -12697,7 +12684,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -325, y: -216}
+  m_AnchoredPosition: {x: -450, y: -216}
   m_SizeDelta: {x: 434, y: 260}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &865529646
@@ -14464,6 +14451,7 @@ RectTransform:
   - {fileID: 1479843341}
   - {fileID: 438746618}
   - {fileID: 681761246}
+  - {fileID: 1433555222}
   - {fileID: 974588974}
   - {fileID: 1964435666}
   - {fileID: 2034860024}
@@ -16337,15 +16325,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<line-height=130%>Prior to this, I have published a research paper about
-    an
-
-    analysis of existing DGB techniques across different
-
-    games: ((link))
-
-    This
-    gave me a theoretical foundation on which my thesis project can be built upon.'
+  m_text: "<line-height=130%>Prior to this, I have submitted a research paper about
+    an analysis of existing DGB techniques across different games, as well as a conference
+    paper about this thesis game itself. These gave me a theoretical foundation on
+    which my thesis project can be built upon.\r"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -18559,15 +18542,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<line-height=130%>SHOP - After clearing each round, you may purchase
+  m_text: '<line-height=130%>SHOP - After clearing each round, you may purchase powerups
+    from the shop with your gold. Powerups can be active (manually activated with
+    Q/W/E/R/T keys), passive (automatic), or stat-buffs.
 
-    powerups
-    from the shop with your gold. Powerups can be
-
-    active (manually activated
-    with number keypads), passive
-
-    (automatic), single-use, or stat buffs'
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -19307,6 +19286,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1415850750}
+  m_CullTransparentMesh: 1
+--- !u!1 &1433555221
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1433555222}
+  - component: {fileID: 1433555224}
+  - component: {fileID: 1433555223}
+  m_Layer: 5
+  m_Name: Image1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1433555222
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433555221}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 952925904}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 484.8, y: -33}
+  m_SizeDelta: {x: 400, y: 400}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1433555223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433555221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 07b0bbad005f1134fbbc8521f8f46ec7, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1433555224
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1433555221}
   m_CullTransparentMesh: 1
 --- !u!1 &1435327700
 GameObject:
@@ -20806,7 +20860,7 @@ MonoBehaviour:
 
     This will push enemies
     to a different tile, or kill them (and give you gold). You pass the round by
-    killing all enemies'
+    killing all enemies.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -25035,16 +25089,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<line-height=130%>OTHERS - There are still other details like different
-    map
-
-    tiles, what each powerop does, how the enemies become
-
-    harder, etc.
-    Don''t worry, you''ll learn as you go.
-
-
-    Have fun!'
+  m_text: "<line-height=130%>OTHERS - There are still other details like what each
+    powerup does, how the enmies become harder, etc.\r\n\r\nDon\u2019t worry, you\u2019ll
+    learn as you go.\r\n\r\nHave fun!\r\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
   m_sharedMaterial: {fileID: 2294526734951650931, guid: fddb63b405ba87e4fa5887bc15427dcf, type: 2}
@@ -28055,6 +28102,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2041285581}
   m_CullTransparentMesh: 1
+--- !u!1 &2042371220
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2042371221}
+  - component: {fileID: 2042371223}
+  - component: {fileID: 2042371222}
+  m_Layer: 5
+  m_Name: Image3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2042371221
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2042371220}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2140101965}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 450, y: -201}
+  m_SizeDelta: {x: 434, y: 260}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2042371222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2042371220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 7a91aea6699809d4d80829309c62146c, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &2042371223
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2042371220}
+  m_CullTransparentMesh: 1
 --- !u!1 &2046877393
 GameObject:
   m_ObjectHideFlags: 0
@@ -29581,6 +29703,7 @@ RectTransform:
   - {fileID: 1200188229}
   - {fileID: 865529645}
   - {fileID: 242577495}
+  - {fileID: 2042371221}
   - {fileID: 304166}
   - {fileID: 1662512502}
   - {fileID: 1096861936}

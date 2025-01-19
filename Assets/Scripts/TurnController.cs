@@ -132,11 +132,8 @@ public class TurnController : MonoBehaviour
 
         if (currentEnemyIndex >= allEnemiesAliveRightNow.Length)
         {
-            if (selectedDifficulty == "Adaptive")
-            {
-                dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex();
-                playerAndEnemyStatusController.PrintAndLogPerTurnHealthKillsPointsGold();
-            }
+            playerAndEnemyStatusController.PrintAndLogPerTurnHealthKillsPointsGold();
+            if (selectedDifficulty == "Adaptive") { dynamicDifficultyController.PrintAndLogPerTurnAllDGBInputAndOutputIndex(); }
             Invoke(nameof(PlayerTurn), 0.5f); // Meaning all enemies have taken their turn moving / reduce delay by 1
         }
         else

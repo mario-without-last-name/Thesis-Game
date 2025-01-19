@@ -62,6 +62,23 @@ public class GenerateStatisticsController : MonoBehaviour
     private void Start()
     {
         selectedDifficulty = PlayerPrefs.GetString("modeDifficulty", "Adaptive");
+
+        dataLogPerTurnHpLeft = "50,";
+        dataLogPerTurnEnemiesKilled = "0,";
+        dataLogPerTurnEnemyPointsObtained = "0,";
+        dataLogPerTurnGoldEarned = "0,"; // This also includes gold earned from selling powerups
+        dataLogPerTurnCurrentGold = "20,";  // (1/2) THIS INITIAL VALUE MUST BE MANUALLY UPDATED WITH THE INITIAL GOLD YOU SET FOR NEW GAMES
+
+        dataLogPerRoundHpLeft = "50,";
+        dataLogPerRoundEnemiesKilled = "0,";
+        dataLogPerRoundEnemyPointsObtained = "0,";
+        dataLogPerRoundGoldEarned = "0,";
+        dataLogPerRoundCurrentGold = "20,"; // (2/2) THIS INITIAL VALUE MUST BE MANUALLY UPDATED WITH THE INITIAL GOLD YOU SET FOR NEW GAMES
+
+        dataLogPerRoundTotalMoves = "0,";
+        dataLogPerRoundGoldSpent = "0,"; // THIS COMMENT BELOW DOES NOT WORK? (maybe because te get ready function was not called upon loading the scene?)
+                                         // -> this one starts off with no string as at the "get ready" battle mode, it is already set to "0,"
+
         if (selectedDifficulty == "Adaptive")
         {
             dataLogPerTurnDGBInputDamageReceivedAndDealt = "333,";
@@ -70,26 +87,25 @@ public class GenerateStatisticsController : MonoBehaviour
             dataLogPerTurnDGBInputTimeThinkingAndStepsTaken = "333,";
             dataLogPerTurnDGBOutputDifficultyIndex = "500,";
 
-            dataLogPerTurnHpLeft = "50,";
-            dataLogPerTurnEnemiesKilled = "0,";
-            dataLogPerTurnEnemyPointsObtained = "0,";
-            dataLogPerTurnGoldEarned = "0,"; // This also includes gold earned from selling powerups
-            dataLogPerTurnCurrentGold = "0,";
-
             dataLogPerRoundDGBInputDamageReceivedAndDealt = "333,";
             dataLogPerRoundDGBInputHealthLeft = "1000,";
             dataLogPerRoundDGBInputPowerupUsage = "333,";
             dataLogPerRoundDGBInputTimeThinkingAndStepsTaken = "333,";
             dataLogPerRoundDGBOutputDifficultyIndex = "500,";
+        }
+        else
+        {
+            dataLogPerTurnDGBInputDamageReceivedAndDealt = "x";
+            dataLogPerTurnDGBInputHealthLeft = "x";
+            dataLogPerTurnDGBInputPowerupUsage = "x";
+            dataLogPerTurnDGBInputTimeThinkingAndStepsTaken = "x";
+            dataLogPerTurnDGBOutputDifficultyIndex = "x";
 
-            dataLogPerRoundHpLeft = "50,";
-            dataLogPerRoundEnemiesKilled = "0,";
-            dataLogPerRoundEnemyPointsObtained = "0,";
-            dataLogPerRoundGoldEarned = "0,";
-            dataLogPerRoundCurrentGold = "0,";
-
-            dataLogPerRoundTotalMoves = "0,";
-            dataLogPerRoundGoldSpent = ""; // this one starts off with no string as at the "get ready" battle mode, it is already set to "0,"
+            dataLogPerRoundDGBInputDamageReceivedAndDealt = "x";
+            dataLogPerRoundDGBInputHealthLeft = "x";
+            dataLogPerRoundDGBInputPowerupUsage = "x";
+            dataLogPerRoundDGBInputTimeThinkingAndStepsTaken = "x";
+            dataLogPerRoundDGBOutputDifficultyIndex = "x";
         }
 
 
@@ -105,15 +121,15 @@ public class GenerateStatisticsController : MonoBehaviour
         }
         else
         {
-            if (PlayerPrefs.GetInt("isStatsChecked", 0) == 1) { textDynamicSettingsActivated.text += "1. Enemies’ health, attack, quantity, and variants"; }
+            if (PlayerPrefs.GetInt("isStatsChecked", 1) == 1) { textDynamicSettingsActivated.text += "1. Enemies’ health, attack, quantity, and variants"; }
             else { textDynamicSettingsActivated.text += "1. ---"; }
-            if (PlayerPrefs.GetInt("isHintsChecked", 0) == 1) { textDynamicSettingsActivated.text += "\n2. Visual hints of enemy attack and movement areas"; }
+            if (PlayerPrefs.GetInt("isHintsChecked", 1) == 1) { textDynamicSettingsActivated.text += "\n2. Visual hints of enemy attack and movement areas"; }
             else { textDynamicSettingsActivated.text += "\n2. ---"; }
-            if (PlayerPrefs.GetInt("isPowerupChecked", 0) == 1) { textDynamicSettingsActivated.text += "\n3. Quality and price of powerups in the shop"; }
+            if (PlayerPrefs.GetInt("isPowerupChecked", 1) == 1) { textDynamicSettingsActivated.text += "\n3. Quality and price of powerups in the shop"; }
             else { textDynamicSettingsActivated.text += "\n3. ---"; }
-            if (PlayerPrefs.GetInt("isAIChecked", 0) == 1) { textDynamicSettingsActivated.text += "\n4. Enemy AI"; }
+            if (PlayerPrefs.GetInt("isAIChecked", 1) == 1) { textDynamicSettingsActivated.text += "\n4. Enemy AI"; }
             else { textDynamicSettingsActivated.text += "\n4. ---"; }
-            if (PlayerPrefs.GetInt("isLimitChecked", 0) == 1) { textDynamicSettingsActivated.text += "\n5. Time limit to decide your next move"; }
+            if (PlayerPrefs.GetInt("isLimitChecked", 1) == 1) { textDynamicSettingsActivated.text += "\n5. Time limit to decide your next move"; }
             else { textDynamicSettingsActivated.text += "\n5. ---"; }
         }
 
@@ -171,11 +187,14 @@ public class GenerateStatisticsController : MonoBehaviour
 
     public void LogPerTurnDGBInputsAndOutputs(string inputDGB1, string inputDGB2, string inputDGB3, string inputDGB4, string outputDGB) // Called in TurnController.NextEnemysTurnOneByOneForYellowTiles() when round is not over, then called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
     {
-        dataLogPerTurnDGBInputDamageReceivedAndDealt    += inputDGB1 + ",";
-        dataLogPerTurnDGBInputHealthLeft += inputDGB2 + ",";
-        dataLogPerTurnDGBInputPowerupUsage += inputDGB3 + ",";
-        dataLogPerTurnDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
-        dataLogPerTurnDGBOutputDifficultyIndex += outputDGB + ",";
+        if (selectedDifficulty == "Adaptive")
+        {
+            dataLogPerTurnDGBInputDamageReceivedAndDealt += inputDGB1 + ",";
+            dataLogPerTurnDGBInputHealthLeft += inputDGB2 + ",";
+            dataLogPerTurnDGBInputPowerupUsage += inputDGB3 + ",";
+            dataLogPerTurnDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
+            dataLogPerTurnDGBOutputDifficultyIndex += outputDGB + ",";
+        }
     }
 
     public void LogPerTurnHealthKillsPointsGold(string stat1, string stat2, string stat3, string stat4, string stat5) // Called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
@@ -189,11 +208,14 @@ public class GenerateStatisticsController : MonoBehaviour
 
     public void LogPerRoundDGBInputsAndOutputs(string inputDGB1, string inputDGB2, string inputDGB3, string inputDGB4, string outputDGB) // Called in TurnController.NextEnemysTurnOneByOneForYellowTiles() when round is not over, then called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
     {
-        dataLogPerRoundDGBInputDamageReceivedAndDealt += inputDGB1 + ",";
-        dataLogPerRoundDGBInputHealthLeft += inputDGB2 + ",";
-        dataLogPerRoundDGBInputPowerupUsage += inputDGB3 + ",";
-        dataLogPerRoundDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
-        dataLogPerRoundDGBOutputDifficultyIndex += outputDGB + ",";
+        if (selectedDifficulty == "Adaptive")
+        {
+            dataLogPerRoundDGBInputDamageReceivedAndDealt += inputDGB1 + ",";
+            dataLogPerRoundDGBInputHealthLeft += inputDGB2 + ",";
+            dataLogPerRoundDGBInputPowerupUsage += inputDGB3 + ",";
+            dataLogPerRoundDGBInputTimeThinkingAndStepsTaken += inputDGB4 + ",";
+            dataLogPerRoundDGBOutputDifficultyIndex += outputDGB + ",";
+        }
     }
 
     public void LogPerRoundHealthKillsPointsGoldMoves(string stat1, string stat2, string stat3, string stat4, string stat5, string stat6) // Called in PlayerAndEnemyStatusController.AnEnemyWasKilledAndEarnGold() when round is over
@@ -262,8 +284,8 @@ public class GenerateStatisticsController : MonoBehaviour
         form.AddField("entry.1351446707", dataLogPerTurnHpLeft);
         form.AddField("entry.968578843" , dataLogPerTurnEnemiesKilled);
         form.AddField("entry.319869713" , dataLogPerTurnEnemyPointsObtained);
-        form.AddField("entry.361863272" , dataLogPerTurnGoldEarned);
-        form.AddField("entry.338449906" , dataLogPerTurnCurrentGold);
+        form.AddField("entry.338449906", dataLogPerTurnGoldEarned);
+        form.AddField("entry.361863272", dataLogPerTurnCurrentGold);
 
         form.AddField("entry.1264335556", dataLogPerRoundDGBInputDamageReceivedAndDealt);
         form.AddField("entry.1133282211", dataLogPerRoundDGBInputHealthLeft);

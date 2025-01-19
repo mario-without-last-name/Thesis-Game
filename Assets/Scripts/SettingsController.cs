@@ -58,11 +58,11 @@ public class SettingsController : MonoBehaviour
         isMusicChecked        = PlayerPrefs.GetInt("isMusicChecked", 1) == 1;
         isSoundEffectsChecked = PlayerPrefs.GetInt("isSoundEffectsChecked", 1) == 1;
         isTimerChecked        = PlayerPrefs.GetInt("isTimerChecked", 1) == 1;
-        isStatsChecked        = PlayerPrefs.GetInt("isStatsChecked", 0) == 1;
-        isHintsChecked        = PlayerPrefs.GetInt("isHintsChecked", 0) == 1;
-        isPowerupChecked      = PlayerPrefs.GetInt("isPowerupChecked", 0) == 1;
-        isAIChecked           = PlayerPrefs.GetInt("isAIChecked", 0) == 1;
-        isLimitChecked        = PlayerPrefs.GetInt("isLimitChecked", 0) == 1;
+        isStatsChecked        = PlayerPrefs.GetInt("isStatsChecked", 1) == 1;
+        isHintsChecked        = PlayerPrefs.GetInt("isHintsChecked", 1) == 1;
+        isPowerupChecked      = PlayerPrefs.GetInt("isPowerupChecked", 1) == 1;
+        isAIChecked           = PlayerPrefs.GetInt("isAIChecked", 1) == 1;
+        isLimitChecked        = PlayerPrefs.GetInt("isLimitChecked", 1) == 1;
 
         UpdateButtonImage(buttonMusic,        isMusicChecked);
         UpdateButtonImage(buttonSoundEffects, isSoundEffectsChecked);

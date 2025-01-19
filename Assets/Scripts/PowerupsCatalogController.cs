@@ -350,14 +350,17 @@ public class PowerupsCatalogController : MonoBehaviour
 
         else if (powerupIdentity == "statBuff-smallSnack"){
             return (powerupIdentity, "statBuff", "Small Snack", imageSmallSnack, "[Stat Buff]", "<line-height=130%>Heal {8} health",
-                    (10, 20), (-1, -1), (15, 8), (-1, -1), (-1, -1));
+                    (10, 20), (-1, -1), (20, 10), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-lunchBreak"){
             return (powerupIdentity, "statBuff", "LunchBreak", imageLunchBreak, "[Stat Buff]", "<line-height=130%>Heal {8} health",
                     (16, 32), (-1, -1), (40, 20), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-tavernBuffet"){
-            return (powerupIdentity, "statBuff", "Tavern Buffet", imageTavernBuffet, "[Stat Buff]", "<line-height=130%>Heal to full health",
-                    (25, 50), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
-        }else if (powerupIdentity == "statBuff-hardenedFists"){
+            return (powerupIdentity, "statBuff", "Tavern Buffet", imageTavernBuffet, "[Stat Buff]", "<line-height=130%>Heal {8} health",
+                    (22, 44), (-1, -1), (60, 40), (-1, -1), (-1, -1));
+            //return (powerupIdentity, "statBuff", "Tavern Buffet", imageTavernBuffet, "[Stat Buff]", "<line-height=130%>Heal to full health",
+            //        (25, 50), (-1, -1), (-1, -1), (-1, -1), (-1, -1));
+        }
+        else if (powerupIdentity == "statBuff-hardenedFists"){
             return (powerupIdentity, "statBuff", "Hardened Fists", imageHardenedFists, "[Stat Buff]", "<line-height=130%>Permanently increases your direct contact damage by {8}",
                     (12, 24), (-1, -1), (6, 2), (-1, -1), (-1, -1));
         }else if (powerupIdentity == "statBuff-ironFists"){
@@ -582,10 +585,15 @@ public class PowerupsCatalogController : MonoBehaviour
         }
         else if (powerupIdentity == "statBuff-tavernBuffet")
         {
-            int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + 40 - playerAndEnemyStatusController.GetPlayerMaxHealth(), 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
-            float DGBInputToDeductPowerupUsage = (float)(Mathf.Max((healthOverflow / 40) - 0.5f, 0) / 2.5); // This one is different than the other 2 passive healing: 
+            //int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + 40 - playerAndEnemyStatusController.GetPlayerMaxHealth(), 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
+            //float DGBInputToDeductPowerupUsage = (float)(Mathf.Max((healthOverflow / 40) - 0.5f, 0) / 2.5); // This one is different than the other 2 passive healing: 
+            //dynamicDifficultyController.SetDynamicInputChange("powerupUsage", - DGBInputToDeductPowerupUsage, false);
+            //playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerMaxHealth());
+
+            int healthOverflow = Mathf.Max(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA - playerAndEnemyStatusController.GetPlayerMaxHealth(), 0); // Deduct player DGB input powerup usage if they wasted >= half of this powerup's healing on overheal.
+            float DGBInputToDeductPowerupUsage = (float)(Mathf.Max((healthOverflow / numberA) - 0.5f, 0) / 2.5);
             dynamicDifficultyController.SetDynamicInputChange("powerupUsage", - DGBInputToDeductPowerupUsage, false);
-            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerMaxHealth());
+            playerAndEnemyStatusController.SetPlayerCurrHealth(playerAndEnemyStatusController.GetPlayerCurrHealth() + numberA);
         }
         else if (powerupIdentity == "statBuff-hardenedFists")
         {

@@ -210,11 +210,11 @@ public class MenuController : MonoBehaviour // KEEP THIS PUBLIC
             "\nMusic : " + PlayerPrefs.GetInt("isMusicChecked", 1) +
             "\nSound Effects : " + PlayerPrefs.GetInt("isSoundEffectsChecked", 1) +
             "\nShow Timer : " + PlayerPrefs.GetInt("isTimerChecked", 1) +
-            "\nEnemy Stats : " + PlayerPrefs.GetInt("isStatsChecked", 0) +
-            "\nVisual Hints : " + PlayerPrefs.GetInt("isHintsChecked", 0) +
-            "\nPowerup Usage : " + PlayerPrefs.GetInt("isPowerupChecked", 0) +
-            "\nEnemy AI : " + PlayerPrefs.GetInt("isAIChecked", 0) +
-            "\nTime Limit : " + PlayerPrefs.GetInt("isLimitChecked", 0));
+            "\nEnemy Stats : " + PlayerPrefs.GetInt("isStatsChecked", 1) +
+            "\nVisual Hints : " + PlayerPrefs.GetInt("isHintsChecked", 1) +
+            "\nPowerup Usage : " + PlayerPrefs.GetInt("isPowerupChecked", 1) +
+            "\nEnemy AI : " + PlayerPrefs.GetInt("isAIChecked", 1) +
+            "\nTime Limit : " + PlayerPrefs.GetInt("isLimitChecked", 1));
         SceneManager.LoadSceneAsync("SceneFight"); // Can also use LoadSceneAsync(1), a scene index as seen in the Build Settings
     }
 

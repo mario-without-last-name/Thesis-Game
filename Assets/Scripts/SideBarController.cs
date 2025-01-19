@@ -97,6 +97,11 @@ public class SideBarController : MonoBehaviour
         enemyCount.text = currEnemiesLeftValue.ToString() + "/" + totalEnemiesThisRoundValue.ToString();
     }
 
+    public void SetSideBarUnknownEnemyCount()
+    {
+        enemyCount.text =  "??/??";
+    }
+
     //public int GetSideBarcurrPlayerHealthPointValue()
     //{
     //    return currPlayerHealthPointValue;

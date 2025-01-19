@@ -22,6 +22,7 @@ public class DynamicDifficultyController : MonoBehaviour
     private float ThisRoundInitialdynamicInputIndexTimeThinkingAndStepsTaken;
 
     private float dynamicOutputOverallIndex;
+    private float modifiedDynamicOutputOverallIndex;
 
     private string selectedDifficulty;
 
@@ -99,11 +100,14 @@ public class DynamicDifficultyController : MonoBehaviour
         else if (selectedDifficulty == "Hard")     { return 1.0f; }
         else if (selectedDifficulty == "Adaptive")
         {
-            if      (dynamicOutputType == "enemyStats")     { return PlayerPrefs.GetInt("isStatsChecked", 0)   == 1 ? dynamicOutputOverallIndex : 0.5f; }
-            else if (dynamicOutputType == "visualHint")     { return PlayerPrefs.GetInt("isHintsChecked", 0)   == 1 ? dynamicOutputOverallIndex : 0.5f; }
-            else if (dynamicOutputType == "powerupQuality") { return PlayerPrefs.GetInt("isPowerupChecked", 0) == 1 ? dynamicOutputOverallIndex : 0.5f; }
-            else if (dynamicOutputType == "enemyAI")        { return PlayerPrefs.GetInt("isAIChecked", 0)      == 1 ? dynamicOutputOverallIndex : 0.5f; }
-            else if (dynamicOutputType == "timeLimit")      { return PlayerPrefs.GetInt("isLimitChecked", 0)   == 1 ? dynamicOutputOverallIndex : 0.5f; }
+            // For experimentation purposes, the less the number of DGB outputs activated, the faster the DGB output index fluctuates from 0.5
+            float totalDynamicOutputsActivated = PlayerPrefs.GetInt("isStatsChecked", 1) + PlayerPrefs.GetInt("isHintsChecked", 1) + PlayerPrefs.GetInt("isPowerupChecked", 1) + PlayerPrefs.GetInt("isAIChecked", 1) + PlayerPrefs.GetInt("isLimitChecked", 1);
+            modifiedDynamicOutputOverallIndex = Mathf.Clamp(    (float)(0.5 + (dynamicOutputOverallIndex - 0.5) * (1 + (5-totalDynamicOutputsActivated) / 8)),    0f, 1f);
+            if      (dynamicOutputType == "enemyStats")     { return PlayerPrefs.GetInt("isStatsChecked", 1)   == 1 ? modifiedDynamicOutputOverallIndex : 0.5f; }
+            else if (dynamicOutputType == "visualHint")     { return PlayerPrefs.GetInt("isHintsChecked", 1)   == 1 ? modifiedDynamicOutputOverallIndex : 0.5f; }
+            else if (dynamicOutputType == "powerupQuality") { return PlayerPrefs.GetInt("isPowerupChecked", 1) == 1 ? modifiedDynamicOutputOverallIndex : 0.5f; }
+            else if (dynamicOutputType == "enemyAI")        { return PlayerPrefs.GetInt("isAIChecked", 1)      == 1 ? modifiedDynamicOutputOverallIndex : 0.5f; }
+            else if (dynamicOutputType == "timeLimit")      { return PlayerPrefs.GetInt("isLimitChecked", 1)   == 1 ? modifiedDynamicOutputOverallIndex : 0.5f; }
             else { Debug.LogWarning("unknown dynamic output type: " + dynamicOutputType); return 0.5f; }
         }
         else { Debug.LogWarning("unknown difficulty setting: " + selectedDifficulty); return 0.5f; }
